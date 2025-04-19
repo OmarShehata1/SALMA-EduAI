@@ -1,215 +1,127 @@
+// src/components/PDFViewer/index.jsx
+import { useState, useRef } from "react";
+import PDFSidebar from "./PDFSidebar";
+import PDFContent from "./PDFContent";
+import PDFSelectionModal from "./PDFSelectionModal";
 
-// components/PDFViewer.jsx
-import React, { useEffect, useRef, useState } from 'react';
-import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
-
-function PDFViewer({ pdfData, pdfName }) {
-  const [pdfDoc, setPdfDoc] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageRendering, setPageRendering] = useState(false);
-  const [pageNumPending, setPageNumPending] = useState(null);
-  const [scale, setScale] = useState(1.5);
-  const [numPages, setNumPages] = useState(0);
-  
-  const canvasRef = useRef(null);
-  const textLayerRef = useRef(null);
-  const pdfViewerRef = useRef(null);
-
-  // إنشاء وثيقة PDF عند تغيير البيانات
-  useEffect(() => {
-    if (pdfData) {
-      console.log("بدء معالجة بيانات PDF في المكون PDFViewer");
-      
-      window.pdfjsLib.getDocument(pdfData).promise
-        .then(pdf => {
-          console.log("تم تحميل PDF بنجاح، عدد الصفحات:", pdf.numPages);
-          setPdfDoc(pdf);
-          setNumPages(pdf.numPages);
-          setCurrentPage(1);
-        })
-        .catch(error => {
-          console.error('خطأ في تحميل PDF:', error);
-        });
-    }
-  }, [pdfData]);
-
-
-
-
-
-useEffect(() => {
-    if (pdfDoc && currentPage) {
-      const canvas = document.getElementById('pdf-canvas');
-      const context = canvas.getContext('2d');
-  
-      pdfDoc.getPage(currentPage).then(page => {
-        const viewport = page.getViewport({ scale: 1.0 });
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-  
-        page.render({
-          canvasContext: context,
-          viewport: viewport,
-        });
-      });
-    }
-  }, [pdfDoc, currentPage]);
-
-  // عرض الصفحة الحالية عند تغييرها
-  useEffect(() => {
-    if (pdfDoc) {
-      renderPage(currentPage);
-    }
-  }, [currentPage, pdfDoc, scale]);
-
-  // تنقل لوحة المفاتيح
-  useKeyboardNavigation({
-    onLeftArrow: () => changePage(-1),
-    onRightArrow: () => changePage(1),
-    enabled: pdfDoc !== null
+const PDFViewer = () => {
+  const [pdfFiles, setPdfFiles] = useState([]);
+  const [currentPdf, setCurrentPdf] = useState(null);
+  const [selectedText, setSelectedText] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [selectionCoordinates, setSelectionCoordinates] = useState({
+    x: 0,
+    y: 0,
   });
+  const pdfContainerRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  const renderPage = (pageNum) => {
-    if (pageRendering) {
-      setPageNumPending(pageNum);
-      return;
-    }
-    
-    setPageRendering(true);
-    
-    pdfDoc.getPage(pageNum).then(page => {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      const viewport = page.getViewport({ scale });
-      
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-      
-      const renderContext = {
-        canvasContext: ctx,
-        viewport: viewport
-      };
-      
-      const renderTask = page.render(renderContext);
-      
-      renderTask.promise.then(() => {
-        setPageRendering(false);
-        
-        if (pageNumPending !== null) {
-          renderPage(pageNumPending);
-          setPageNumPending(null);
-        }
-        
-        createTextLayer(page, viewport);
-      });
-    });
-  };
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const newPdfFiles = files
+      .filter((file) => file.type === "application/pdf")
+      .map((file) => ({
+        name: file.name,
+        url: URL.createObjectURL(file),
+      }));
 
-  const createTextLayer = (page, viewport) => {
-    page.getTextContent().then(textContent => {
-      if (textLayerRef.current) {
-        while (textLayerRef.current.firstChild) {
-          textLayerRef.current.removeChild(textLayerRef.current.firstChild);
-        }
-      } else {
-        const textLayer = document.createElement('div');
-        textLayer.setAttribute('id', 'text-layer');
-        textLayer.style.position = 'absolute';
-        textLayer.style.left = canvasRef.current.offsetLeft + 'px';
-        textLayer.style.top = canvasRef.current.offsetTop + 'px';
-        textLayer.style.height = canvasRef.current.height + 'px';
-        textLayer.style.width = canvasRef.current.width + 'px';
-        pdfViewerRef.current.appendChild(textLayer);
-        textLayerRef.current = textLayer;
+    if (newPdfFiles.length > 0) {
+      setPdfFiles((prev) => [...prev, ...newPdfFiles]);
+      if (!currentPdf) {
+        setCurrentPdf(newPdfFiles[0]);
       }
-      
-      textLayerRef.current.style.height = canvasRef.current.height + 'px';
-      textLayerRef.current.style.width = canvasRef.current.width + 'px';
-      
-      window.pdfjsLib.renderTextLayer({
-        textContent: textContent,
-        container: textLayerRef.current,
-        viewport: viewport,
-        textDivs: []
+    } else if (files.length > 0) {
+      alert("Please select valid PDF files");
+    }
+  };
+
+  const handlePdfSelect = (pdf) => {
+    setCurrentPdf(pdf);
+  };
+
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+
+    if (selectedText) {
+      setSelectedText(selectedText);
+
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const containerRect = pdfContainerRef.current.getBoundingClientRect();
+
+      setSelectionCoordinates({
+        x: rect.left - containerRect.left + rect.width / 2,
+        y: rect.top - containerRect.top,
       });
-    });
-  };
 
-  const changePage = (offset) => {
-    const newPage = currentPage + offset;
-    if (newPage >= 1 && newPage <= numPages) {
-      setCurrentPage(newPage);
+      setShowModal(true);
     }
   };
 
-  const handlePageInputChange = (e) => {
-    const pageNumber = parseInt(e.target.value);
-    if (pageNumber >= 1 && pageNumber <= numPages) {
-      setCurrentPage(pageNumber);
+  const handleConfirmSelection = async () => {
+    try {
+      const response = await fetch("your-backend-endpoint", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          selectedText,
+          pdfName: currentPdf?.name || "Unknown",
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send selection to backend");
+
+      const result = await response.json();
+      console.log("Selection saved:", result);
+
+      setShowModal(false);
+      window.getSelection().removeAllRanges();
+    } catch (error) {
+      console.error("Error sending selection:", error);
+      alert("Failed to save selection. Please try again.");
     }
   };
 
-  const handleZoomChange = (newScale) => {
-    setScale(newScale);
+  const handleCancelSelection = () => {
+    setShowModal(false);
+    window.getSelection().removeAllRanges();
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
   };
 
   return (
-    <div className="pdf-viewer-container">
-      <div className="pdf-header">
-        <div className="pdf-name">{pdfName}</div>
-        <div className="pdf-controls">
-          <button 
-            className="zoom-btn" 
-            onClick={() => handleZoomChange(scale - 0.25)}
-            disabled={scale <= 0.5}
-          >
-            -
-          </button>
-          <span className="zoom-level">{Math.round(scale * 100)}%</span>
-          <button 
-            className="zoom-btn" 
-            onClick={() => handleZoomChange(scale + 0.25)}
-          >
-            +
-          </button>
-        </div>
-      </div>
+    <div className="flex h-screen w-full bg-gray-100">
+      <PDFSidebar
+        pdfFiles={pdfFiles}
+        currentPdf={currentPdf}
+        fileInputRef={fileInputRef}
+        onFileChange={handleFileChange}
+        onPdfSelect={handlePdfSelect}
+        triggerFileInput={triggerFileInput}
+      />
       
-      <div className="pdf-viewer" ref={pdfViewerRef}>
-        <canvas ref={canvasRef} id="pdf-canvas"></canvas>
-      </div>
+      <PDFContent
+        currentPdf={currentPdf}
+        pdfContainerRef={pdfContainerRef}
+        onTextSelection={handleTextSelection}
+      />
       
-      <div className="page-controls">
-        <button 
-          id="prev-page" 
-          onClick={() => changePage(-1)}
-          disabled={currentPage <= 1}
-        >
-         Previous Page 
-        </button>
-        
-        <div className="page-input">
-          <input 
-            id="page-number" 
-            type="number" 
-            value={currentPage}
-            onChange={handlePageInputChange}
-            min="1" 
-            max={numPages} 
-          />
-          <span>/ {numPages}</span>
-        </div>
-        
-        <button 
-          id="next-page" 
-          onClick={() => changePage(1)}
-          disabled={currentPage >= numPages}
-        >
-          Next Page
-        </button>
-      </div>
+      {showModal && (
+        <PDFSelectionModal
+          selectedText={selectedText}
+          coordinates={selectionCoordinates}
+          onConfirm={handleConfirmSelection}
+          onCancel={handleCancelSelection}
+        />
+      )}
     </div>
   );
-}
+};
 
 export default PDFViewer;
