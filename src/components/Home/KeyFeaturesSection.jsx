@@ -5,6 +5,15 @@ const KeyFeaturesSection = () => {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+
+  useEffect(() => {
+    // Set up event listener for the custom event
+    const handleScrollToFeatures = () => {
+      document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+    };
+    
+    window.addEventListener('scrollToFeatures', handleScrollToFeatures);
+  }, []);
   
   // Features data
   const features = [
@@ -88,7 +97,7 @@ const KeyFeaturesSection = () => {
   }, []);
 
   return (
-    <div ref={sectionRef} className="py-24 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+    <div ref={sectionRef}  id="features" className="py-24 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className={`transition-all duration-700 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'

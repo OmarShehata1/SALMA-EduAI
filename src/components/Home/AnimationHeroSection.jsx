@@ -1,15 +1,23 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, BookOpen, Check, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Link, Users } from "lucide-react";
+
 
 const AnimatedHeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
+  
+  const scrollToFeatures = () => {
+    // Method 1: Using an event
+    const event = new CustomEvent('scrollToFeatures');
+    window.dispatchEvent(event);
+  
+  };
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-blue-800 via-indigo-700 to-blue-600 text-white h-screen">
+    <div className="relative overflow-hidden bg-gradient-to-br from-blue-800 via-indigo-700 to-blue-600 text-white h-screen pt-11">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-white animate-pulse"></div>
@@ -69,7 +77,9 @@ const AnimatedHeroSection = () => {
                 Get Started
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:bg-opacity-10 transition-colors">
+              <button 
+                 onClick={scrollToFeatures}
+                 className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:bg-opacity-10 transition-colors">
                 Learn More
               </button>
             </div>
