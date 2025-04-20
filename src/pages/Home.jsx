@@ -4,10 +4,10 @@ import {
   ClipboardDocumentCheckIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
-import AnimatedHeroSection from "../components/AnimationHeroSection";
-import HowItWorksSection from "../components/HowItWorksSection";
-import SALMAUniqueSection from "../components/SALMAUniqueSection";
-import KeyFeaturesSection from "../components/KeyFeaturesSection";
+import AnimatedHeroSection from "../components/Home/AnimationHeroSection";
+import HowItWorksSection from "../components/Home/HowItWorksSection";
+import SALMAUniqueSection from "../components/Home/SALMAUniqueSection";
+import KeyFeaturesSection from "../components/Home/KeyFeaturesSection";
 
 export default function Home() {
   return (
