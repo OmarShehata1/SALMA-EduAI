@@ -18,7 +18,7 @@ export function Header() {
           </div>
           <div className="ml-3">
             <p className="text-sm text-blue-700">
-              Select exam type and difficulty level to begin. You can customize question formats and download complete exams with answer keys.
+              Select exam type and difficulty level to begin. You can customize question formats and download complete exams.
             </p>
           </div>
         </div>

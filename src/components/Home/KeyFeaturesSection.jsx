@@ -103,7 +103,7 @@ const KeyFeaturesSection = () => {
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
           <h2 className="text-4xl font-bold text-center mb-4"style={{ fontFamily: 'Patrick Hand, cursive' }}>Key Features</h2>
-          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-16"style={{ fontFamily: 'Patrick Hand, cursive' }}>
+          <p className="text-gray-700 text-center max-w-2xl mx-auto mb-16"style={{ fontFamily: 'Patrick Hand, cursive' }}>
             Discover how SALMA transforms the assessment process from start to finish
           </p>
         </div>

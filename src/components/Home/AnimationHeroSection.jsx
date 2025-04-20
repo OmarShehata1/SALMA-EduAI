@@ -49,7 +49,7 @@ const AnimatedHeroSection = () => {
               className="text-4xl md:text-5xl lg:text-6xl mb-8 font-semibold leading-tight"
               style={{ fontFamily: "Patrick Hand, cursive" }}
             >
-              System for Automated Learning and Assessment
+              System for Automated Learning and Multi-Agent Assessment
             </h1>
             <h3
               className="text-xl md:text-xl mb-6 text-blue-100"
