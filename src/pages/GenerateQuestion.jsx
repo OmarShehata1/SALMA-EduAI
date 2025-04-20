@@ -1,27 +1,29 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
 import GeneratedQuestion from "../components/QuestionGenerator/GeneratedQuestion";
+import { usePDFContext } from "../context/PDFContext";
 
 export default function QuestionGenerator() {
+  const { selectedText, currentPdf } = usePDFContext();
   const location = useLocation();
-  const selectedTextFromPDF = location.state?.selectedText || '';
-  
-  const [topic, setTopic] = useState(selectedTextFromPDF);
-  const [difficulty, setDifficulty] = useState('medium');
+  const existingQuestions = location.state?.existingQuestions || [];
+
+  const [topic, setTopic] = useState(selectedText || "");
+  const [difficulty, setDifficulty] = useState("medium");
   const [numQuestions, setNumQuestions] = useState(5);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
-  
+
   const navigate = useNavigate();
   const topicInputRef = useRef(null);
 
   useEffect(() => {
-    if (selectedTextFromPDF && topicInputRef.current) {
+    if (selectedText && topicInputRef.current) {
       topicInputRef.current.focus();
     }
-  }, [selectedTextFromPDF]);
+  }, [selectedText]);
 
   const generateQuestions = () => {
     setIsGenerating(true);
@@ -36,6 +38,7 @@ export default function QuestionGenerator() {
           answer: `Sample answer for question #${i} about ${topic}.`,
           isSelected: true,
           difficulty: difficulty,
+          source: currentPdf ? currentPdf.name : "Unknown source",
         });
       }
       setGeneratedQuestions(newQuestions);
@@ -45,7 +48,7 @@ export default function QuestionGenerator() {
 
   const handleCheckboxChange = (id) => {
     setGeneratedQuestions(
-      generatedQuestions.map(q =>
+      generatedQuestions.map((q) =>
         q.id === id ? { ...q, isSelected: !q.isSelected } : q
       )
     );
@@ -57,7 +60,7 @@ export default function QuestionGenerator() {
 
   const handleSaveEdit = (editedQuestion) => {
     setGeneratedQuestions(
-      generatedQuestions.map(q =>
+      generatedQuestions.map((q) =>
         q.id === editedQuestion.id ? editedQuestion : q
       )
     );
@@ -69,21 +72,57 @@ export default function QuestionGenerator() {
   };
 
   const handleSaveQuestions = () => {
-    const selectedQuestions = generatedQuestions.filter(q => q.isSelected);
-    localStorage.setItem('selectedQuestions', JSON.stringify(selectedQuestions));
-    navigate('/questions');
+    const selectedQuestions = generatedQuestions.filter((q) => q.isSelected);
+    navigate("/questions", {
+      state: {
+        newQuestions: selectedQuestions,
+      },
+    });
+  };
+
+  const handleBackToPDF = () => {
+    navigate("/create");
   };
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12">
-      <h1 className="text-3xl font-bold mb-6 text-blue-700">Question Generator</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-blue-700">Question Generator</h1>
+        <button
+          onClick={handleBackToPDF}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-md font-medium flex items-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Back to PDF
+        </button>
+      </div>
 
-      {/* Generation Controls */}
+      {currentPdf && (
+        <div className="mb-4 text-sm text-gray-600">
+          <p>Source: {currentPdf.name}</p>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Topic</label>
-            <input
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Topic
+            </label>
+            <textarea
               ref={topicInputRef}
               type="text"
               value={topic}
@@ -94,7 +133,9 @@ export default function QuestionGenerator() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Difficulty
+            </label>
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
@@ -107,7 +148,9 @@ export default function QuestionGenerator() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Number of Questions</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Number of Questions
+            </label>
             <input
               type="number"
               min="1"
@@ -124,15 +167,14 @@ export default function QuestionGenerator() {
           disabled={!topic || isGenerating}
           className={`w-full py-2 px-4 rounded-md text-white font-medium ${
             !topic || isGenerating
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700'
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
           }`}
         >
-          {isGenerating ? 'Generating...' : 'Generate Questions'}
+          {isGenerating ? "Generating..." : "Generate Questions"}
         </button>
       </div>
 
-      {/* Generated Questions */}
       {generatedQuestions.length > 0 && (
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -158,7 +200,6 @@ export default function QuestionGenerator() {
         </div>
       )}
 
-      {/* Question Editor Modal */}
       {editingQuestion && (
         <QuestionEditor
           question={editingQuestion}

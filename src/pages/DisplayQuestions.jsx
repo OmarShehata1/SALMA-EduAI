@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import QuestionCard from "../components/QuestionsDisplay/QuestionCard";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
 
@@ -7,14 +7,31 @@ export default function QuestionsDisplay() {
   const [questions, setQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [filter, setFilter] = useState("all");
+  const location = useLocation();
 
   useEffect(() => {
     // Load questions from localStorage
     const savedQuestions = localStorage.getItem("selectedQuestions");
-    if (savedQuestions) {
-      setQuestions(JSON.parse(savedQuestions));
+    const initialQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
+    
+    // Check if we're coming from the generator with new questions
+    if (location.state?.newQuestions) {
+      // Combine existing questions with new ones, avoiding duplicates by ID
+      const combinedQuestions = [
+        ...initialQuestions,
+        ...location.state.newQuestions.filter(
+          newQ => !initialQuestions.some(existingQ => existingQ.id === newQ.id)
+        )
+      ];
+      setQuestions(combinedQuestions);
+      localStorage.setItem("selectedQuestions", JSON.stringify(combinedQuestions));
+      
+      // Clear location state to prevent reappending on refresh
+      window.history.replaceState({}, document.title);
+    } else {
+      setQuestions(initialQuestions);
     }
-  }, []);
+  }, [location.state]);
 
   const handleEditQuestion = (question) => {
     setEditingQuestion(question);
@@ -50,12 +67,13 @@ export default function QuestionsDisplay() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">Your Questions</h1>
         
-          <Link
-            to="/create"
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium"
-          >
-            Generate More Questions
-          </Link>
+        <Link
+          to="/create"
+          state={{ existingQuestions: questions }}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium"
+        >
+          Generate More Questions
+        </Link>
       </div>
 
       {/* Filter Controls */}
@@ -164,8 +182,8 @@ export default function QuestionsDisplay() {
         />
       )}
 
-      <div className="flex justify-end mt-6" >
-        <button className="bg-indigo-800 hover:bg-indigo-700  text-white py-2 px-4 rounded-md font-medium">
+      <div className="flex justify-end mt-6">
+        <button className="bg-indigo-800 hover:bg-indigo-700 text-white py-2 px-4 rounded-md font-medium">
           Add Questions to Exam
         </button>
       </div>

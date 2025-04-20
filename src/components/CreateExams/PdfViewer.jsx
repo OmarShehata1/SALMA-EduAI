@@ -1,14 +1,21 @@
 // src/components/PDFViewer/index.jsx
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import PDFSidebar from "./PDFSidebar";
 import PDFContent from "./PDFContent";
 import PDFSelectionModal from "./PDFSelectionModal";
-import { useNavigate } from "react-router-dom";
+import { usePDFContext } from "../../context/PDFContext";
 
 const PDFViewer = () => {
-  const [pdfFiles, setPdfFiles] = useState([]);
-  const [currentPdf, setCurrentPdf] = useState(null);
-  const [selectedText, setSelectedText] = useState("");
+  const { 
+    pdfFiles, 
+    currentPdf, 
+    setCurrentPdf, 
+    selectedText, 
+    setSelectedText,
+    addPdfFiles
+  } = usePDFContext();
+  
   const [showModal, setShowModal] = useState(false);
   const [selectionCoordinates, setSelectionCoordinates] = useState({
     x: 0,
@@ -20,19 +27,9 @@ const PDFViewer = () => {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    const newPdfFiles = files
-      .filter((file) => file.type === "application/pdf")
-      .map((file) => ({
-        name: file.name,
-        url: URL.createObjectURL(file),
-      }));
-
-    if (newPdfFiles.length > 0) {
-      setPdfFiles((prev) => [...prev, ...newPdfFiles]);
-      if (!currentPdf) {
-        setCurrentPdf(newPdfFiles[0]);
-      }
-    } else if (files.length > 0) {
+    const added = addPdfFiles(files);
+    
+    if (!added && files.length > 0) {
       alert("Please select valid PDF files");
     }
   };
@@ -43,10 +40,10 @@ const PDFViewer = () => {
 
   const handleTextSelection = () => {
     const selection = window.getSelection();
-    const selectedText = selection.toString().trim();
+    const text = selection.toString().trim();
 
-    if (selectedText) {
-      setSelectedText(selectedText);
+    if (text) {
+      setSelectedText(text);
 
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
@@ -62,35 +59,11 @@ const PDFViewer = () => {
   };
 
   const handleConfirmSelection = () => {
-    // try {
-    //   const response = await fetch("your-backend-endpoint", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       selectedText,
-    //       pdfName: currentPdf?.name || "Unknown",
-    //       timestamp: new Date().toISOString(),
-    //     }),
-    //   });
-
-    //   if (!response.ok) throw new Error("Failed to send selection to backend");
-
-    //   const result = await response.json();
-    //   console.log("Selection saved:", result);
-
-    // } catch (error) {
-    //   console.error("Error sending selection:", error);
-    //   alert("Failed to save selection. Please try again.");
-    // }
     setShowModal(false);
     window.getSelection().removeAllRanges();
 
-    // ✅ Navigate and pass the selected text
-    navigate("/generate", {
-      state: { selectedText },
-    });
+    // Navigate while keeping the context state intact
+    navigate("/generate");
   };
 
   const handleCancelSelection = () => {
