@@ -83,8 +83,8 @@ const HowItWorksSection = () => {
             visibleItems.title ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
           }`}
         >
-          <h2 className="text-4xl font-bold text-center mb-2">How It Works</h2>
-          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-4xl font-bold text-center mb-2" style={{ fontFamily: 'Patrick Hand, cursive' }}>How It Works</h2>
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12" style={{ fontFamily: 'Patrick Hand, cursive' }}>
             Our intelligent system simplifies both exam creation and evaluation
           </p>
         </div>
