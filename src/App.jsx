@@ -4,6 +4,8 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import CreateExam from './pages/CreateExam';
 import Grades from './pages/Grades';
+import Login from './components/Login';
+import Register from './components/Register';
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/create" element={<CreateExam />} />
           <Route path="/grades" element={<Grades />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
         <Footer />
       </div>

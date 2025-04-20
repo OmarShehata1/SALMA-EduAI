@@ -12,14 +12,10 @@
   "dependencies": {
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
-<<<<<<< HEAD
     "lucide-react": "^0.501.0",
-    "pdfjs-dist": "^5.1.91",
-=======
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
     "pdfjs-dist": "^2.16.105",
->>>>>>> 6b37e444eba0b7e1a5a3cef6dcd2de36244fa5b6
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-pdf": "^9.2.1",

@@ -11,11 +11,11 @@ import KeyFeaturesSection from "../components/KeyFeaturesSection";
 
 export default function Home() {
   return (
-    <>
+    <div className="mt-12">
       <AnimatedHeroSection />
       <HowItWorksSection />
       <SALMAUniqueSection />
       <KeyFeaturesSection />
-    </>
+    </div>
   );
 }

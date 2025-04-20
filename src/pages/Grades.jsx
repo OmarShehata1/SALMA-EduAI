@@ -18,7 +18,7 @@ export default function Grades() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 flex-1">
+    <div className="container mx-auto px-4 py-8 flex-1 mt-12">
       <h1 className="text-3xl font-bold mb-8">Grade Evaluation</h1>
 
       <div className="max-w-2xl mx-auto">

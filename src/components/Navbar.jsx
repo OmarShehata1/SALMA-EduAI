@@ -33,7 +33,7 @@ export default function Navbar() {
             <div className="bg-blue-600 text-white font-bold p-2 rounded mr-2">
               S
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent " style={{ fontFamily: 'cursive' }}>
               SALMA
             </span>
           </Link>
