@@ -9,6 +9,8 @@ export default {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        peach: '#FFD180',
+        mint: '#A7FFEB'
       },
     },
   },

@@ -6,6 +6,8 @@ import CreateExam from './pages/CreateExam';
 import Grades from './pages/Grades';
 import Login from './components/Login';
 import Register from './components/Register';
+import QuestionGenerator from './pages/GenerateQuestion';
+import QuestionsDisplay from './pages/DisplayQuestions';
 
 export default function App() {
   return (
@@ -18,6 +20,9 @@ export default function App() {
           <Route path="/grades" element={<Grades />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/generate" element={<QuestionGenerator />} />
+          <Route path="/questions" element={<QuestionsDisplay />} />
+          {/* <Route path="/" element={<Navigate to="/generate" />} /> */}
         </Routes>
         <Footer />
       </div>

@@ -9,7 +9,7 @@ const AnimatedHeroSection = () => {
   }, []);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-blue-800 via-indigo-700 to-blue-600 text-white">
+    <div className="relative overflow-hidden bg-gradient-to-br from-blue-800 via-indigo-700 to-blue-600 text-white h-screen">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-white animate-pulse"></div>
@@ -23,11 +23,11 @@ const AnimatedHeroSection = () => {
             <div className="bg-blue-500 bg-opacity-20 inline-block px-3 py-1 rounded-full mb-4">
               <span className="text-sm font-medium">Intelligent Assessment System</span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-5xl font-bold mb-6 leading-tight">
               System for Automated Learning and Assessment
             </h1>
             <h3 className="text-xl md:text-2xl mb-6 text-blue-100">
-              Revolutionize exam creation and evaluation with AI-powered tools
+              Revolutionize exam <span className="bg-mint text-black px-2 rounded font-semibold">Generation</span> and <span className="bg-mint  text-black px-2 rounded font-semibold">Evaluation</span> with AI-powered tools
             </h3>
             <p className="text-lg mb-8 text-blue-50 max-w-lg">
               Our multi-agent platform streamlines the entire assessment process from creation to analysis, saving educators valuable time.
