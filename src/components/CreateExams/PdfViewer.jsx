@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import PDFSidebar from "./PDFSidebar";
 import PDFContent from "./PDFContent";
 import PDFSelectionModal from "./PDFSelectionModal";
+import { useNavigate } from "react-router-dom";
 
 const PDFViewer = () => {
   const [pdfFiles, setPdfFiles] = useState([]);
@@ -15,6 +16,7 @@ const PDFViewer = () => {
   });
   const pdfContainerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -59,31 +61,36 @@ const PDFViewer = () => {
     }
   };
 
-  const handleConfirmSelection = async () => {
-    try {
-      const response = await fetch("your-backend-endpoint", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          selectedText,
-          pdfName: currentPdf?.name || "Unknown",
-          timestamp: new Date().toISOString(),
-        }),
-      });
+  const handleConfirmSelection = () => {
+    // try {
+    //   const response = await fetch("your-backend-endpoint", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       selectedText,
+    //       pdfName: currentPdf?.name || "Unknown",
+    //       timestamp: new Date().toISOString(),
+    //     }),
+    //   });
 
-      if (!response.ok) throw new Error("Failed to send selection to backend");
+    //   if (!response.ok) throw new Error("Failed to send selection to backend");
 
-      const result = await response.json();
-      console.log("Selection saved:", result);
+    //   const result = await response.json();
+    //   console.log("Selection saved:", result);
 
-      setShowModal(false);
-      window.getSelection().removeAllRanges();
-    } catch (error) {
-      console.error("Error sending selection:", error);
-      alert("Failed to save selection. Please try again.");
-    }
+    // } catch (error) {
+    //   console.error("Error sending selection:", error);
+    //   alert("Failed to save selection. Please try again.");
+    // }
+    setShowModal(false);
+    window.getSelection().removeAllRanges();
+
+    // ✅ Navigate and pass the selected text
+    navigate("/generate", {
+      state: { selectedText },
+    });
   };
 
   const handleCancelSelection = () => {
@@ -105,13 +112,13 @@ const PDFViewer = () => {
         onPdfSelect={handlePdfSelect}
         triggerFileInput={triggerFileInput}
       />
-      
+
       <PDFContent
         currentPdf={currentPdf}
         pdfContainerRef={pdfContainerRef}
         onTextSelection={handleTextSelection}
       />
-      
+
       {showModal && (
         <PDFSelectionModal
           selectedText={selectedText}
@@ -125,5 +132,3 @@ const PDFViewer = () => {
 };
 
 export default PDFViewer;
-
-

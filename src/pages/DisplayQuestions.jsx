@@ -166,7 +166,7 @@ export default function QuestionsDisplay() {
 
       <div className="flex justify-end mt-6" >
         <button className="bg-indigo-800 hover:bg-indigo-700  text-white py-2 px-4 rounded-md font-medium">
-          Add Questions in Exam
+          Add Questions to Exam
         </button>
       </div>
     </div>

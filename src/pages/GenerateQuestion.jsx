@@ -1,22 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
 import GeneratedQuestion from "../components/QuestionGenerator/GeneratedQuestion";
-import { useNavigate } from 'react-router-dom';
 
 export default function QuestionGenerator() {
-  const [generatedQuestions, setGeneratedQuestions] = useState([]);
-  const [topic, setTopic] = useState('');
+  const location = useLocation();
+  const selectedTextFromPDF = location.state?.selectedText || '';
+  
+  const [topic, setTopic] = useState(selectedTextFromPDF);
   const [difficulty, setDifficulty] = useState('medium');
   const [numQuestions, setNumQuestions] = useState(5);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   
   const navigate = useNavigate();
-  
-  // Mock function to simulate generating questions with an AI model
+  const topicInputRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedTextFromPDF && topicInputRef.current) {
+      topicInputRef.current.focus();
+    }
+  }, [selectedTextFromPDF]);
+
   const generateQuestions = () => {
     setIsGenerating(true);
-    
+
     // Simulate API call delay
     setTimeout(() => {
       const newQuestions = [];
@@ -26,56 +35,56 @@ export default function QuestionGenerator() {
           question: `Sample ${difficulty} question about ${topic} (#${i})`,
           answer: `Sample answer for question #${i} about ${topic}.`,
           isSelected: true,
-          difficulty: difficulty
+          difficulty: difficulty,
         });
       }
       setGeneratedQuestions(newQuestions);
       setIsGenerating(false);
     }, 1500);
   };
-  
+
   const handleCheckboxChange = (id) => {
     setGeneratedQuestions(
-      generatedQuestions.map(q => 
+      generatedQuestions.map(q =>
         q.id === id ? { ...q, isSelected: !q.isSelected } : q
       )
     );
   };
-  
+
   const handleEditQuestion = (question) => {
     setEditingQuestion(question);
   };
-  
+
   const handleSaveEdit = (editedQuestion) => {
     setGeneratedQuestions(
-      generatedQuestions.map(q => 
+      generatedQuestions.map(q =>
         q.id === editedQuestion.id ? editedQuestion : q
       )
     );
     setEditingQuestion(null);
   };
-  
+
   const handleCancelEdit = () => {
     setEditingQuestion(null);
   };
-  
+
   const handleSaveQuestions = () => {
     const selectedQuestions = generatedQuestions.filter(q => q.isSelected);
-    // Save selected questions to local storage (in a real app, you'd use an API)
     localStorage.setItem('selectedQuestions', JSON.stringify(selectedQuestions));
-    navigate('/questions'); // Navigate to the questions display page
+    navigate('/questions');
   };
-  
+
   return (
     <div className="container mx-auto px-4 py-8 mt-12">
       <h1 className="text-3xl font-bold mb-6 text-blue-700">Question Generator</h1>
-      
+
       {/* Generation Controls */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Topic</label>
             <input
+              ref={topicInputRef}
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
@@ -83,7 +92,7 @@ export default function QuestionGenerator() {
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
             <select
@@ -96,7 +105,7 @@ export default function QuestionGenerator() {
               <option value="hard">Hard</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Number of Questions</label>
             <input
@@ -109,7 +118,7 @@ export default function QuestionGenerator() {
             />
           </div>
         </div>
-        
+
         <button
           onClick={generateQuestions}
           disabled={!topic || isGenerating}
@@ -122,7 +131,7 @@ export default function QuestionGenerator() {
           {isGenerating ? 'Generating...' : 'Generate Questions'}
         </button>
       </div>
-      
+
       {/* Generated Questions */}
       {generatedQuestions.length > 0 && (
         <div className="mb-8">
@@ -135,7 +144,7 @@ export default function QuestionGenerator() {
               Save Selected Questions
             </button>
           </div>
-          
+
           <div className="space-y-4">
             {generatedQuestions.map((question) => (
               <GeneratedQuestion
@@ -148,7 +157,7 @@ export default function QuestionGenerator() {
           </div>
         </div>
       )}
-      
+
       {/* Question Editor Modal */}
       {editingQuestion && (
         <QuestionEditor

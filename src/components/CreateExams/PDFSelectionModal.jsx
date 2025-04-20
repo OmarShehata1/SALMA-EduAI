@@ -1,32 +1,23 @@
-// src/components/PDFViewer/PDFSelectionModal.jsx
-const PDFSelectionModal = ({ selectedText, coordinates, onConfirm, onCancel }) => {
-    return (
-      <div
-        className="absolute bg-white rounded-lg shadow-lg border border-gray-200"
-        style={{
-          left: `${coordinates.x}px`,
-          top: `${coordinates.y}px`,
-          transform: "translate(-50%, -100%)",
-          zIndex: 50,
-          maxWidth: "300px",
-        }}
-      >
-        <div className="p-3">
-          <h4 className="text-sm font-semibold mb-2">Confirm Selection</h4>
-          <div className="text-xs bg-gray-50 p-2 rounded mb-3 max-h-24 overflow-y-auto">
-            {selectedText.length > 100
-              ? `${selectedText.substring(0, 100)}...`
+const PDFSelectionModal = ({ selectedText, onConfirm, onCancel }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-md mx-4 sm:mx-0 animate-fadeIn">
+        <div className="p-5">
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">Confirm Selection</h4>
+          <div className="text-sm bg-gray-100 p-3 rounded-md mb-4 max-h-40 overflow-y-auto text-gray-700">
+            {selectedText.length > 200
+              ? `${selectedText.substring(0, 200)}...`
               : selectedText}
           </div>
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-3">
             <button
-              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+              className="px-4 py-2 text-sm bg-gray-200 text-gray-800 hover:bg-gray-300 rounded-md transition-colors"
               onClick={onCancel}
             >
               Cancel
             </button>
             <button
-              className="px-3 py-1 text-xs bg-blue-600 text-white hover:bg-blue-700 rounded transition-colors"
+              className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
               onClick={onConfirm}
             >
               Confirm
@@ -34,7 +25,8 @@ const PDFSelectionModal = ({ selectedText, coordinates, onConfirm, onCancel }) =
           </div>
         </div>
       </div>
-    );
-  };
-  
-  export default PDFSelectionModal;
+    </div>
+  );
+};
+
+export default PDFSelectionModal;
