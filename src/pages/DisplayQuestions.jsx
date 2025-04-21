@@ -3,6 +3,41 @@ import { Link, useLocation } from "react-router-dom";
 import QuestionCard from "../components/QuestionsDisplay/QuestionCard";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
 
+// Notification component with animation
+const Notification = ({ type, message, isVisible, onClose }) => {
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onClose]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed top-4 right-4 z-50 animate-fadeIn">
+      <div className="bg-white shadow-lg rounded-lg p-4 flex items-center border-l-4 border-green-500 max-w-md transform transition-all duration-500 ease-in-out">
+        <div className="mr-3 bg-green-100 p-2 rounded-full">
+          <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <p className="font-medium text-gray-900">{type}</p>
+          <p className="text-gray-600">{message}</p>
+        </div>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function QuestionsDisplay() {
   const [questions, setQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
@@ -10,6 +45,11 @@ export default function QuestionsDisplay() {
   const [currentExamId, setCurrentExamId] = useState(null);
   const [isCreatingExam, setIsCreatingExam] = useState(false);
   const [isSubmittingExam, setIsSubmittingExam] = useState(false);
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    type: "",
+    message: ""
+  });
   const location = useLocation();
 
   useEffect(() => {
@@ -66,6 +106,21 @@ export default function QuestionsDisplay() {
     }
   };
 
+  const showNotification = (type, message) => {
+    setNotification({
+      isVisible: true,
+      type,
+      message
+    });
+  };
+
+  const hideNotification = () => {
+    setNotification({
+      ...notification,
+      isVisible: false
+    });
+  };
+
   const createEmptyExam = async () => {
     try {
       setIsCreatingExam(true);
@@ -92,11 +147,11 @@ export default function QuestionsDisplay() {
       setCurrentExamId(examData.id);
       sessionStorage.setItem("currentExamId", examData.id);
       
-      // Show success message
-      alert('Empty exam created successfully!');
+      // Show success notification instead of alert
+      showNotification("Success", "Empty exam created successfully!");
     } catch (error) {
       console.error('Error creating exam:', error);
-      alert(`Failed to create exam: ${error.message}`);
+      showNotification("Error", `Failed to create exam: ${error.message}`);
     } finally {
       setIsCreatingExam(false);
     }
@@ -104,7 +159,7 @@ export default function QuestionsDisplay() {
 
   const submitExamWithQuestions = async () => {
     if (!currentExamId || filteredQuestions.length === 0) {
-      alert('No exam or questions available to submit');
+      showNotification("Error", "No exam or questions available to submit");
       return;
     }
     
@@ -145,11 +200,11 @@ export default function QuestionsDisplay() {
       setQuestions([]);
       sessionStorage.removeItem("selectedQuestions");
       
-      // Show success message
-      alert(`Exam submitted successfully! Exam ID: ${examData.id}`);
+      // Show success notification instead of alert
+      showNotification("Success", `Exam submitted successfully! Exam ID: ${examData.id}`);
     } catch (error) {
       console.error('Error submitting exam:', error);
-      alert(`Failed to submit exam: ${error.message}`);
+      showNotification("Error", `Failed to submit exam: ${error.message}`);
     } finally {
       setIsSubmittingExam(false);
     }
@@ -162,6 +217,14 @@ export default function QuestionsDisplay() {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12 mb-10">
+      {/* Notification Component */}
+      <Notification 
+        type={notification.type}
+        message={notification.message}
+        isVisible={notification.isVisible}
+        onClose={hideNotification}
+      />
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">Your Questions</h1>
         
