@@ -9,6 +9,7 @@ import Register from './components/Home/Register';
 import QuestionGenerator from './pages/GenerateQuestion';
 import QuestionsDisplay from './pages/DisplayQuestions';
 import { PDFProvider } from './context/PDFContext';
+import CreateFullExam from './pages/CreateFullExam';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/create" element={<CreateExam />} />
+            <Route path="/create/full" element={<CreateFullExam />} />
             <Route path="/grades" element={<Grades />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
