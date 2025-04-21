@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
 import GeneratedQuestion from "../components/QuestionGenerator/GeneratedQuestion";
 import { usePDFContext } from "../context/PDFContext";
 
 export default function QuestionGenerator() {
   const { selectedText, currentPdf } = usePDFContext();
-  const location = useLocation();
-  const existingQuestions = location.state?.existingQuestions || [];
+  
 
   const [topic, setTopic] = useState(selectedText || "");
   const [difficulty, setDifficulty] = useState("medium");
