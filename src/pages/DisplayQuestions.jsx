@@ -71,7 +71,7 @@ export default function QuestionsDisplay() {
       setIsCreatingExam(true);
       
       // Call the API to create an empty exam
-      const response = await fetch('https://localhost:7102/api/exams/create', {
+      const response = await fetch('https://60b0-197-35-45-118.ngrok-free.app/api/exams/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ export default function QuestionsDisplay() {
       }));
       
       // Call the API to add questions to the exam
-      const response = await fetch(`https://localhost:7102/api/exams/${currentExamId}/questions`, {
+      const response = await fetch(`https://60b0-197-35-45-118.ngrok-free.app/api/exams/${currentExamId}/questions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
