@@ -32,7 +32,7 @@ export default function QuestionGenerator() {
 
     try {
       // Updated API endpoint to match our backend
-      const response = await fetch('https://localhost:7102/api/QuestionGenerator/generate-questions', {
+      const response = await fetch('https://60b0-197-35-45-118.ngrok-free.app/api/QuestionGenerator/generate-questions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
