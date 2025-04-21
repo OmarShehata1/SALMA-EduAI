@@ -1,51 +1,111 @@
-import { useState } from 'react';
+import React, { useState } from "react";
 
-export default function QuestionCard({ question, onEdit, onDelete }) {
-  const [showAnswer, setShowAnswer] = useState(false);
-  
+const QuestionCard = ({ question, onEdit, onDelete }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const difficultyColor = {
+    easy: "bg-green-100 text-green-800 border-green-200",
+    medium: "bg-blue-100 text-blue-800 border-blue-200",
+    hard: "bg-red-100 text-red-800 border-red-200",
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className={`bg-white rounded-lg shadow-md border-l-4 ${difficultyColor[question.difficulty]}`}>
       <div className="p-4">
         <div className="flex justify-between items-start">
-          <h3 className="text-lg font-medium">{question.question}</h3>
-          <span className={`px-2 py-1 text-xs font-semibold rounded-full
-            ${question.difficulty === 'easy' ? 'bg-green-100 text-green-800' : 
-              question.difficulty === 'medium' ? 'bg-blue-100 text-blue-800' : 
-              'bg-red-100 text-red-800'}`}>
-            {question.difficulty}
+          <h3 className="text-lg font-semibold text-gray-900">
+            {question.question}
+          </h3>
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              difficultyColor[question.difficulty]
+            }`}
+          >
+            {question.difficulty.charAt(0).toUpperCase() +
+              question.difficulty.slice(1)}
           </span>
         </div>
-        
-        {showAnswer && (
-          <div className="mt-3 p-3 bg-gray-50 rounded-md">
+
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center"
+        >
+          {expanded ? "Hide Answer" : "Show Answer"}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-4 w-4 ml-1 transform ${
+              expanded ? "rotate-180" : ""
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+
+        {expanded && (
+          <div className="mt-2 pt-2 border-t border-gray-200">
             <p className="text-gray-700">{question.answer}</p>
           </div>
         )}
-        
-        <div className="mt-4 flex justify-between items-center">
-          <button
-            onClick={() => setShowAnswer(!showAnswer)}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            {showAnswer ? 'Hide Answer' : 'Show Answer'}
-          </button>
-          
-          <div className="space-x-3">
-            <button
-              onClick={() => onEdit(question)}
-              className="text-gray-600 hover:text-gray-800 font-medium"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => onDelete(question.id)}
-              className="text-red-600 hover:text-red-800 font-medium"
-            >
-              Delete
-            </button>
+
+        {question.source && (
+          <div className="mt-2 text-xs text-gray-500">
+            Source: {question.source}
           </div>
+        )}
+
+        <div className="mt-3 flex justify-end space-x-2">
+          <button
+            onClick={() => onEdit(question)}
+            className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
+            Edit
+          </button>
+          <button
+            onClick={() => onDelete(question.id)}
+            className="inline-flex items-center text-sm font-medium text-red-600 hover:text-red-800"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            Delete
+          </button>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default QuestionCard;

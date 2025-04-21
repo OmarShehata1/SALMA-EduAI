@@ -15,6 +15,7 @@ export default function QuestionGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
   const topicInputRef = useRef(null);
@@ -25,25 +26,49 @@ export default function QuestionGenerator() {
     }
   }, [selectedText]);
 
-  const generateQuestions = () => {
+  const generateQuestions = async () => {
     setIsGenerating(true);
+    setError(null);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      const newQuestions = [];
-      for (let i = 1; i <= numQuestions; i++) {
-        newQuestions.push({
-          id: Date.now() + i,
-          question: `Sample ${difficulty} question about ${topic} (#${i})`,
-          answer: `Sample answer for question #${i} about ${topic}.`,
-          isSelected: true,
+    try {
+      // Updated API endpoint to match our backend
+      const response = await fetch('https://localhost:7102/api/QuestionGenerator/generate-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pdfName: currentPdf ? currentPdf.name : null,
+          selectedText: topic,
           difficulty: difficulty,
-          source: currentPdf ? currentPdf.name : "Unknown source",
-        });
+          numQuestions: numQuestions
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
-      setGeneratedQuestions(newQuestions);
+
+      const data = await response.json();
+      
+      // Process the returned questions
+      // The API now returns questions with questionText property
+      const formattedQuestions = data.questions.map((q) => ({
+        id: q.id,
+        question: q.questionText, // Map backend "questionText" to frontend "question"
+        answer: q.answer,
+        isSelected: true,
+        difficulty: q.difficulty,
+        source: q.source || (currentPdf ? currentPdf.name : "Unknown source"),
+      }));
+
+      setGeneratedQuestions(formattedQuestions);
+    } catch (err) {
+      console.error("Error generating questions:", err);
+      setError("Failed to generate questions. Please try again.");
+    } finally {
       setIsGenerating(false);
-    }, 1500);
+    }
   };
 
   const handleCheckboxChange = (id) => {
@@ -124,7 +149,6 @@ export default function QuestionGenerator() {
             </label>
             <textarea
               ref={topicInputRef}
-              type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Enter a topic for the questions"
@@ -173,6 +197,10 @@ export default function QuestionGenerator() {
         >
           {isGenerating ? "Generating..." : "Generate Questions"}
         </button>
+        
+        {error && (
+          <div className="mt-3 text-red-600 text-sm">{error}</div>
+        )}
       </div>
 
       {generatedQuestions.length > 0 && (

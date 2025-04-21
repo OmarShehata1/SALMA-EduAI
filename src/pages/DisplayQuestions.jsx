@@ -7,11 +7,14 @@ export default function QuestionsDisplay() {
   const [questions, setQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [currentExamId, setCurrentExamId] = useState(null);
+  const [isCreatingExam, setIsCreatingExam] = useState(false);
+  const [isSubmittingExam, setIsSubmittingExam] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    // Load questions from localStorage
-    const savedQuestions = localStorage.getItem("selectedQuestions");
+    // Load questions from sessionStorage
+    const savedQuestions = sessionStorage.getItem("selectedQuestions");
     const initialQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
     
     // Check if we're coming from the generator with new questions
@@ -24,12 +27,18 @@ export default function QuestionsDisplay() {
         )
       ];
       setQuestions(combinedQuestions);
-      localStorage.setItem("selectedQuestions", JSON.stringify(combinedQuestions));
+      sessionStorage.setItem("selectedQuestions", JSON.stringify(combinedQuestions));
       
       // Clear location state to prevent reappending on refresh
       window.history.replaceState({}, document.title);
     } else {
       setQuestions(initialQuestions);
+    }
+
+    // Check if there's a current exam ID in sessionStorage
+    const savedExamId = sessionStorage.getItem("currentExamId");
+    if (savedExamId) {
+      setCurrentExamId(savedExamId);
     }
   }, [location.state]);
 
@@ -42,7 +51,7 @@ export default function QuestionsDisplay() {
       q.id === editedQuestion.id ? editedQuestion : q
     );
     setQuestions(updatedQuestions);
-    localStorage.setItem("selectedQuestions", JSON.stringify(updatedQuestions));
+    sessionStorage.setItem("selectedQuestions", JSON.stringify(updatedQuestions));
     setEditingQuestion(null);
   };
 
@@ -50,10 +59,99 @@ export default function QuestionsDisplay() {
     if (window.confirm("Are you sure you want to delete this question?")) {
       const updatedQuestions = questions.filter((q) => q.id !== questionId);
       setQuestions(updatedQuestions);
-      localStorage.setItem(
+      sessionStorage.setItem(
         "selectedQuestions",
         JSON.stringify(updatedQuestions)
       );
+    }
+  };
+
+  const createEmptyExam = async () => {
+    try {
+      setIsCreatingExam(true);
+      
+      // Call the API to create an empty exam
+      const response = await fetch('https://localhost:7102/api/exams/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: 'New Exam',
+          description: 'Generated exam',
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create exam');
+      }
+      
+      const examData = await response.json();
+      
+      // Save the exam ID
+      setCurrentExamId(examData.id);
+      sessionStorage.setItem("currentExamId", examData.id);
+      
+      // Show success message
+      alert('Empty exam created successfully!');
+    } catch (error) {
+      console.error('Error creating exam:', error);
+      alert(`Failed to create exam: ${error.message}`);
+    } finally {
+      setIsCreatingExam(false);
+    }
+  };
+
+  const submitExamWithQuestions = async () => {
+    if (!currentExamId || filteredQuestions.length === 0) {
+      alert('No exam or questions available to submit');
+      return;
+    }
+    
+    try {
+      setIsSubmittingExam(true);
+      
+      // Transform questions to match the backend format if needed
+      const questionsToSubmit = filteredQuestions.map(q => ({
+        id: q.id,
+        questionText: q.question, // Map frontend "question" to backend "questionText"
+        answer: q.answer,
+        difficulty: q.difficulty,
+        source: q.source,
+        isSelected: true
+      }));
+      
+      // Call the API to add questions to the exam
+      const response = await fetch(`https://localhost:7102/api/exams/${currentExamId}/questions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          examId: currentExamId,
+          questions: questionsToSubmit
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add questions to exam');
+      }
+      
+      const examData = await response.json();
+      
+      // Clear the exam ID and questions after successful submission
+      setCurrentExamId(null);
+      sessionStorage.removeItem("currentExamId");
+      setQuestions([]);
+      sessionStorage.removeItem("selectedQuestions");
+      
+      // Show success message
+      alert(`Exam submitted successfully! Exam ID: ${examData.id}`);
+    } catch (error) {
+      console.error('Error submitting exam:', error);
+      alert(`Failed to submit exam: ${error.message}`);
+    } finally {
+      setIsSubmittingExam(false);
     }
   };
 
@@ -182,11 +280,37 @@ export default function QuestionsDisplay() {
         />
       )}
 
-      <div className="flex justify-end mt-6">
-        <button className="bg-indigo-800 hover:bg-indigo-700 text-white py-2 px-4 rounded-md font-medium">
-          Add Questions to Exam
+      <div className="flex justify-end mt-6 gap-2">
+        <button
+          onClick={createEmptyExam}
+          disabled={isCreatingExam || currentExamId !== null}
+          className={`py-2 px-4 rounded-md font-medium ${
+            currentExamId !== null || isCreatingExam
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-indigo-800 hover:bg-indigo-700 text-white"
+          }`}
+        >
+          {isCreatingExam ? "Creating..." : "Create Empty Exam"}
+        </button>
+        
+        <button
+          onClick={submitExamWithQuestions}
+          disabled={!currentExamId || isSubmittingExam || filteredQuestions.length === 0}
+          className={`py-2 px-4 rounded-md font-medium ${
+            !currentExamId || isSubmittingExam || filteredQuestions.length === 0
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-500 text-white"
+          }`}
+        >
+          {isSubmittingExam ? "Submitting..." : "Submit Exam"}
         </button>
       </div>
+      
+      {currentExamId && (
+        <div className="mt-2 text-right text-sm text-gray-600">
+          Current Exam ID: {currentExamId}
+        </div>
+      )}
     </div>
   );
 }
