@@ -1,3 +1,4 @@
+// student tables component
 import React from 'react';
 
 export function StudentsTable({ studentsData, handleStudentClick }) {

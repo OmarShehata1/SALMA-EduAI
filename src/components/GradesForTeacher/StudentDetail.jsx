@@ -1,3 +1,4 @@
+// student detail component
 import React from 'react';
 
 export function StudentDetail({ selectedStudent }) {

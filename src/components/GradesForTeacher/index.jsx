@@ -1,3 +1,4 @@
+// main component for the Grades page
 import { useState } from 'react';
 import { Header } from './Header';
 import { FileUpload } from './FileUpload';

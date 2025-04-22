@@ -1,3 +1,4 @@
+// file upload component for uploading answer sheets in PDF format
 import React from 'react';
 
 export function FileUpload({ file, setFile, handleEvaluate }) {
