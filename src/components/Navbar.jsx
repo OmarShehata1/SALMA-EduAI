@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X, LogIn, UserPlus, ChevronDown } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, LogIn, UserPlus, ChevronDown, LogOut, User } from "lucide-react";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Navbar() {
-  const [, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCreateExamOpen, setIsCreateExamOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Handle scroll effect
   useEffect(() => {
@@ -23,11 +27,14 @@ export default function Navbar() {
     };
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isCreateExamOpen && !event.target.closest('#create-exam-dropdown')) {
         setIsCreateExamOpen(false);
+      }
+      if (isUserMenuOpen && !event.target.closest('#user-menu-dropdown')) {
+        setIsUserMenuOpen(false);
       }
     };
 
@@ -35,15 +42,27 @@ export default function Navbar() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isCreateExamOpen]);
+  }, [isCreateExamOpen, isUserMenuOpen]);
 
   const toggleCreateExamDropdown = () => {
     setIsCreateExamOpen(!isCreateExamOpen);
   };
 
+  const toggleUserMenuDropdown = () => {
+    setIsUserMenuOpen(!isUserMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    navigate('/');
+  };
+
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white shadow-md py-2"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white shadow-md py-2 ${
+        isScrolled ? 'shadow-md' : ''
+      }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
@@ -122,22 +141,69 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Auth Buttons - Right (hidden on mobile) */}
+          {/* Auth Buttons or User Menu - Right (hidden on mobile) */}
           <div className="hidden md:flex items-center space-x-2">
-            <Link
-              to="/login"
-              className="flex items-center px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
-            >
-              <LogIn className="w-4 h-4 mr-1" />
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              <UserPlus className="w-4 h-4 mr-1" />
-              Register
-            </Link>
+            {currentUser ? (
+              <div className="relative" id="user-menu-dropdown">
+                <button
+                  onClick={toggleUserMenuDropdown}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                >
+                  <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <span>{currentUser.username}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50">
+                    <div className="py-1">
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      >
+                        <div className="flex items-center">
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign out
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="flex items-center px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  <LogIn className="w-4 h-4 mr-1" />
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -178,20 +244,54 @@ export default function Navbar() {
                 label="Grades"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
+              
               <div className="border-t border-gray-200 my-2 pt-2"></div>
-              <MobileNavLink
-                to="/login"
-                label="Login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                icon={<LogIn className="w-4 h-4" />}
-              />
-              <MobileNavLink
-                to="/register"
-                label="Register"
-                onClick={() => setIsMobileMenuOpen(false)}
-                icon={<UserPlus className="w-4 h-4" />}
-                isButton
-              />
+              
+              {currentUser ? (
+                <>
+                  <div className="px-4 py-2">
+                    <div className="font-medium text-gray-800 mb-2">
+                      Signed in as <span className="text-blue-600">{currentUser.username}</span>
+                    </div>
+                  </div>
+                  <MobileNavLink
+                    to="/profile"
+                    label="Profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <MobileNavLink
+                    to="/dashboard"
+                    label="Dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <MobileNavLink
+                    to="/login"
+                    label="Login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    icon={<LogIn className="w-4 h-4" />}
+                  />
+                  <MobileNavLink
+                    to="/register"
+                    label="Register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    icon={<UserPlus className="w-4 h-4" />}
+                    isButton
+                  />
+                </>
+              )}
             </div>
           </div>
         )}
@@ -199,8 +299,6 @@ export default function Navbar() {
     </nav>
   );
 }
-
-import { useLocation } from "react-router-dom";
 
 const NavLink = ({ to, label, activePaths = [] }) => {
   const location = useLocation();
