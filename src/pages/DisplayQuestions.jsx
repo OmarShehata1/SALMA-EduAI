@@ -2,41 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import QuestionCard from "../components/QuestionsDisplay/QuestionCard";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
-
-// Notification component with animation
-const Notification = ({ type, message, isVisible, onClose }) => {
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        onClose();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, onClose]);
-
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed top-4 right-4 z-50 animate-fadeIn">
-      <div className="bg-white shadow-lg rounded-lg p-4 flex items-center border-l-4 border-green-500 max-w-md transform transition-all duration-500 ease-in-out">
-        <div className="mr-3 bg-green-100 p-2 rounded-full">
-          <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <div className="flex-1">
-          <p className="font-medium text-gray-900">{type}</p>
-          <p className="text-gray-600">{message}</p>
-        </div>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-};
+import NotificationManager from "../components/Notification"; // Import the notification manager
 
 export default function QuestionsDisplay() {
   const [questions, setQuestions] = useState([]);
@@ -45,12 +11,11 @@ export default function QuestionsDisplay() {
   const [currentExamId, setCurrentExamId] = useState(null);
   const [isCreatingExam, setIsCreatingExam] = useState(false);
   const [isSubmittingExam, setIsSubmittingExam] = useState(false);
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    type: "",
-    message: ""
-  });
   const location = useLocation();
+  const url = 'https://localhost:7102';
+  
+  // Initialize notification manager
+  const { addNotification, NotificationList } = NotificationManager();
 
   useEffect(() => {
     // Load questions from sessionStorage
@@ -93,6 +58,7 @@ export default function QuestionsDisplay() {
     setQuestions(updatedQuestions);
     sessionStorage.setItem("selectedQuestions", JSON.stringify(updatedQuestions));
     setEditingQuestion(null);
+    addNotification("Question updated successfully", "success");
   };
 
   const handleDeleteQuestion = (questionId) => {
@@ -103,22 +69,8 @@ export default function QuestionsDisplay() {
         "selectedQuestions",
         JSON.stringify(updatedQuestions)
       );
+      addNotification("Question deleted successfully", "info");
     }
-  };
-
-  const showNotification = (type, message) => {
-    setNotification({
-      isVisible: true,
-      type,
-      message
-    });
-  };
-
-  const hideNotification = () => {
-    setNotification({
-      ...notification,
-      isVisible: false
-    });
   };
 
   const createEmptyExam = async () => {
@@ -126,7 +78,7 @@ export default function QuestionsDisplay() {
       setIsCreatingExam(true);
       
       // Call the API to create an empty exam
-      const response = await fetch('https://60b0-197-35-45-118.ngrok-free.app/api/exams/create', {
+      const response = await fetch(`${url}/api/exams/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,11 +99,11 @@ export default function QuestionsDisplay() {
       setCurrentExamId(examData.id);
       sessionStorage.setItem("currentExamId", examData.id);
       
-      // Show success notification instead of alert
-      showNotification("Success", "Empty exam created successfully!");
+      // Show success notification
+      addNotification('Empty exam created successfully!', 'success');
     } catch (error) {
       console.error('Error creating exam:', error);
-      showNotification("Error", `Failed to create exam: ${error.message}`);
+      addNotification(`Failed to create exam: ${error.message}`, 'error');
     } finally {
       setIsCreatingExam(false);
     }
@@ -159,7 +111,7 @@ export default function QuestionsDisplay() {
 
   const submitExamWithQuestions = async () => {
     if (!currentExamId || filteredQuestions.length === 0) {
-      showNotification("Error", "No exam or questions available to submit");
+      addNotification('No exam or questions available to submit', 'warning');
       return;
     }
     
@@ -177,7 +129,7 @@ export default function QuestionsDisplay() {
       }));
       
       // Call the API to add questions to the exam
-      const response = await fetch(`https://60b0-197-35-45-118.ngrok-free.app/api/exams/${currentExamId}/questions`, {
+      const response = await fetch(`${url}/api/exams/${currentExamId}/questions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,17 +146,52 @@ export default function QuestionsDisplay() {
       
       const examData = await response.json();
       
+      // Save the exam ID for PDF download
+      const savedExamId = examData.id;
+      
       // Clear the exam ID and questions after successful submission
       setCurrentExamId(null);
       sessionStorage.removeItem("currentExamId");
       setQuestions([]);
       sessionStorage.removeItem("selectedQuestions");
       
-      // Show success notification instead of alert
-      showNotification("Success", `Exam submitted successfully! Exam ID: ${examData.id}`);
+      // Show success notification
+      addNotification(`Exam submitted successfully! Exam ID: ${savedExamId}`, 'success');
+      
+      // Download the PDF
+      try {
+        const pdfResponse = await fetch(`${url}/api/exams/pdf/${savedExamId}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/pdf',
+          },
+        });
+        
+        if (!pdfResponse.ok) {
+          throw new Error('Failed to download PDF');
+        }
+        
+        const blob = await pdfResponse.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `exam-${savedExamId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+          window.URL.revokeObjectURL(downloadUrl);
+          document.body.removeChild(a);
+        }, 100);
+        
+      } catch (pdfError) {
+        console.error('Error downloading PDF after submission:', pdfError);
+        addNotification('Exam submitted, but PDF download failed. You can download it later.', 'warning');
+      }
+      
     } catch (error) {
       console.error('Error submitting exam:', error);
-      showNotification("Error", `Failed to submit exam: ${error.message}`);
+      addNotification(`Failed to submit exam: ${error.message}`, 'error');
     } finally {
       setIsSubmittingExam(false);
     }
@@ -217,13 +204,8 @@ export default function QuestionsDisplay() {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12 mb-10">
-      {/* Notification Component */}
-      <Notification 
-        type={notification.type}
-        message={notification.message}
-        isVisible={notification.isVisible}
-        onClose={hideNotification}
-      />
+      {/* Notification component */}
+      <NotificationList />
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">Your Questions</h1>
@@ -370,8 +352,10 @@ export default function QuestionsDisplay() {
       </div>
       
       {currentExamId && (
-        <div className="mt-2 text-right text-sm text-gray-600">
-          Current Exam ID: {currentExamId}
+        <div className="mt-4 flex flex-col items-end">
+          <div className="text-sm text-gray-600 mb-2">
+            Current Exam ID: {currentExamId}
+          </div>
         </div>
       )}
     </div>

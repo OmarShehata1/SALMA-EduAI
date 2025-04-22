@@ -1,46 +1,46 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthProvider';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
-const Login = () => {
-  const [email, setEmail] = useState('');
+export default function Login() {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     
-    // Basic validation
-    if (!email || !password) {
-      setError('Please enter both email and password');
+    if (!username || !password) {
+      setError('Please fill in all fields');
       return;
     }
     
     try {
+      setError('');
       setIsLoading(true);
-      // Here you would add your actual authentication logic
-      // For example:
-      // await loginUser(email, password);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await login(username, password, rememberMe);
       
-      // Redirect or handle successful login
-      console.log('Login successful');
-      // navigate('/dashboard'); // Uncomment if using React Router's useNavigate
+      if (result.success) {
+        navigate('/'); // Redirect to homepage after successful login
+      } else {
+        setError(result.message);
+      }
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
-      console.error('Login error:', err);
+      setError('Failed to log in');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 mt-10">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center">
@@ -50,9 +50,9 @@ const Login = () => {
           </div>
           <h2 className="mt-4 text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Or{' '}
+            Don't have an account?{' '}
             <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-              create a new account
+              Create a new account
             </Link>
           </p>
         </div>
@@ -66,23 +66,23 @@ const Login = () => {
           
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
-                  placeholder="you@example.com"
+                  placeholder="Username"
                 />
               </div>
             </div>
@@ -128,6 +128,8 @@ const Login = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
@@ -193,6 +195,4 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}

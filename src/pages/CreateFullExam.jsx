@@ -15,7 +15,8 @@ export default function CreateFullExamPage() {
   const [questions, setQuestions] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
-
+  const [error, setError] = useState(null);
+  const url = "https://localhost:7102";
   const navigate = useNavigate();
 
   // Handle file upload
@@ -44,37 +45,72 @@ export default function CreateFullExamPage() {
   };
 
   // Generate questions based on selected files and settings
-  const generateQuestions = () => {
-    if (selectedFileIds.length === 0) return;
+  const generateQuestions = async () => {
+    if (selectedFileIds.length === 0) {
+      setError("Please select at least one file.");
+      return;
+    }
 
     setIsGenerating(true);
+    setError(null);
 
-    // Simulate API call with selected files
-    setTimeout(() => {
-      // Mock data - in a real app, this would come from your backend
-      const mockQuestions = Array.from({ length: numQuestions }, (_, i) => ({
-        id: Math.random().toString(36).substring(2, 15), // Unique ID for each question
-        question: `Sample ${difficulty.toLowerCase()} question about ${
-          topic || "selected topic"
-        } (#${i + 1})`,
-        answer: `Sample answer for question #${i + 1} about ${
-          topic || "this topic"
-        }.`,
-        difficulty: difficulty.toLowerCase(),
-        isSelected: true, // Mark all new questions as selected by default
+    try {
+      // Create FormData for API call
+      const formData = new FormData();
+
+      // Add selected files to FormData
+      const selectedFiles = files.filter((f) => selectedFileIds.includes(f.id));
+      selectedFiles.forEach((fileObj) => {
+        formData.append("Files", fileObj.file);
+      });
+
+      // Add other parameters
+      formData.append("NumQuestions", numQuestions);
+      formData.append("Difficulty", difficulty);
+      if (topic) {
+        formData.append("Topic", topic);
+      }
+
+      // Make API call to generate questions
+      const response = await fetch(`${url}/api/QuestionGenerator/generate`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to generate questions");
+      }
+
+      const data = await response.json();
+
+      // Transform the backend data structure to match our frontend needs
+      const formattedQuestions = data.questions.map((q) => ({
+        id: q.id.toString(),
+        question: q.questionText,
+        answer: q.answer,
+        difficulty: q.difficulty.toLowerCase(),
+        isSelected: q.isSelected,
+        source: q.source,
       }));
 
-      setQuestions(mockQuestions);
-      setIsGenerating(false);
+      setQuestions(formattedQuestions);
 
       // Navigate to Questions page with the new questions
       navigate("/questions", {
         state: {
-          newQuestions: mockQuestions, // Send the newly generated questions
+          newQuestions: formattedQuestions, // Send the newly generated questions
           addToExisting: true, // Flag to indicate these should be added to existing questions
         },
       });
-    }, 1500);
+    } catch (err) {
+      console.error("Error generating questions:", err);
+      setError(
+        err.message || "Failed to generate questions. Please try again."
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   // Handle saving selected questions
@@ -97,8 +133,8 @@ export default function CreateFullExamPage() {
       </h1>
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <p className="text-gray-700 mb-6">
-          Upload PDF files or documents to generate a complete exam. Our AI will
-          analyze your content and create questions based on your
+          Upload PDF files or documents to generate a complete exam. Our system
+          will analyze your content and create questions based on your
           specifications. You can then review, edit, or delete questions before
           finalizing your exam.
         </p>
@@ -113,6 +149,15 @@ export default function CreateFullExamPage() {
             </p>
           </div>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <div className="flex">
+              <AlertCircle className="text-red-500 w-5 h-5 mr-2 flex-shrink-0" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {!showQuestions ? (

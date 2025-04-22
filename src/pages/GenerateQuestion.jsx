@@ -6,7 +6,6 @@ import { usePDFContext } from "../context/PDFContext";
 
 export default function QuestionGenerator() {
   const { selectedText, currentPdf } = usePDFContext();
-  
 
   const [topic, setTopic] = useState(selectedText || "");
   const [difficulty, setDifficulty] = useState("medium");
@@ -15,10 +14,9 @@ export default function QuestionGenerator() {
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [error, setError] = useState(null);
-
   const navigate = useNavigate();
   const topicInputRef = useRef(null);
-
+  const url = "https://localhost:7102";
   useEffect(() => {
     if (selectedText && topicInputRef.current) {
       topicInputRef.current.focus();
@@ -31,25 +29,28 @@ export default function QuestionGenerator() {
 
     try {
       // Updated API endpoint to match our backend
-      const response = await fetch('https://60b0-197-35-45-118.ngrok-free.app/api/QuestionGenerator/generate-questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          pdfName: currentPdf ? currentPdf.name : null,
-          selectedText: topic,
-          difficulty: difficulty,
-          numQuestions: numQuestions
-        }),
-      });
+      const response = await fetch(
+        `${url}/api/QuestionGenerator/generate-questions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            pdfName: currentPdf ? currentPdf.name : null,
+            selectedText: topic,
+            difficulty: difficulty,
+            numQuestions: numQuestions,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       // Process the returned questions
       // The API now returns questions with questionText property
       const formattedQuestions = data.questions.map((q) => ({
@@ -196,10 +197,8 @@ export default function QuestionGenerator() {
         >
           {isGenerating ? "Generating..." : "Generate Questions"}
         </button>
-        
-        {error && (
-          <div className="mt-3 text-red-600 text-sm">{error}</div>
-        )}
+
+        {error && <div className="mt-3 text-red-600 text-sm">{error}</div>}
       </div>
 
       {generatedQuestions.length > 0 && (
