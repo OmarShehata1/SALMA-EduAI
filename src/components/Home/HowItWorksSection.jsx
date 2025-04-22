@@ -175,8 +175,11 @@ const HowItWorksSection = () => {
         </div>
 
         <div className="text-center mt-12">
-          <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center">
+          <button
+            onClick={() => window.location.href = activeTab === 'create' ? '/create' : '/grades'}
+           className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center">
             {activeTab === 'create' ? 'Start Creating Exams' : 'Start Evaluating'}
+            
             <ArrowRight className="ml-2 w-5 h-5" />
           </button>
         </div>
