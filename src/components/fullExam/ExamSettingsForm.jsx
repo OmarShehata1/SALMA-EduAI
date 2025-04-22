@@ -1,8 +1,6 @@
 
 // ExamSettingsForm.jsx
 export default function ExamSettingsForm({
-    topic,
-    setTopic,
     difficulty,
     setDifficulty,
     numQuestions,
@@ -16,18 +14,7 @@ export default function ExamSettingsForm({
         <h2 className="text-xl font-semibold mb-4">Exam Settings</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Topic
-            </label>
-            <textarea
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="Enter topic or leave blank to use content from files"
-              className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              rows={3}
-            />
-          </div>
+         
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

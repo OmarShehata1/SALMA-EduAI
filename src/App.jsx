@@ -42,47 +42,47 @@ export default function App() {
               <Route
                 path="/create"
                 element={
-                  <ProtectedRoute>
+                  <GuestRoute>
                     <CreateExam />
-                  </ProtectedRoute>
+                  </GuestRoute>
                 }
               />
               <Route
                 path="/create/full"
                 element={
-                  <ProtectedRoute>
+                  <GuestRoute>
                     <CreateFullExam />
-                  </ProtectedRoute>
+                  </GuestRoute>
                 }
               />
               <Route
                 path="/grades"
                 element={
-                  <ProtectedRoute>
+                  <GuestRoute>
                     <Grades />
-                  </ProtectedRoute>
+                  </GuestRoute>
                 }
               />
               <Route
                 path="/generate"
                 element={
-                  <ProtectedRoute>
+                  <GuestRoute>
                     <QuestionGenerator />
-                  </ProtectedRoute>
+                  </GuestRoute>
                 }
               />
               <Route
                 path="/questions"
                 element={
-                  <ProtectedRoute>
+                  <GuestRoute>
                     <QuestionsDisplay />
-                  </ProtectedRoute>
+                  </GuestRoute>
                 }
               />
 
 
               <Route
-                path="/Student"
+                path="/student"
                 element={
                   <GuestRoute>
                     <Student />

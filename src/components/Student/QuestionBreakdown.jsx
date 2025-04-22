@@ -1,6 +1,6 @@
 // QuestionBreakdown.jsx - Component to display detailed breakdown of each question
 import { useState } from 'react';
-// import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, AlertCircle, CheckCircle, HelpCircle } from 'lucide-react';
 
 export default function QuestionBreakdown({ questions }) {

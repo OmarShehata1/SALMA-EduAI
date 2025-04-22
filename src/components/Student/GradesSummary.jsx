@@ -1,5 +1,5 @@
 // GradesSummary.jsx - Component to display summary of grades for a specific teacher
-// import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Calendar, BookOpen, Award } from 'lucide-react';
 
 export default function GradesSummary({ teacherName, courseTitle, totalScore, evaluationDate }) {

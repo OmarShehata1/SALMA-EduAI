@@ -1,5 +1,5 @@
 // EmptyState.jsx - Component for when there are no grades or a teacher hasn't been selected
-// import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function EmptyState({ message }) {
   return (

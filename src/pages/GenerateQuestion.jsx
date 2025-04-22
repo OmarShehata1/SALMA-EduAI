@@ -153,6 +153,7 @@ export default function QuestionGenerator() {
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Enter a topic for the questions"
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              rows="8"
             />
           </div>
 

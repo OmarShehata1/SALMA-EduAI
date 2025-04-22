@@ -97,6 +97,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center justify-center flex-1">
             <div className="flex space-x-1">
               <NavLink to="/" label="Home" />
+              <NavLink to="/student" label="Student" />
               
               {/* Create Exam Dropdown */}
               <div className="relative" id="create-exam-dropdown">

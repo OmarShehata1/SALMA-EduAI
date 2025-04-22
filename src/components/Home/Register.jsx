@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle, BookOpen, GraduationCap } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    userType: '' // New field for user type
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -16,7 +17,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   // const navigate = useNavigate();
 
-  const { username, email, password, confirmPassword } = formData;
+  const { username, email, password, confirmPassword, userType } = formData;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +40,12 @@ export default function Register() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
+      return false;
+    }
+
+    // Validate user type selection
+    if (!userType) {
+      setError('Please select whether you are a Teacher or Student');
       return false;
     }
     
@@ -81,7 +88,7 @@ export default function Register() {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Here you would add your actual registration logic
-      // const result = await register(username, email, password);
+      // const result = await register(username, email, password, userType);
       
       // Move to success step
       setStep(3);
@@ -151,6 +158,66 @@ export default function Register() {
             className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
             placeholder="you@example.com"
           />
+        </div>
+      </div>
+
+      {/* User Type Selection */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          I am a
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, userType: 'teacher' })}
+            className={`relative rounded-lg border ${
+              userType === 'teacher'
+                ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500'
+                : 'border-gray-300 bg-white'
+            } p-4 flex flex-col items-center hover:border-indigo-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+          >
+            <div className={`rounded-full p-3 ${
+              userType === 'teacher' ? 'bg-indigo-100' : 'bg-gray-100'
+            }`}>
+              <BookOpen className={`h-6 w-6 ${
+                userType === 'teacher' ? 'text-indigo-600' : 'text-gray-500'
+              }`} />
+            </div>
+            <span className={`mt-2 font-medium ${
+              userType === 'teacher' ? 'text-indigo-700' : 'text-gray-900'
+            }`}>Teacher</span>
+            {userType === 'teacher' && (
+              <div className="absolute top-2 right-2">
+                <CheckCircle className="h-5 w-5 text-indigo-600" />
+              </div>
+            )}
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, userType: 'student' })}
+            className={`relative rounded-lg border ${
+              userType === 'student'
+                ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500'
+                : 'border-gray-300 bg-white'
+            } p-4 flex flex-col items-center hover:border-indigo-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+          >
+            <div className={`rounded-full p-3 ${
+              userType === 'student' ? 'bg-indigo-100' : 'bg-gray-100'
+            }`}>
+              <GraduationCap className={`h-6 w-6 ${
+                userType === 'student' ? 'text-indigo-600' : 'text-gray-500'
+              }`} />
+            </div>
+            <span className={`mt-2 font-medium ${
+              userType === 'student' ? 'text-indigo-700' : 'text-gray-900'
+            }`}>Student</span>
+            {userType === 'student' && (
+              <div className="absolute top-2 right-2">
+                <CheckCircle className="h-5 w-5 text-indigo-600" />
+              </div>
+            )}
+          </button>
         </div>
       </div>
 
@@ -291,7 +358,9 @@ export default function Register() {
       </div>
       <h3 className="mt-3 text-xl font-medium text-gray-900">Registration Successful!</h3>
       <p className="mt-2 text-sm text-gray-500">
-        Your account has been created successfully. You can now sign in to your account.
+        Your account has been created successfully as a{' '}
+        <span className="font-medium text-indigo-600 capitalize">{userType}</span>.
+        You can now sign in to your account.
       </p>
       <div className="mt-6">
         <Link
