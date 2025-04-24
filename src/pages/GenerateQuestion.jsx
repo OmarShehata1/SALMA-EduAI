@@ -16,7 +16,7 @@ export default function QuestionGenerator() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const topicInputRef = useRef(null);
-  const url = "https://localhost:7102";
+  // const url = "https://localhost:7102";
   useEffect(() => {
     if (selectedText && topicInputRef.current) {
       topicInputRef.current.focus();
@@ -30,7 +30,7 @@ export default function QuestionGenerator() {
     try {
       // Updated API endpoint to match our backend
       const response = await fetch(
-        `${url}/api/QuestionGenerator/generate-questions`,
+        `http://localhost:5000/teachers/671aef1355912c5627ef8d0b/exams/genqa`,
         {
           method: "POST",
           headers: {
@@ -39,8 +39,8 @@ export default function QuestionGenerator() {
           body: JSON.stringify({
             pdfName: currentPdf ? currentPdf.name : null,
             selectedText: topic,
-            difficulty: difficulty,
-            numQuestions: numQuestions,
+            // difficulty: difficulty,
+            // numQuestions: numQuestions,
           }),
         }
       );
@@ -55,11 +55,11 @@ export default function QuestionGenerator() {
       // The API now returns questions with questionText property
       const formattedQuestions = data.questions.map((q) => ({
         id: q.id,
-        question: q.questionText, // Map backend "questionText" to frontend "question"
+        question: q.question, // Map backend "questionText" to frontend "question"
         answer: q.answer,
-        isSelected: true,
-        difficulty: q.difficulty,
-        source: q.source || (currentPdf ? currentPdf.name : "Unknown source"),
+        // isSelected: true,
+        // difficulty: q.difficulty,
+        // source: q.source || (currentPdf ? currentPdf.name : "Unknown source"),
       }));
 
       setGeneratedQuestions(formattedQuestions);

@@ -4,11 +4,11 @@ import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle, BookOpen, Graduat
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    userType: '' // New field for user type
+    role: '' // Changed from userType to match backend parameter "role"
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -17,7 +17,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   // const navigate = useNavigate();
 
-  const { username, email, password, confirmPassword, userType } = formData;
+  const { name, email, password, confirmPassword, role } = formData;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,8 +26,8 @@ export default function Register() {
 
   const validateStep1 = () => {
     // Basic validation for step 1
-    if (!username.trim()) {
-      setError('Username is required');
+    if (!name.trim()) {
+      setError('Full name is required');
       return false;
     }
     
@@ -44,7 +44,7 @@ export default function Register() {
     }
 
     // Validate user type selection
-    if (!userType) {
+    if (!role) {
       setError('Please select whether you are a Teacher or Student');
       return false;
     }
@@ -84,16 +84,34 @@ export default function Register() {
     
     try {
       setIsLoading(true);
-      // Simulate API call for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Here you would add your actual registration logic
-      // const result = await register(username, email, password, userType);
+      // Send registration request to the backend
+      const response = await fetch('http://localhost:5000/user/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name, // Changed from username to name
+          email,
+          password,
+          role, // Changed from userType to role
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+      
+      // Store the JWT token in local storage
+      localStorage.setItem('token', data.token);
       
       // Move to success step
       setStep(3);
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -118,23 +136,23 @@ export default function Register() {
   const renderStep1 = () => (
     <div className="space-y-6">
       <div>
-        <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-          Username
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          Full Name
         </label>
         <div className="mt-1 relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <User className="h-5 w-5 text-gray-400" />
           </div>
           <input
-            id="username"
-            name="username"
+            id="name"
+            name="name"
             type="text"
-            autoComplete="username"
+            autoComplete="name"
             required
-            value={username}
+            value={name}
             onChange={handleChange}
             className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
-            placeholder="johndoe"
+            placeholder="John Doe"
           />
         </div>
       </div>
@@ -169,24 +187,24 @@ export default function Register() {
         <div className="grid grid-cols-2 gap-4">
           <button
             type="button"
-            onClick={() => setFormData({ ...formData, userType: 'teacher' })}
+            onClick={() => setFormData({ ...formData, role: 'teacher' })}
             className={`relative rounded-lg border ${
-              userType === 'teacher'
+              role === 'teacher'
                 ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500'
                 : 'border-gray-300 bg-white'
             } p-4 flex flex-col items-center hover:border-indigo-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           >
             <div className={`rounded-full p-3 ${
-              userType === 'teacher' ? 'bg-indigo-100' : 'bg-gray-100'
+              role === 'teacher' ? 'bg-indigo-100' : 'bg-gray-100'
             }`}>
               <BookOpen className={`h-6 w-6 ${
-                userType === 'teacher' ? 'text-indigo-600' : 'text-gray-500'
+                role === 'teacher' ? 'text-indigo-600' : 'text-gray-500'
               }`} />
             </div>
             <span className={`mt-2 font-medium ${
-              userType === 'teacher' ? 'text-indigo-700' : 'text-gray-900'
+              role === 'teacher' ? 'text-indigo-700' : 'text-gray-900'
             }`}>Teacher</span>
-            {userType === 'teacher' && (
+            {role === 'teacher' && (
               <div className="absolute top-2 right-2">
                 <CheckCircle className="h-5 w-5 text-indigo-600" />
               </div>
@@ -195,24 +213,24 @@ export default function Register() {
           
           <button
             type="button"
-            onClick={() => setFormData({ ...formData, userType: 'student' })}
+            onClick={() => setFormData({ ...formData, role: 'student' })}
             className={`relative rounded-lg border ${
-              userType === 'student'
+              role === 'student'
                 ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500'
                 : 'border-gray-300 bg-white'
             } p-4 flex flex-col items-center hover:border-indigo-500 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           >
             <div className={`rounded-full p-3 ${
-              userType === 'student' ? 'bg-indigo-100' : 'bg-gray-100'
+              role === 'student' ? 'bg-indigo-100' : 'bg-gray-100'
             }`}>
               <GraduationCap className={`h-6 w-6 ${
-                userType === 'student' ? 'text-indigo-600' : 'text-gray-500'
+                role === 'student' ? 'text-indigo-600' : 'text-gray-500'
               }`} />
             </div>
             <span className={`mt-2 font-medium ${
-              userType === 'student' ? 'text-indigo-700' : 'text-gray-900'
+              role === 'student' ? 'text-indigo-700' : 'text-gray-900'
             }`}>Student</span>
-            {userType === 'student' && (
+            {role === 'student' && (
               <div className="absolute top-2 right-2">
                 <CheckCircle className="h-5 w-5 text-indigo-600" />
               </div>
@@ -359,7 +377,7 @@ export default function Register() {
       <h3 className="mt-3 text-xl font-medium text-gray-900">Registration Successful!</h3>
       <p className="mt-2 text-sm text-gray-500">
         Your account has been created successfully as a{' '}
-        <span className="font-medium text-indigo-600 capitalize">{userType}</span>.
+        <span className="font-medium text-indigo-600 capitalize">{role}</span>.
         You can now sign in to your account.
       </p>
       <div className="mt-6">
