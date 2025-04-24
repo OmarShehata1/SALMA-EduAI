@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
-import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import axios from 'axios';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!username || !password) {
+    if (!email || !password) {
       setError('Please fill in all fields');
       return;
     }
@@ -25,15 +27,38 @@ export default function Login() {
       setError('');
       setIsLoading(true);
       
-      const result = await login(username, password, rememberMe);
+      // Connect to your backend endpoint
+      const response = await axios.post('http://localhost:5000/user/login', {
+        email,
+        password
+      });
       
-      if (result.success) {
-        navigate('/'); // Redirect to homepage after successful login
-      } else {
-        setError(result.message);
+      // If successful, we'll have a token in the response
+      if (response.data && response.data.token) {
+        // Store the token
+        localStorage.setItem('token', response.data.token);
+        
+        // Show success notification
+        setSuccess(true);
+        
+        // If you're using the AuthContext, you can call the login function
+        if (login) {
+          await login(email, password, rememberMe);
+        }
+        
+        // Redirect to homepage after a short delay to show the success message
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
       }
     } catch (err) {
-      setError('Failed to log in');
+      // Handle specific error messages from the backend
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || 'Login failed');
+      } else {
+        setError('Failed to log in');
+      }
+      setSuccess(false);
     } finally {
       setIsLoading(false);
     }
@@ -63,26 +88,33 @@ export default function Login() {
               <p>{error}</p>
             </div>
           )}
+
+          {success && (
+            <div className="mb-4 p-3 bg-green-50 border-l-4 border-green-500 text-green-700 flex items-center">
+              <CheckCircle className="h-5 w-5 mr-2" />
+              <p>Login successful! Redirecting to dashboard...</p>
+            </div>
+          )}
           
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
-                  placeholder="Username"
+                  placeholder="Email address"
                 />
               </div>
             </div>
