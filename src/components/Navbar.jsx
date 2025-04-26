@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, LogIn, UserPlus, ChevronDown, LogOut, User } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogIn,
+  UserPlus,
+  ChevronDown,
+  LogOut,
+  User,
+} from "lucide-react";
 import { useAuth } from "../context/AuthProvider";
 
 export default function Navbar() {
@@ -30,17 +38,17 @@ export default function Navbar() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isCreateExamOpen && !event.target.closest('#create-exam-dropdown')) {
+      if (isCreateExamOpen && !event.target.closest("#create-exam-dropdown")) {
         setIsCreateExamOpen(false);
       }
-      if (isUserMenuOpen && !event.target.closest('#user-menu-dropdown')) {
+      if (isUserMenuOpen && !event.target.closest("#user-menu-dropdown")) {
         setIsUserMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isCreateExamOpen, isUserMenuOpen]);
 
@@ -55,13 +63,13 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     setIsUserMenuOpen(false);
-    navigate('/');
+    navigate("/");
   };
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white shadow-md py-2 ${
-        isScrolled ? 'shadow-md' : ''
+        isScrolled ? "shadow-md" : ""
       }`}
     >
       <div className="container mx-auto px-4">
@@ -98,35 +106,35 @@ export default function Navbar() {
             <div className="flex space-x-1">
               <NavLink to="/" label="Home" />
               <NavLink to="/student" label="Student" />
-              
+
               {/* Create Exam Dropdown */}
               <div className="relative" id="create-exam-dropdown">
-                <button 
+                <button
                   onClick={toggleCreateExamDropdown}
                   className="px-4 py-2 rounded-lg font-medium transition-colors text-gray-600 hover:text-blue-600 hover:bg-blue-50 flex items-center"
                 >
                   Create Exam
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </button>
-                
+
                 {isCreateExamOpen && (
                   <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50">
                     <div className="py-1">
-                      <Link 
+                      <Link
                         to="/create"
                         onClick={() => setIsCreateExamOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                       >
                         Customize Exam
                       </Link>
-                      <Link 
+                      <Link
                         to="/create/full"
                         onClick={() => setIsCreateExamOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                       >
                         Full Exam
                       </Link>
-                      <Link 
+                      <Link
                         to="/create/bank"
                         onClick={() => setIsCreateExamOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
@@ -137,7 +145,7 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-              
+
               <NavLink to="/grades" label="Grades" />
             </div>
           </div>
@@ -153,10 +161,10 @@ export default function Navbar() {
                   <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
                     <User className="w-4 h-4" />
                   </div>
-                  <span>{currentUser.username}</span>
+                  <span>{currentUser.email}</span>
                   <ChevronDown className="w-4 h-4" />
                 </button>
-                
+
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50">
                     <div className="py-1">
@@ -217,10 +225,12 @@ export default function Navbar() {
                 label="Home"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
-              
+
               {/* Mobile Create Exam Submenu */}
               <div className="px-4 py-2">
-                <div className="font-medium text-gray-800 mb-2">Create Exam</div>
+                <div className="font-medium text-gray-800 mb-2">
+                  Create Exam
+                </div>
                 <div className="ml-4 space-y-2">
                   <MobileNavLink
                     to="/create/customize"
@@ -239,20 +249,23 @@ export default function Navbar() {
                   />
                 </div>
               </div>
-              
+
               <MobileNavLink
                 to="/grades"
                 label="Grades"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
-              
+
               <div className="border-t border-gray-200 my-2 pt-2"></div>
-              
+
               {currentUser ? (
                 <>
                   <div className="px-4 py-2">
                     <div className="font-medium text-gray-800 mb-2">
-                      Signed in as <span className="text-blue-600">{currentUser.username}</span>
+                      Signed in as{" "}
+                      <span className="text-blue-600">
+                        {currentUser.username}
+                      </span>
                     </div>
                   </div>
                   <MobileNavLink

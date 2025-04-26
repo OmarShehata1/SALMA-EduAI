@@ -26,49 +26,115 @@ export default function QuestionGenerator() {
   const generateQuestions = async () => {
     setIsGenerating(true);
     setError(null);
+    const formattedQuestions = [
+      {
+        id: "1",
+        question: "What is the capital of France?",
+        answer: "Paris",
+        isSelected: false,
+        difficulty: "easy",
+      },
+      {
+        id: "2",
+        question: "What is the largest planet in our solar system?",
+        answer: "Jupiter",
+        isSelected: false,
+        difficulty: "medium",
+      },
+      {
+        id: "3",
+        question: "What is the chemical symbol for gold?",
+        answer: "Au",
+        isSelected: false,
+      difficulty: "hard",
+      },
+      {
+        id: "4",
+        question: "Who wrote 'Romeo and Juliet'?",
+        answer: "William Shakespeare",
+      isSelected: false,
+      difficulty: "medium",
+      },
+      {
+        id: "5",
+        question: "What is the speed of light?",
+        answer: "299,792,458 m/s",
+        isSelected: false,
+        difficulty: "hard",
+      },
+    ];
+    setGeneratedQuestions(formattedQuestions);
+    setIsGenerating(false);
 
-    try {
-      // Updated API endpoint to match our backend
-      const response = await fetch(
-        `http://localhost:5000/teachers/671aef1355912c5627ef8d0b/exams/genqa`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            pdfName: currentPdf ? currentPdf.name : null,
-            selectedText: topic,
-            // difficulty: difficulty,
-            // numQuestions: numQuestions,
-          }),
-        }
-      );
+    // try {
+    //   // Updated API endpoint to match our backend
+    //   // const response = await fetch(
+    //   //   `http://localhost:5000/teachers/671aef1355912c5627ef8d0b/exams/genqa`,
+    //   //   {
+    //   //     method: "POST",
+    //   //     headers: {
+    //   //       "Content-Type": "application/json",
+    //   //     },
+    //   //     body: JSON.stringify({
+    //   //       pdfName: currentPdf ? currentPdf.name : null,
+    //   //       selectedText: topic,
+    //   //       // difficulty: difficulty,
+    //   //       // numQuestions: numQuestions,
+    //   //     }),
+    //   //   }
+    //   // );
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
+    //   // if (!response.ok) {
+    //   //   throw new Error(`API error: ${response.status}`);
+    //   // }
 
-      const data = await response.json();
+    //   // const data = await response.json();
 
+    //   const formattedQuestions = [
+    //     {
+    //       id: "1",
+    //       question: "What is the capital of France?",
+    //       answer: "Paris",
+    //     },
+    //     {
+    //       id: "2",
+    //       question: "What is the largest planet in our solar system?",
+    //       answer: "Jupiter",
+    //     },
+    //     {
+    //       id: "3",
+    //       question: "What is the chemical symbol for gold?",
+    //       answer: "Au",
+    //     },
+    //     {
+    //       id: "4",
+    //       question: "Who wrote 'Romeo and Juliet'?",
+    //       answer: "William Shakespeare",
+    //     },
+    //     {
+    //       id: "5",
+    //       question: "What is the speed of light?",
+    //       answer: "299,792,458 m/s",
+    //     },
+    //   ];
       // Process the returned questions
       // The API now returns questions with questionText property
-      const formattedQuestions = data.questions.map((q) => ({
-        id: q.id,
-        question: q.question, // Map backend "questionText" to frontend "question"
-        answer: q.answer,
-        // isSelected: true,
-        // difficulty: q.difficulty,
-        // source: q.source || (currentPdf ? currentPdf.name : "Unknown source"),
-      }));
+      // const formattedQuestions = data.questions.map((q) => ({
+      //   id: q.id,
+      //   question: q.question, // Map backend "questionText" to frontend "question"
+      //   answer: q.answer,
+      //   // isSelected: true,
+      //   // difficulty: q.difficulty,
+      //   // source: q.source || (currentPdf ? currentPdf.name : "Unknown source"),
+      // }));
 
-      setGeneratedQuestions(formattedQuestions);
-    } catch (err) {
-      console.error("Error generating questions:", err);
-      setError("Failed to generate questions. Please try again.");
-    } finally {
-      setIsGenerating(false);
-    }
+    //   setGeneratedQuestions(formattedQuestions);
+    // } catch (err) {
+    //   console.error("Error generating questions:", err);
+    //   setError("Failed to generate questions. Please try again.");
+    // } finally {
+    //   setIsGenerating(false);
+    // }
   };
 
   const handleCheckboxChange = (id) => {

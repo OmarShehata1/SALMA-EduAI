@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle, BookOpen, GraduationCap } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthProvider';
 export default function Register() {
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,7 +17,8 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { register } = useAuth(); // Use the register function from AuthProvider
 
   const { name, email, password, confirmPassword, role } = formData;
 
@@ -85,31 +88,21 @@ export default function Register() {
     try {
       setIsLoading(true);
       
-      // Send registration request to the backend
-      const response = await fetch('http://localhost:5000/user/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name, // Changed from username to name
-          email,
-          password,
-          role, // Changed from userType to role
-        }),
-      });
+      // Use the register function from AuthProvider
+      const result = await register(name, email, password, role);
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+      if (!result.success) {
+        throw new Error(result.message || 'Registration failed');
       }
-      
-      // Store the JWT token in local storage
-      localStorage.setItem('token', data.token);
       
       // Move to success step
       setStep(3);
+      
+      // Optionally redirect after successful registration
+      setTimeout(() => {
+        navigate('/'); // Or wherever you want to redirect to
+      }, 2000);
+      
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -131,6 +124,7 @@ export default function Register() {
   };
 
   const passwordStrength = getPasswordStrength();
+
 
   // Render different steps
   const renderStep1 = () => (

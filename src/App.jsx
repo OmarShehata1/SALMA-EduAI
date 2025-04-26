@@ -13,6 +13,7 @@ import { PDFProvider } from "./context/PDFContext";
 import CreateFullExam from "./pages/CreateFullExam";
 import ProtectedRoute, { GuestRoute } from "./components/ProtectedRoute";
 import Student from "./pages/Student";
+import MyExams from "./components/myExam";
 
 export default function App() {
   return (
@@ -42,54 +43,60 @@ export default function App() {
               <Route
                 path="/create"
                 element={
-                  <GuestRoute>
+                  <ProtectedRoute>
                     <CreateExam />
-                  </GuestRoute>
+                  </ProtectedRoute>
                 }
               />
               <Route
                 path="/create/full"
                 element={
-                  <GuestRoute>
+                  <ProtectedRoute>
                     <CreateFullExam />
-                  </GuestRoute>
+                  </ProtectedRoute>
                 }
               />
               <Route
                 path="/grades"
                 element={
-                  <GuestRoute>
+                  <ProtectedRoute>
                     <Grades />
-                  </GuestRoute>
+                  </ProtectedRoute>
                 }
               />
               <Route
                 path="/generate"
                 element={
-                  <GuestRoute>
+                  <ProtectedRoute>
                     <QuestionGenerator />
-                  </GuestRoute>
+                  </ProtectedRoute>
                 }
               />
               <Route
                 path="/questions"
                 element={
-                  <GuestRoute>
+                  <ProtectedRoute>
                     <QuestionsDisplay />
-                  </GuestRoute>
+                  </ProtectedRoute>
                 }
               />
-
 
               <Route
                 path="/student"
                 element={
-                  <GuestRoute>
+                  <ProtectedRoute>
                     <Student />
-                  </GuestRoute>
+                  </ProtectedRoute>
                 }
               />
-
+              <Route
+                path="/exam"
+                element={
+                  <ProtectedRoute>
+                    <MyExams />
+                  </ProtectedRoute>
+                }
+              />
               {/* Catch-all route */}
               <Route path="*" element={<div>Page Not Found</div>} />
             </Routes>

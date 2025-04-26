@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import axios from 'axios';
+// import axios from 'axios';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,7 +12,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { login } = useAuth();
+  const { login } = useAuth(); // Use the login function from AuthProvider
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -27,42 +27,29 @@ export default function Login() {
       setError('');
       setIsLoading(true);
       
-      // Connect to your backend endpoint
-      const response = await axios.post('http://localhost:5000/user/login', {
-        email,
-        password
-      });
+      // Use the login function from AuthProvider instead of direct API call
+      const result = await login(email, password);
       
-      // If successful, we'll have a token in the response
-      if (response.data && response.data.token) {
-        // Store the token
-        localStorage.setItem('token', response.data.token);
-        
-        // Show success notification
-        setSuccess(true);
-        
-        // If you're using the AuthContext, you can call the login function
-        if (login) {
-          await login(email, password, rememberMe);
-        }
-        
-        // Redirect to homepage after a short delay to show the success message
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
+      if (!result.success) {
+        throw new Error(result.message || 'Login failed');
       }
+      
+      // Show success notification
+      setSuccess(true);
+      
+      // Redirect to homepage after a short delay to show the success message
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
+      
     } catch (err) {
-      // Handle specific error messages from the backend
-      if (err.response && err.response.data) {
-        setError(err.response.data.message || 'Login failed');
-      } else {
-        setError('Failed to log in');
-      }
+      setError(err.message || 'Failed to log in');
       setSuccess(false);
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 mt-10">

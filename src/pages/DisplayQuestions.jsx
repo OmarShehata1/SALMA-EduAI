@@ -2,50 +2,91 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import QuestionCard from "../components/QuestionsDisplay/QuestionCard";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
-import NotificationManager from "../components/Notification"; // Import the notification manager
+import NotificationManager from "../components/Notification";
 
 export default function QuestionsDisplay() {
   const [questions, setQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [filter, setFilter] = useState("all");
-  const [currentExamId, setCurrentExamId] = useState(null);
-  const [isCreatingExam, setIsCreatingExam] = useState(false);
-  const [isSubmittingExam, setIsSubmittingExam] = useState(false);
+  const [examName, setExamName] = useState("");
+  const [fullMark, setFullMark] = useState(100);
+  const [showExamForm, setShowExamForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [, setError] = useState(null);
+  const [teacherId, setTeacherId] = useState(null);
   const location = useLocation();
-  const url = 'https://localhost:7102';
-  
+  const apiUrl = "http://localhost:5000";
+
   // Initialize notification manager
   const { addNotification, NotificationList } = NotificationManager();
 
   useEffect(() => {
+    // Load user information and extract teacher ID
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        // Check different possible ID fields
+        const id = user.id || user._id || user.teacherId;
+        if (id) {
+          setTeacherId(id);
+        } else {
+          console.warn("Could not find teacher ID in user object");
+        }
+      } catch (error) {
+        console.error("Error parsing user from localStorage:", error);
+      }
+    }
+
     // Load questions from sessionStorage
     const savedQuestions = sessionStorage.getItem("selectedQuestions");
     const initialQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
-    
+
     // Check if we're coming from the generator with new questions
     if (location.state?.newQuestions) {
       // Combine existing questions with new ones, avoiding duplicates by ID
       const combinedQuestions = [
         ...initialQuestions,
         ...location.state.newQuestions.filter(
-          newQ => !initialQuestions.some(existingQ => existingQ.id === newQ.id)
-        )
+          (newQ) =>
+            !initialQuestions.some((existingQ) => existingQ.id === newQ.id)
+        ),
       ];
       setQuestions(combinedQuestions);
-      sessionStorage.setItem("selectedQuestions", JSON.stringify(combinedQuestions));
-      
+      sessionStorage.setItem(
+        "selectedQuestions",
+        JSON.stringify(combinedQuestions)
+      );
+
       // Clear location state to prevent reappending on refresh
       window.history.replaceState({}, document.title);
     } else {
       setQuestions(initialQuestions);
     }
-
-    // Check if there's a current exam ID in sessionStorage
-    const savedExamId = sessionStorage.getItem("currentExamId");
-    if (savedExamId) {
-      setCurrentExamId(savedExamId);
-    }
   }, [location.state]);
+
+  // Get current teacher ID - with fallback
+  const getCurrentTeacherId = () => {
+    if (teacherId) return teacherId;
+
+    // If teacherId state is not set, try to get it directly from localStorage
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user.id || user._id || user.teacherId || "fallback-teacher-id";
+      }
+    } catch (error) {
+      console.error("Error accessing teacher ID:", error);
+    }
+
+    // If all else fails, return a fallback ID or show an error
+    addNotification(
+      "Could not determine teacher ID. Please login again.",
+      "error"
+    );
+    return "fallback-teacher-id";
+  };
 
   const handleEditQuestion = (question) => {
     setEditingQuestion(question);
@@ -56,7 +97,10 @@ export default function QuestionsDisplay() {
       q.id === editedQuestion.id ? editedQuestion : q
     );
     setQuestions(updatedQuestions);
-    sessionStorage.setItem("selectedQuestions", JSON.stringify(updatedQuestions));
+    sessionStorage.setItem(
+      "selectedQuestions",
+      JSON.stringify(updatedQuestions)
+    );
     setEditingQuestion(null);
     addNotification("Question updated successfully", "success");
   };
@@ -73,127 +117,117 @@ export default function QuestionsDisplay() {
     }
   };
 
-  const createEmptyExam = async () => {
-    try {
-      setIsCreatingExam(true);
-      
-      // Call the API to create an empty exam
-      const response = await fetch(`${url}/api/exams/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: 'New Exam',
-          description: 'Generated exam',
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create exam');
-      }
-      
-      const examData = await response.json();
-      
-      // Save the exam ID
-      setCurrentExamId(examData.id);
-      sessionStorage.setItem("currentExamId", examData.id);
-      
-      // Show success notification
-      addNotification('Empty exam created successfully!', 'success');
-    } catch (error) {
-      console.error('Error creating exam:', error);
-      addNotification(`Failed to create exam: ${error.message}`, 'error');
-    } finally {
-      setIsCreatingExam(false);
-    }
-  };
-
-  const submitExamWithQuestions = async () => {
-    if (!currentExamId || filteredQuestions.length === 0) {
-      addNotification('No exam or questions available to submit', 'warning');
+  // Combined function to create an exam, add questions, and save it
+  const createAndSaveExam = async () => {
+    if (!showExamForm) {
+      // First click - show the form modal
+      setShowExamForm(true);
       return;
     }
-    
+
+    // Form submit handler
+    if (filteredQuestions.length === 0) {
+      addNotification("No questions available to save", "warning");
+      return;
+    }
+
+    if (!examName.trim()) {
+      addNotification("Please enter an exam name", "warning");
+      return;
+    }
+
     try {
-      setIsSubmittingExam(true);
-      
-      // Transform questions to match the backend format if needed
-      const questionsToSubmit = filteredQuestions.map(q => ({
-        id: q.id,
-        questionText: q.question, // Map frontend "question" to backend "questionText"
+      setIsLoading(true);
+      const currentTeacherId = getCurrentTeacherId();
+
+      // Format questions for the endpoint
+      const formattedQuestions = filteredQuestions.map((q) => ({
+        question: q.question,
         answer: q.answer,
-        difficulty: q.difficulty,
-        source: q.source,
-        isSelected: true
+        grade: q.difficulty === "easy" ? 1 : q.difficulty === "medium" ? 2 : 3,
       }));
-      
-      // Call the API to add questions to the exam
-      const response = await fetch(`${url}/api/exams/${currentExamId}/questions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          examId: currentExamId,
-          questions: questionsToSubmit
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to add questions to exam');
-      }
-      
-      const examData = await response.json();
-      
-      // Save the exam ID for PDF download
-      const savedExamId = examData.id;
-      
-      // Clear the exam ID and questions after successful submission
-      setCurrentExamId(null);
-      sessionStorage.removeItem("currentExamId");
-      setQuestions([]);
-      sessionStorage.removeItem("selectedQuestions");
-      
-      // Show success notification
-      addNotification(`Exam submitted successfully! Exam ID: ${savedExamId}`, 'success');
-      
-      // Download the PDF
-      try {
-        const pdfResponse = await fetch(`${url}/api/exams/pdf/${savedExamId}`, {
-          method: 'GET',
+
+      // Call the API to create and save the exam
+      const response = await fetch(
+        `${apiUrl}/teachers/${currentTeacherId}/exams/generate/save`,
+        {
+          method: "POST",
           headers: {
-            'Accept': 'application/pdf',
+            "Content-Type": "application/json",
           },
-        });
-        
-        if (!pdfResponse.ok) {
-          throw new Error('Failed to download PDF');
+          body: JSON.stringify({
+            exam_name: examName,
+            full_mark: fullMark,
+            num_of_questions: filteredQuestions.length,
+            questions: formattedQuestions,
+            students: [],
+            returnPdf: true, // Add this flag to explicitly request PDF in response
+          }),
         }
-        
-        const blob = await pdfResponse.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `exam-${savedExamId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        
-        setTimeout(() => {
-          window.URL.revokeObjectURL(downloadUrl);
-          document.body.removeChild(a);
-        }, 100);
-        
-      } catch (pdfError) {
-        console.error('Error downloading PDF after submission:', pdfError);
-        addNotification('Exam submitted, but PDF download failed. You can download it later.', 'warning');
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create and save exam");
       }
-      
+
+      const responseData = await response.json();
+      console.log("Response data:", responseData); // Debugging line
+      // Process the response and handle PDF display
+      if (responseData.exam && responseData.exam._id) {
+        const examId = responseData.exam._id;
+        localStorage.setItem("examId", examId);
+
+        // Clear questions after successful submission
+        setQuestions([]);
+        sessionStorage.removeItem("selectedQuestions");
+
+        // Reset form and close it
+        setExamName("");
+        setFullMark(100);
+        setShowExamForm(false);
+
+        // Show success notification
+        addNotification(
+          `Exam "${responseData.exam.name}" created and saved successfully!`,
+          "success"
+        );
+
+        // Handle PDF display if available in the response
+        if (responseData.base64Pdf) {
+          // Convert Base64 to Blob
+          const byteCharacters = atob(responseData.base64Pdf);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: "application/pdf" });
+
+          // Create Object URL and Open in New Tab
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, "_blank"); // Open PDF in a new tab
+
+          // Optional: Create and trigger download
+          const downloadLink = document.createElement("a");
+          downloadLink.href = blobUrl;
+          downloadLink.download = `${examName}.pdf`;
+          downloadLink.click();
+        } else {
+          addNotification(
+            "Exam saved but PDF not returned. Please check with administrator.",
+            "warning"
+          );
+        }
+      } else {
+        throw new Error("Failed to retrieve exam ID from response");
+      }
     } catch (error) {
-      console.error('Error submitting exam:', error);
-      addNotification(`Failed to submit exam: ${error.message}`, 'error');
+      console.error("Error creating and saving exam:", error);
+      addNotification(`Failed to create exam: ${error.message}`, "error");
+      setError(error.message);
     } finally {
-      setIsSubmittingExam(false);
+      setIsLoading(false);
     }
   };
 
@@ -209,14 +243,16 @@ export default function QuestionsDisplay() {
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">Your Questions</h1>
-        
-        <Link
-          to="/create"
-          state={{ existingQuestions: questions }}
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium"
-        >
-          Generate More Questions
-        </Link>
+
+        <div className="flex space-x-4">
+          <Link
+            to="/create"
+            state={{ existingQuestions: questions }}
+            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium"
+          >
+            Generate More Questions
+          </Link>
+        </div>
       </div>
 
       {/* Filter Controls */}
@@ -269,6 +305,33 @@ export default function QuestionsDisplay() {
           </div>
         </div>
       </div>
+
+      {/* Teacher ID warning if not found */}
+      {!teacherId && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-yellow-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                Teacher ID not found. Some features may not work properly.
+                Please log in again.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Questions List */}
       {filteredQuestions.length > 0 ? (
@@ -325,39 +388,97 @@ export default function QuestionsDisplay() {
         />
       )}
 
+      {/* Create and Save Exam Form */}
+      {showExamForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Create New Exam</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createAndSaveExam();
+              }}
+            >
+              <div className="mb-4">
+                <label
+                  htmlFor="examName"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  Exam Name
+                </label>
+                <input
+                  type="text"
+                  id="examName"
+                  value={examName}
+                  onChange={(e) => setExamName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="fullMark"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  Full Mark
+                </label>
+                <input
+                  type="number"
+                  id="fullMark"
+                  value={fullMark}
+                  onChange={(e) => setFullMark(Number(e.target.value))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="1"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowExamForm(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    isLoading ||
+                    !examName ||
+                    filteredQuestions.length === 0 ||
+                    !teacherId
+                  }
+                  className={`px-4 py-2 rounded-md font-medium ${
+                    isLoading ||
+                    !examName ||
+                    filteredQuestions.length === 0 ||
+                    !teacherId
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-500 text-white"
+                  }`}
+                >
+                  {isLoading ? "Creating..." : "Create & Save Exam"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Action buttons */}
       <div className="flex justify-end mt-6 gap-2">
         <button
-          onClick={createEmptyExam}
-          disabled={isCreatingExam || currentExamId !== null}
+          onClick={createAndSaveExam}
+          disabled={filteredQuestions.length === 0 || !teacherId || isLoading}
           className={`py-2 px-4 rounded-md font-medium ${
-            currentExamId !== null || isCreatingExam
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-indigo-800 hover:bg-indigo-700 text-white"
-          }`}
-        >
-          {isCreatingExam ? "Creating..." : "Create Empty Exam"}
-        </button>
-        
-        <button
-          onClick={submitExamWithQuestions}
-          disabled={!currentExamId || isSubmittingExam || filteredQuestions.length === 0}
-          className={`py-2 px-4 rounded-md font-medium ${
-            !currentExamId || isSubmittingExam || filteredQuestions.length === 0
+            filteredQuestions.length === 0 || !teacherId || isLoading
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-green-600 hover:bg-green-500 text-white"
           }`}
         >
-          {isSubmittingExam ? "Submitting..." : "Submit Exam"}
+          {isLoading ? "Processing..." : "Create & Save Exam"}
         </button>
       </div>
-      
-      {currentExamId && (
-        <div className="mt-4 flex flex-col items-end">
-          <div className="text-sm text-gray-600 mb-2">
-            Current Exam ID: {currentExamId}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
