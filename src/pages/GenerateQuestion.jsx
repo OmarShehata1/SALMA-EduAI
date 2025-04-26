@@ -33,6 +33,7 @@ export default function QuestionGenerator() {
         answer: "Paris",
         isSelected: false,
         difficulty: "easy",
+        grade:5
       },
       {
         id: "2",
@@ -40,6 +41,7 @@ export default function QuestionGenerator() {
         answer: "Jupiter",
         isSelected: false,
         difficulty: "medium",
+        grade:15
       },
       {
         id: "3",
@@ -47,6 +49,7 @@ export default function QuestionGenerator() {
         answer: "Au",
         isSelected: false,
       difficulty: "hard",
+      grade:20
       },
       {
         id: "4",
@@ -54,6 +57,7 @@ export default function QuestionGenerator() {
         answer: "William Shakespeare",
       isSelected: false,
       difficulty: "medium",
+      grade:10
       },
       {
         id: "5",
@@ -61,6 +65,7 @@ export default function QuestionGenerator() {
         answer: "299,792,458 m/s",
         isSelected: false,
         difficulty: "hard",
+        grade:20
       },
     ];
     setGeneratedQuestions(formattedQuestions);

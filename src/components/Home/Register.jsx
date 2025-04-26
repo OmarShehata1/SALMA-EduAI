@@ -99,9 +99,9 @@ export default function Register() {
       setStep(3);
       
       // Optionally redirect after successful registration
-      setTimeout(() => {
-        navigate('/'); // Or wherever you want to redirect to
-      }, 2000);
+      navigate('/login'); // Or wherever you want to redirect to
+      // setTimeout(() => {
+      // }, 1000);
       
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');

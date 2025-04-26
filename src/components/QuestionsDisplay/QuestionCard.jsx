@@ -9,6 +9,15 @@ const QuestionCard = ({ question, onEdit, onDelete }) => {
     hard: "bg-red-100 text-red-800 border-red-200",
   };
 
+   // Function to determine grade color based on numeric value
+   const gradeColor = (grade) => {
+    if (grade >= 20) return "bg-red-100 text-red-800"; // A equivalent
+    if (grade >= 15) return "bg-blue-100 text-blue-800"; // B equivalent
+    if (grade >= 10) return "bg-cyan-100 text-cyan-800"; // C equivalent
+    if (grade >= 5) return "bg-green-100 text-green-800"; // D equivalent
+    return "bg-rose-100 text-rose-800";                    // F equivalent
+  };
+
   return (
     <div className={`bg-white rounded-lg shadow-md border-l-4 ${difficultyColor[question.difficulty]}`}>
       <div className="p-4">
@@ -16,16 +25,28 @@ const QuestionCard = ({ question, onEdit, onDelete }) => {
           <h3 className="text-lg font-semibold text-gray-900">
             {question.question}
           </h3>
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              difficultyColor[question.difficulty]
-            }`}
-          >
-            {question.difficulty.charAt(0).toUpperCase() +
-              question.difficulty.slice(1)}
-          </span>
+          <div className="flex items-center space-x-2">
+            {question.grade && (
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  gradeColor(question.grade) || "bg-gray-100 text-gray-800"
+                }`}
+              >
+                Grade: {question.grade}
+              </span>
+            )}
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                difficultyColor[question.difficulty]
+              }`}
+            >
+              {question.difficulty.charAt(0).toUpperCase() +
+                question.difficulty.slice(1)}
+            </span>
+          </div>
         </div>
 
+        {/* Rest of the component remains the same */}
         <button
           onClick={() => setExpanded(!expanded)}
           className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center"

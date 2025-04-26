@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -49,13 +49,23 @@ export const AuthProvider = ({ children }) => {
 
       // Store the token and user data
       localStorage.setItem("token", data.token);
-
+      // Try to extract userId from token if available
+      let userId = null;
+      if (data.token) {
+        try {
+          const decoded = jwtDecode(data.token);
+          userId = decrementObjectIdCounter(decoded.id) || null;
+        } catch (e) {
+          console.warn("Could not decode JWT token", e);
+        }
+      }
       // Create user object
       const user = {
         name,
         email,
         role,
         token: data.token,
+        id: userId, // Include the ID if available
       };
 
       localStorage.setItem("user", JSON.stringify(user));
@@ -72,8 +82,9 @@ export const AuthProvider = ({ children }) => {
     const prefix = hexStr.slice(0, 18);
     const counter = parseInt(hexStr.slice(18), 16);
     const newCounter = Math.max(0, counter - decrement);
-    return prefix + newCounter.toString(16).padStart(6, '0');
+    return prefix + newCounter.toString(16).padStart(6, "0");
   }
+
   // Login function
   const login = async (email, password) => {
     try {
@@ -131,7 +142,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user", JSON.stringify(user));
       setCurrentUser(user);
 
-      console.log("Auth: User logged in with ID:", userId );
+      console.log("Auth: User logged in with ID:", userId);
 
       return { success: true };
     } catch (err) {
@@ -144,7 +155,10 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("selectedQuestions");
     setCurrentUser(null);
+    // Refresh the page after logout
+    window.location.href = "/";
   };
 
   const value = {

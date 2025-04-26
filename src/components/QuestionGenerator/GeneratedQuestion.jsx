@@ -2,13 +2,22 @@ import React from "react";
 
 const GeneratedQuestion = ({ question, onCheckboxChange, onEdit }) => {
   const difficultyColor = {
-    easy: "bg-green-100 text-green-800",
-    medium: "bg-blue-100 text-blue-800",
-    hard: "bg-red-100 text-red-800",
+    easy: "bg-green-100 text-green-800 border-green-200",
+    medium: "bg-blue-100 text-blue-800 border-blue-200",
+    hard: "bg-red-100 text-red-800 border-red-200",
+  };
+
+  // Function to determine grade color based on numeric value
+  const getGradeColor = (grade) => {
+    if (grade >= 20) return "bg-red-100 text-red-800"; // A equivalent
+    if (grade >= 15) return "bg-blue-100 text-blue-800"; // B equivalent
+    if (grade >= 10) return "bg-cyan-100 text-cyan-800"; // C equivalent
+    if (grade >= 5) return "bg-green-100 text-green-800"; // D equivalent
+    return "bg-rose-100 text-rose-800";  // F equivalent
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
+    <div className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${difficultyColor[question.difficulty]}`}>
       <div className="flex items-start">
         <input
           type="checkbox"
@@ -21,14 +30,25 @@ const GeneratedQuestion = ({ question, onCheckboxChange, onEdit }) => {
             <h3 className="text-lg font-semibold text-gray-900">
               {question.question}
             </h3>
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                difficultyColor[question.difficulty]
-              }`}
-            >
-              {question.difficulty.charAt(0).toUpperCase() +
-                question.difficulty.slice(1)}
-            </span>
+            <div className="flex items-center space-x-2">
+              {typeof question.grade === "number" && (
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getGradeColor(
+                    question.grade
+                  )}`}
+                >
+                  Grade: {question.grade}
+                </span>
+              )}
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  difficultyColor[question.difficulty]
+                }`}
+              >
+                {question.difficulty.charAt(0).toUpperCase() +
+                  question.difficulty.slice(1)}
+              </span>
+            </div>
           </div>
           <p className="mt-2 text-gray-600">{question.answer}</p>
           {question.source && (

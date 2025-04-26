@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import {  Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 // import axios from 'axios';
@@ -13,7 +13,7 @@ export default function Login() {
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth(); // Use the login function from AuthProvider
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,9 +38,9 @@ export default function Login() {
       setSuccess(true);
       
       // Redirect to homepage after a short delay to show the success message
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
+      // window.location.href = '/'; 
+      // setTimeout(() => {
+      // }, 1000);
       
     } catch (err) {
       setError(err.message || 'Failed to log in');
