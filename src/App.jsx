@@ -13,7 +13,6 @@ import { PDFProvider } from "./context/PDFContext";
 import CreateFullExam from "./pages/CreateFullExam";
 import ProtectedRoute, { GuestRoute } from "./components/ProtectedRoute";
 import Student from "./pages/Student";
-import MyExams from "./components/myExam";
 
 export default function App() {
   return (
@@ -86,14 +85,6 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <Student />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/exam"
-                element={
-                  <ProtectedRoute>
-                    <MyExams />
                   </ProtectedRoute>
                 }
               />

@@ -117,116 +117,190 @@ export default function QuestionsDisplay() {
     }
   };
 
-  // Combined function to create an exam, add questions, and save it
   const createAndSaveExam = async () => {
     if (!showExamForm) {
+      console.log("DEBUG: First click - showing exam form modal");
       // First click - show the form modal
       setShowExamForm(true);
       return;
     }
-
+  
+    console.log("DEBUG: Form submitted with values:", { examName, fullMark });
+    console.log("DEBUG: Available questions:", filteredQuestions.length);
+  
     // Form submit handler
     if (filteredQuestions.length === 0) {
+      console.log("DEBUG: No questions available - showing warning");
       addNotification("No questions available to save", "warning");
       return;
     }
-
+  
     if (!examName.trim()) {
+      console.log("DEBUG: Empty exam name - showing warning");
       addNotification("Please enter an exam name", "warning");
       return;
     }
-
+  
     try {
+      console.log("DEBUG: Starting exam creation process");
       setIsLoading(true);
       const currentTeacherId = getCurrentTeacherId();
-
-      // Format questions for the endpoint
-      const formattedQuestions = filteredQuestions.map((q) => ({
-        question: q.question,
-        answer: q.answer,
-        grade: q.difficulty === "easy" ? 1 : q.difficulty === "medium" ? 2 : 3,
-      }));
-
-      // Call the API to create and save the exam
-      const response = await fetch(
-        `${apiUrl}/teachers/${currentTeacherId}/exams/generate/save`,
-        {
+      console.log("DEBUG: Using teacher ID:", currentTeacherId);
+  
+      // Step 1: Create an empty exam with the name and full mark from the modal
+      console.log("DEBUG: Creating empty exam with name:", examName, "and full mark:", fullMark);
+      const createExamEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/create`;
+      console.log("DEBUG: Calling endpoint:", createExamEndpoint);
+      
+      const createExamResponse = await fetch(createExamEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: examName,
+          full_mark: fullMark
+        }),
+      });
+  
+      console.log("DEBUG: Create exam response status:", createExamResponse.status);
+      
+      if (!createExamResponse.ok) {
+        const errorData = await createExamResponse.json();
+        console.error("DEBUG: Failed to create exam. Error:", errorData);
+        throw new Error(errorData.message || "Failed to create empty exam");
+      }
+  
+      const createExamData = await createExamResponse.json();
+      console.log("DEBUG: Create exam response data:", createExamData);
+      
+      const examId = createExamData.examId;
+      
+      if (!examId) {
+        console.error("DEBUG: No exam ID in response:", createExamData);
+        throw new Error("Failed to retrieve exam ID from response");
+      }
+      
+      console.log("DEBUG: Successfully created exam with ID:", examId);
+      
+      // Store the exam ID for future reference
+      localStorage.setItem("examId", examId);
+      console.log("DEBUG: Stored exam ID in localStorage");
+      
+      // Step 2: Add each question to the exam one by one
+      let finalBase64Pdf = null;
+      
+      console.log("DEBUG: Adding", filteredQuestions.length, "questions to exam");
+      
+      for (let i = 0; i < filteredQuestions.length; i++) {
+        const question = filteredQuestions[i];
+        console.log(`DEBUG: Adding question ${i+1}/${filteredQuestions.length}:`, question.id);
+        
+        // Map difficulty to grade
+        let grade;
+        switch (question.difficulty) {
+          case "easy": grade = 1; break;
+          case "medium": grade = 2; break;
+          case "hard": grade = 3; break;
+          default: grade = 1;
+        }
+        
+        console.log("DEBUG: Mapped difficulty", question.difficulty, "to grade", grade);
+        
+        const addQuestionEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/${examId}/genqa/save`;
+        console.log("DEBUG: Calling endpoint:", addQuestionEndpoint);
+        
+        const addQuestionResponse = await fetch(addQuestionEndpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            exam_name: examName,
-            full_mark: fullMark,
-            num_of_questions: filteredQuestions.length,
-            questions: formattedQuestions,
-            students: [],
-            returnPdf: true, // Add this flag to explicitly request PDF in response
+            question: question.question,
+            answer: question.answer,
+            grade: question.grade || grade,
           }),
+        });
+        
+        console.log("DEBUG: Add question response status:", addQuestionResponse.status);
+        
+        if (!addQuestionResponse.ok) {
+          const errorData = await addQuestionResponse.json();
+          console.error(`DEBUG: Failed to add question ${i+1}. Error:`, errorData);
+          // Continue with other questions even if one fails
+          continue;
         }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create and save exam");
-      }
-
-      const responseData = await response.json();
-      console.log("Response data:", responseData); // Debugging line
-      // Process the response and handle PDF display
-      if (responseData.exam && responseData.exam._id) {
-        const examId = responseData.exam._id;
-        localStorage.setItem("examId", examId);
-
-        // Clear questions after successful submission
-        setQuestions([]);
-        sessionStorage.removeItem("selectedQuestions");
-
-        // Reset form and close it
-        setExamName("");
-        setFullMark(100);
-        setShowExamForm(false);
-
-        // Show success notification
-        addNotification(
-          `Exam "${responseData.exam.name}" created and saved successfully!`,
-          "success"
-        );
-
-        // Handle PDF display if available in the response
-        if (responseData.base64Pdf) {
-          // Convert Base64 to Blob
-          const byteCharacters = atob(responseData.base64Pdf);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: "application/pdf" });
-
-          // Create Object URL and Open in New Tab
-          const blobUrl = URL.createObjectURL(blob);
-          window.open(blobUrl, "_blank"); // Open PDF in a new tab
-
-          // Optional: Create and trigger download
-          const downloadLink = document.createElement("a");
-          downloadLink.href = blobUrl;
-          downloadLink.download = `${examName}.pdf`;
-          downloadLink.click();
+        
+        const questionData = await addQuestionResponse.json();
+        console.log(`DEBUG: Successfully added question ${i+1}. Response:`, 
+          questionData.question ? questionData.question._id : "No question data");
+        
+        // Keep the latest PDF data from the response
+        if (questionData.base64Pdf) {
+          console.log("DEBUG: Received updated PDF data");
+          finalBase64Pdf = questionData.base64Pdf;
         } else {
-          addNotification(
-            "Exam saved but PDF not returned. Please check with administrator.",
-            "warning"
-          );
+          console.log("DEBUG: No PDF data in response for this question");
         }
+      }
+      
+      console.log("DEBUG: All questions processed");
+      
+      // Clear questions after successful submission
+      console.log("DEBUG: Clearing questions from state and session storage");
+      setQuestions([]);
+      sessionStorage.removeItem("selectedQuestions");
+  
+      // Reset form and close it
+      console.log("DEBUG: Resetting form and closing modal");
+      setExamName("");
+      setFullMark(100);
+      setShowExamForm(false);
+  
+      // Show success notification
+      console.log("DEBUG: Showing success notification");
+      addNotification(
+        `Exam "${examName}" created and questions added successfully!`,
+        "success"
+      );
+  
+      // Display PDF if available
+      if (finalBase64Pdf) {
+        console.log("DEBUG: Processing final PDF data for display and download");
+        // Convert Base64 to Blob
+        const byteCharacters = atob(finalBase64Pdf);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+  
+        // Create Object URL and Open in New Tab
+        const blobUrl = URL.createObjectURL(blob);
+        console.log("DEBUG: Created blob URL for PDF:", blobUrl);
+        window.open(blobUrl, "_blank"); // Open PDF in a new tab
+        console.log("DEBUG: Opened PDF in new tab");
+  
+        // Create and trigger download
+        const downloadLink = document.createElement("a");
+        downloadLink.href = blobUrl;
+        downloadLink.download = `${examName}.pdf`;
+        console.log("DEBUG: Triggering PDF download with filename:", `${examName}.pdf`);
+        downloadLink.click();
       } else {
-        throw new Error("Failed to retrieve exam ID from response");
+        console.log("DEBUG: No final PDF data available");
+        addNotification(
+          "Exam saved but PDF not returned. Please check with administrator.",
+          "warning"
+        );
       }
     } catch (error) {
-      console.error("Error creating and saving exam:", error);
+      console.error("DEBUG: Error in createAndSaveExam:", error);
       addNotification(`Failed to create exam: ${error.message}`, "error");
       setError(error.message);
     } finally {
+      console.log("DEBUG: Exam creation process finished");
       setIsLoading(false);
     }
   };

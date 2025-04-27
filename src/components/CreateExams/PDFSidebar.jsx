@@ -51,9 +51,9 @@ const PDFSidebar = ({
               onClick={() => onPdfSelect(pdf)}
             >
               <p className="truncate text-sm">{pdf.name}</p>
-              {pdf.serverStored && (
+              {/* {pdf.serverStored && (
                 <span className="text-xs text-green-600 mt-1 block">Saved on server</span>
-              )}
+              )} */}
             </div>
           ))
         ) : (
