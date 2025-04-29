@@ -76,7 +76,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo - Left */}
           <Link to="/" className="flex items-center">
-            <div className="bg-blue-600 text-white font-bold p-2 rounded mr-2">
+            <div className="relative bg-blue-600 text-white text-xl font-bold px-1.5 py-1 rounded mr-2">
+            <span className="absolute -top-3 -left-5 text-3xl rotate-[-45deg]">🎓</span>
               S
             </div>
             <span
