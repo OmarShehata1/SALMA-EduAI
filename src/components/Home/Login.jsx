@@ -1,213 +1,389 @@
-import { useState } from 'react';
-import {  Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider';
-import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
-// import axios from 'axios';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthProvider";
+import {
+  LogIn,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  GraduationCap,
+  Sparkles,
+  ArrowRight,
+  Github,
+} from "lucide-react";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { login } = useAuth(); // Use the login function from AuthProvider
-  // const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
-    
+
     try {
-      setError('');
+      setError("");
       setIsLoading(true);
-      
-      // Use the login function from AuthProvider instead of direct API call
+
       const result = await login(email, password);
-      
+
       if (!result.success) {
-        throw new Error(result.message || 'Login failed');
+        throw new Error(result.message || "Login failed");
       }
-      
-      // Show success notification
+
       setSuccess(true);
-      
-      // Redirect to homepage after a short delay to show the success message
-      // window.location.href = '/'; 
-      // setTimeout(() => {
-      // }, 1000);
-      
     } catch (err) {
-      setError(err.message || 'Failed to log in');
+      setError(err.message || "Failed to log in");
       setSuccess(false);
     } finally {
       setIsLoading(false);
     }
   };
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 mt-10">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="flex justify-center">
-            <div className="bg-blue-600 text-white font-bold p-3 rounded-lg mb-2">
-              <LogIn className="w-6 h-6" />
+    <div className="min-h-screen mt-12 bg-gradient-to-b from-sky-200 via-sky-100 to-white relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-30">
+        <svg
+          className="absolute inset-0 h-full w-full"
+          viewBox="0 0 400 400"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern
+              id="login-grid"
+              width="60"
+              height="60"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 60 0 L 0 0 0 60"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#login-grid)" />
+        </svg>
+      </div>
+
+      {/* Floating Elements */}
+      <div className="absolute top-20 left-10 opacity-20">
+        <div className="w-32 h-32 bg-gradient-to-r from-sky-300 to-blue-400 rounded-full blur-xl"></div>
+      </div>
+      <div className="absolute bottom-20 right-10 opacity-20">
+        <div className="w-40 h-40 bg-gradient-to-r from-indigo-300 to-purple-400 rounded-full blur-xl"></div>
+      </div>
+
+      <div className="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Welcome Section - Hidden on mobile, visible on desktop */}
+          <div className="hidden lg:block space-y-8">
+            <div className="space-y-6">
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-4 rounded-2xl shadow-lg">
+                    <GraduationCap className="w-8 h-8" />
+                  </div>
+                  <Sparkles className="absolute -top-1 -right-1 w-6 h-6 text-yellow-400 animate-pulse" />
+                </div>
+                <div>
+                  <span
+                    className="text-4xl font-bold bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent"
+                    style={{ fontFamily: "Patrick Hand, cursive" }}
+                  >
+                    SALMA
+                  </span>
+                  <div className="text-lg text-gray-600 font-medium">
+                    AI Assessment Platform
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h1 className="text-5xl font-bold text-gray-800 leading-tight">
+                  Welcome Back to the
+                  <span className="block bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">
+                    Future of Education
+                  </span>
+                </h1>
+                <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
+                  Sign in to continue revolutionizing education through
+                  intelligent assessment and automated grading.
+                </p>
+              </div>
+
+              {/* Feature Highlights */}
+              <div className="grid grid-cols-2 gap-4 max-w-lg">
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
+                  <div className="text-2xl font-bold text-sky-600">70%</div>
+                  <div className="text-sm text-gray-600">Time Saved</div>
+                </div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
+                  <div className="text-2xl font-bold text-emerald-600">95%</div>
+                  <div className="text-sm text-gray-600">OCR Accuracy</div>
+                </div>
+              </div>
             </div>
           </div>
-          <h2 className="mt-4 text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-              Create a new account
-            </Link>
-          </p>
-        </div>
-        
-        <div className="bg-white p-8 rounded-xl shadow-lg">
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700">
-              <p>{error}</p>
-            </div>
-          )}
 
-          {success && (
-            <div className="mb-4 p-3 bg-green-50 border-l-4 border-green-500 text-green-700 flex items-center">
-              <CheckCircle className="h-5 w-5 mr-2" />
-              <p>Login successful! Redirecting to dashboard...</p>
-            </div>
-          )}
-          
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+          {/* Login Form Section */}
+          <div className="w-full max-w-md mx-auto lg:mx-0">
+            {/* Mobile Header */}
+            <div className="lg:hidden text-center mb-8">
+              <div className="flex justify-center mb-4">
+                <div className="relative">
+                  <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-3 rounded-2xl shadow-lg">
+                    <GraduationCap className="w-6 h-6" />
+                  </div>
+                  <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" />
                 </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
-                  placeholder="Email address"
-                />
               </div>
+              <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
+              <p className="text-gray-600 mt-2">
+                Sign in to your SALMA account
+              </p>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+            {/* Form Card */}
+            <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 p-8 space-y-6">
+              {/* Desktop Header */}
+              <div className="hidden lg:block text-center space-y-2">
+                <h3 className="text-2xl font-bold text-gray-800">Sign In</h3>
+                <p className="text-gray-600">
+                  Enter your credentials to continue
+                </p>
+              </div>
+
+              {/* Error/Success Messages */}
+              {error && (
+                <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl p-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-700 font-medium">
+                        {error}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md py-3"
-                  placeholder="••••••••"
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+              )}
+
+              {success && (
+                <div className="bg-emerald-50/80 backdrop-blur-sm border border-emerald-200 rounded-xl p-4">
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 mr-3" />
+                    <p className="text-sm text-emerald-700 font-medium">
+                      Login successful! Redirecting...
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Email Field */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-semibold text-gray-700"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-sky-400" />
+                    </div>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                      placeholder="Enter your email address"
+                    />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-semibold text-gray-700"
+                  >
+                    Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-sky-400" />
+                    </div>
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-12 pr-12 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                      placeholder="Enter your password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-sky-400 hover:text-sky-600 transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remember Me & Forgot Password */}
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 text-sky-600 bg-white/60 border-sky-300 rounded focus:ring-sky-400 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Remember me
+                    </span>
+                  </label>
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-sky-600 hover:text-sky-700 font-medium hover:underline decoration-sky-300 underline-offset-4 transition-all duration-300"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-sky-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Signing in...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-5 w-5" />
+                      <span>Sign In</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-sky-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white/70 text-gray-500 font-medium">
+                    Or continue with
+                  </span>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Remember me
-                </label>
+              {/* Social Login Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  className="flex items-center justify-center px-4 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl text-gray-700 font-medium hover:bg-white/80 hover:border-sky-300 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-md"
+                >
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
+                      fill="#EA4335"
+                    />
+                    <path
+                      d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
+                      fill="#34A853"
+                    />
+                  </svg>
+                  Google
+                </button>
+
+                <button
+                  type="button"
+                  className="flex items-center justify-center px-4 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl text-gray-700 font-medium hover:bg-white/80 hover:border-sky-300 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-md"
+                >
+                  <Github className="w-5 h-5 mr-2" />
+                  GitHub
+                </button>
               </div>
 
-              <div className="text-sm">
-                <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                  Forgot your password?
-                </Link>
+              {/* Sign Up Link */}
+              <div className="text-center pt-4">
+                <p className="text-gray-600">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/register"
+                    className="text-sky-600 hover:text-sky-700 font-semibold hover:underline decoration-sky-300 underline-offset-4 transition-all duration-300"
+                  >
+                    Create your account
+                  </Link>
+                </p>
               </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-              >
-                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <LogIn className="h-5 w-5 text-blue-500 group-hover:text-blue-400" />
-                </span>
-                {isLoading ? 'Signing in...' : 'Sign in'}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335"/>
-                  <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4"/>
-                  <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05"/>
-                  <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853"/>
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.564 9.564 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.308.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>

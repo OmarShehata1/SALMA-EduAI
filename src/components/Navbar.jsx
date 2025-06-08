@@ -8,6 +8,10 @@ import {
   ChevronDown,
   LogOut,
   User,
+  Sparkles,
+  BookOpen,
+  BarChart3,
+  GraduationCap,
 } from "lucide-react";
 import { useAuth } from "../context/AuthProvider";
 
@@ -54,10 +58,12 @@ export default function Navbar() {
 
   const toggleCreateExamDropdown = () => {
     setIsCreateExamOpen(!isCreateExamOpen);
+    setIsUserMenuOpen(false);
   };
 
   const toggleUserMenuDropdown = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
+    setIsCreateExamOpen(false);
   };
 
   const handleLogout = () => {
@@ -68,31 +74,40 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white shadow-md py-2 ${
-        isScrolled ? "shadow-md" : ""
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled
+          ? "bg-white/95 backdrop-blur-lg shadow-lg border-b border-sky-100"
+          : "bg-gradient-to-r from-sky-50/80 to-white/80 backdrop-blur-sm"
       }`}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo - Left */}
-          <Link to="/" className="flex items-center">
-            <div className="relative bg-blue-600 text-white text-xl font-bold px-1.5 py-1 rounded mr-2">
-            <span className="absolute -top-3 -left-5 text-3xl rotate-[-45deg]">🎓</span>
-              S
+          {/* Logo - Enhanced with modern design */}
+          <Link to="/" className="flex items-center group">
+            <div className="relative">
+              <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-xl font-bold px-3 py-2 rounded-xl shadow-lg transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" />
             </div>
-            <span
-              className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
-              style={{ fontFamily: "Patrick Hand", cursive: "cursive" }}
-            >
-              SALMA
-            </span>
+            <div className="ml-3">
+              <span
+                className="text-2xl font-bold bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent"
+                style={{ fontFamily: "Patrick Hand, cursive" }}
+              >
+                SALMA
+              </span>
+              <div className="text-xs text-gray-500 font-medium">
+                AI Assessment
+              </div>
+            </div>
           </Link>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 focus:outline-none"
+              className="p-2 rounded-xl text-gray-600 hover:text-sky-600 hover:bg-sky-50 focus:outline-none transition-all duration-300"
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -102,9 +117,9 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Navigation Links - Center (hidden on mobile) */}
+          {/* Navigation Links - Center */}
           <div className="hidden md:flex items-center justify-center flex-1">
-            <div className="flex space-x-1">
+            <div className="flex space-x-2 bg-white/60 backdrop-blur-lg rounded-2xl p-2 shadow-lg border border-sky-100">
               <NavLink to="/" label="Home" />
               <NavLink to="/student" label="Student" />
 
@@ -112,201 +127,227 @@ export default function Navbar() {
               <div className="relative" id="create-exam-dropdown">
                 <button
                   onClick={toggleCreateExamDropdown}
-                  className="px-4 py-2 rounded-lg font-medium transition-colors text-gray-600 hover:text-blue-600 hover:bg-blue-50 flex items-center"
+                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 text-gray-600 hover:text-sky-600 hover:bg-sky-50 flex items-center ${
+                    isCreateExamOpen ? "bg-sky-50 text-sky-600" : ""
+                  }`}
                 >
-                  Create Exam
-                  <ChevronDown className="w-4 h-4 ml-1" />
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Create
+                  <ChevronDown
+                    className={`w-4 h-4 ml-1 transition-transform duration-300 ${
+                      isCreateExamOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {isCreateExamOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50">
-                    <div className="py-1">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 z-50 overflow-hidden">
+                    <div className="py-2">
                       <Link
                         to="/create"
                         onClick={() => setIsCreateExamOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-300"
                       >
-                        Customize Exam
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                          <GraduationCap className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <div className="font-medium">Custom Exam</div>
+                          <div className="text-xs text-gray-500">
+                            Tailored questions
+                          </div>
+                        </div>
                       </Link>
                       <Link
                         to="/create/full"
                         onClick={() => setIsCreateExamOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-300"
                       >
-                        Full Exam
-                      </Link>
-                      <Link
-                        to="/create/bank"
-                        onClick={() => setIsCreateExamOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                      >
-                        Bank Questions
+                        <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center mr-3">
+                          <BookOpen className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <div className="font-medium">Full Exam</div>
+                          <div className="text-xs text-gray-500">
+                            Complete assessment
+                          </div>
+                        </div>
                       </Link>
                     </div>
                   </div>
                 )}
               </div>
 
-              <NavLink to="/grades" label="Grades" />
+              <NavLink
+                to="/grades"
+                label="Analytics"
+                icon={<BarChart3 className="w-4 h-4" />}
+              />
             </div>
           </div>
 
-          {/* Auth Buttons or User Menu - Right (hidden on mobile) */}
-          <div className="hidden md:flex items-center space-x-2">
+          {/* Auth Section - Right */}
+          <div className="hidden md:flex items-center space-x-3">
             {currentUser ? (
               <div className="relative" id="user-menu-dropdown">
                 <button
                   onClick={toggleUserMenuDropdown}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  className={`flex items-center space-x-3 px-4 py-2 rounded-xl font-medium transition-all duration-300 text-gray-700 hover:bg-sky-50 hover:text-sky-600 ${
+                    isUserMenuOpen ? "bg-sky-50 text-sky-600" : ""
+                  }`}
                 >
-                  <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
+                  <div className="bg-gradient-to-r from-sky-400 to-indigo-500 text-white p-2 rounded-lg">
                     <User className="w-4 h-4" />
                   </div>
-                  <span>{currentUser.email}</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <div className="text-left">
+                    <div className="text-sm font-medium">
+                      {currentUser.name || "User"}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {currentUser.email}
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isUserMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50">
-                    <div className="py-1">
+                  <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 z-50 overflow-hidden">
+                    <div className="py-2">
                       <Link
                         to="/profile"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-300"
                       >
-                        Profile
-                      </Link>
-                      <Link
-                        to="/dashboard"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                      >
-                        Dashboard
+                        <User className="w-4 h-4 mr-3 text-sky-500" />
+                        Profile Settings
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        className="flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-300"
                       >
-                        <div className="flex items-center">
-                          <LogOut className="w-4 h-4 mr-2" />
-                          Sign out
-                        </div>
+                        <LogOut className="w-4 h-4 mr-3" />
+                        Sign Out
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <>
+              <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
-                  className="flex items-center px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
+                  className="flex items-center px-4 py-2 text-sky-600 hover:text-sky-700 font-medium rounded-xl hover:bg-sky-50 transition-all duration-300"
                 >
-                  <LogIn className="w-4 h-4 mr-1" />
-                  Login
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  className="flex items-center px-6 py-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 font-medium"
                 >
-                  <UserPlus className="w-4 h-4 mr-1" />
-                  Register
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Get Started
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Mobile Menu (shown when menu button is clicked) */}
+        {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4">
-            <div className="flex flex-col space-y-2">
-              <MobileNavLink
-                to="/"
-                label="Home"
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
+          <div className="md:hidden mt-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 overflow-hidden">
+            <div className="py-4">
+              <div className="space-y-2 px-4">
+                <MobileNavLink
+                  to="/"
+                  label="Home"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
+                <MobileNavLink
+                  to="/student"
+                  label="Student"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
 
-              {/* Mobile Create Exam Submenu */}
-              <div className="px-4 py-2">
-                <div className="font-medium text-gray-800 mb-2">
-                  Create Exam
+                {/* Mobile Create Exam Section */}
+                <div className="py-2">
+                  <div className="font-medium text-gray-800 mb-3 px-2">
+                    Create Exams
+                  </div>
+                  <div className="ml-4 space-y-2">
+                    <MobileNavLink
+                      to="/create"
+                      label="Custom Exam"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      icon={<GraduationCap className="w-4 h-4" />}
+                    />
+                    <MobileNavLink
+                      to="/create/full"
+                      label="Full Exam"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      icon={<BookOpen className="w-4 h-4" />}
+                    />
+                  </div>
                 </div>
-                <div className="ml-4 space-y-2">
-                  <MobileNavLink
-                    to="/create/customize"
-                    label="Create Customize Exam"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  />
-                  <MobileNavLink
-                    to="/create/full"
-                    label="Create Full Exam"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  />
-                  <MobileNavLink
-                    to="/create/bank"
-                    label="Create Bank Questions"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  />
-                </div>
+
+                <MobileNavLink
+                  to="/grades"
+                  label="Analytics"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  icon={<BarChart3 className="w-4 h-4" />}
+                />
               </div>
 
-              <MobileNavLink
-                to="/grades"
-                label="Grades"
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-
-              <div className="border-t border-gray-200 my-2 pt-2"></div>
-
-              {currentUser ? (
-                <>
-                  <div className="px-4 py-2">
-                    <div className="font-medium text-gray-800 mb-2">
-                      Signed in as{" "}
-                      <span className="text-blue-600">
-                        {currentUser.username}
-                      </span>
+              <div className="border-t border-sky-100 mt-4 pt-4 px-4">
+                {currentUser ? (
+                  <div className="space-y-2">
+                    <div className="px-2 py-2">
+                      <div className="font-medium text-gray-800">
+                        {currentUser.name || "User"}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {currentUser.email}
+                      </div>
                     </div>
+                    <MobileNavLink
+                      to="/profile"
+                      label="Profile"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      icon={<User className="w-4 h-4" />}
+                    />
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-2 py-3 rounded-xl font-medium text-red-600 hover:bg-red-50 transition-all duration-300"
+                    >
+                      <LogOut className="w-4 h-4 mr-3" />
+                      Sign Out
+                    </button>
                   </div>
-                  <MobileNavLink
-                    to="/profile"
-                    label="Profile"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  />
-                  <MobileNavLink
-                    to="/dashboard"
-                    label="Dashboard"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  />
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <MobileNavLink
-                    to="/login"
-                    label="Login"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    icon={<LogIn className="w-4 h-4" />}
-                  />
-                  <MobileNavLink
-                    to="/register"
-                    label="Register"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    icon={<UserPlus className="w-4 h-4" />}
-                    isButton
-                  />
-                </>
-              )}
+                ) : (
+                  <div className="space-y-2">
+                    <MobileNavLink
+                      to="/login"
+                      label="Sign In"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      icon={<LogIn className="w-4 h-4" />}
+                    />
+                    <MobileNavLink
+                      to="/register"
+                      label="Get Started"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      icon={<UserPlus className="w-4 h-4" />}
+                      isButton
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -315,7 +356,7 @@ export default function Navbar() {
   );
 }
 
-const NavLink = ({ to, label, activePaths = [] }) => {
+const NavLink = ({ to, label, icon, activePaths = [] }) => {
   const location = useLocation();
 
   const isActive =
@@ -325,12 +366,13 @@ const NavLink = ({ to, label, activePaths = [] }) => {
   return (
     <Link
       to={to}
-      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+      className={`flex items-center px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
         isActive
-          ? "bg-blue-50 text-blue-600"
-          : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+          ? "bg-sky-100 text-sky-600 shadow-md"
+          : "text-gray-600 hover:text-sky-600 hover:bg-sky-50"
       }`}
     >
+      {icon && <span className="mr-2">{icon}</span>}
       {label}
     </Link>
   );
@@ -344,15 +386,15 @@ const MobileNavLink = ({ to, label, onClick, icon, isButton = false }) => {
     <Link
       to={to}
       onClick={onClick}
-      className={`flex items-center px-4 py-3 rounded-lg font-medium transition-colors ${
+      className={`flex items-center px-2 py-3 rounded-xl font-medium transition-all duration-300 ${
         isButton
-          ? "bg-blue-600 text-white"
+          ? "bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-lg"
           : isActive
-          ? "bg-blue-100 text-blue-600"
-          : "text-gray-800 hover:bg-blue-50 hover:text-blue-600"
+          ? "bg-sky-100 text-sky-600"
+          : "text-gray-800 hover:bg-sky-50 hover:text-sky-600"
       }`}
     >
-      {icon && <span className="mr-2">{icon}</span>}
+      {icon && <span className="mr-3">{icon}</span>}
       {label}
     </Link>
   );
