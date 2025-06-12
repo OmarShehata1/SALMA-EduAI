@@ -61,7 +61,7 @@ const KeyFeaturesSection = () => {
       textColor: "text-purple-600",
       iconBg: "bg-purple-100",
       benefits: [
-        "70% reduction in grading time",
+        "90% reduction in grading time",
         "Detailed feedback generation",
         "Bias reduction",
       ],

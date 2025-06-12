@@ -238,7 +238,7 @@ const AnimatedHeroSection = () => {
               <span className="bg-gradient-to-r from-purple-400 to-pink-500 text-white px-3 py-1 rounded-lg font-semibold shadow-md">
                 Evaluation
               </span>{" "}
-              with AI-powered automation that saves educators 70% of their time
+              with AI-powered automation that saves educators 90% of their time
             </p>
           </div>
 
@@ -253,7 +253,7 @@ const AnimatedHeroSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {[
                 {
-                  number: "70%",
+                  number: "90%",
                   label: "Time Saved",
                   icon: <Zap className="w-5 h-5" />,
                   color: "from-yellow-400 to-orange-500",

@@ -82,7 +82,7 @@ export default function Footer() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-4 max-w-md">
               <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
-                <div className="text-2xl font-bold text-sky-600">70%</div>
+                <div className="text-2xl font-bold text-sky-600">90%</div>
                 <div className="text-xs text-gray-600">Time Saved</div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
