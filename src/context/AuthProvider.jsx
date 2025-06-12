@@ -44,27 +44,28 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       console.log(data);
       if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
+        throw new Error(data.data.message || "Registration failed");
       }
 
       // Store the token and user data
-      localStorage.setItem("token", data.token);
+      console.log(data.token);
+      localStorage.setItem("token", data.data.token);
       // Try to extract userId from token if available
-      let userId = null;
-      if (data.token) {
-        try {
-          const decoded = jwtDecode(data.token);
-          userId = decrementObjectIdCounter(decoded.id) || null;
-        } catch (e) {
-          console.warn("Could not decode JWT token", e);
-        }
-      }
+      let userId = data.data.user.id;
+      // if (data.data.token) {
+      //   try {
+      //     const decoded = jwtDecode(data.data.token);
+      //     userId = decrementObjectIdCounter(decoded.id) || null;
+      //   } catch (e) {
+      //     console.warn("Could not decode JWT token", e);
+      //   }
+      // }
       // Create user object
-      const user = {
+      const user =  {
         name,
         email,
         role,
-        token: data.token,
+        token: data.data.token,
         id: userId, // Include the ID if available
       };
 
@@ -111,14 +112,15 @@ export const AuthProvider = ({ children }) => {
       let userId = null;
 
       // Option 1: If the ID is directly provided in the response
-      if (data.userId || data._id || data.id) {
-        userId = data.userId || data._id || data.id;
+      if (data.data.user.userId || data.data.user._id || data.data.user.id) {
+        userId =
+          data.data.user.userId || data.data.user._id || data.data.user.id;
       }
       // Option 2: If you need to decode the JWT token to get the ID
       else if (data.token) {
         // Simple JWT decoding (middle part contains payload)
         try {
-          const decoded = jwtDecode(data.token);
+          const decoded = jwtDecode(data.data.token);
           userId = decrementObjectIdCounter(decoded.id);
           console.log("Decoded JWT:", decoded);
           console.log("User ID from JWT:", userId);
@@ -128,14 +130,14 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Store the token
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.data.token);
 
       // Create user object with ID
       const user = {
         email,
-        token: data.token,
+        token: data.data.token,
         id: userId, // Store the ID explicitly
-        role: data.role || "teacher", // Default role if not provided
+        role: data.data.role // Default role if not provided
         // Add other user fields as needed
       };
 
