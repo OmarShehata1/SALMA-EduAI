@@ -3,6 +3,8 @@ import { Navigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import StudentGrades from '../components/StudentGrades/StudentGrades';
 import TeacherGrades from '../pages/Grades'; // Your existing teacher component
+import StudentDashboard from '../pages/StudentDashboard';
+import InstructorDashboard from '../pages/InstructorDashboard';
 import Login from '../pages/Login';
 
 // Protected route component that checks user role
@@ -29,6 +31,22 @@ const routes = [
   {
     path: '/login',
     element: <Login />
+  },
+  {
+    path: '/student/dashboard',
+    element: (
+      <ProtectedRoute allowedRoles={['student']}>
+        <StudentDashboard />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/instructor/dashboard',
+    element: (
+      <ProtectedRoute allowedRoles={['instructor', 'teacher']}>
+        <InstructorDashboard />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/student/grades',

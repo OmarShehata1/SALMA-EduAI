@@ -12,6 +12,8 @@ import QuestionsDisplay from "./pages/DisplayQuestions";
 import { PDFProvider } from "./context/PDFContext";
 import CreateFullExam from "./pages/CreateFullExam";
 import ProtectedRoute, { GuestRoute } from "./components/ProtectedRoute";
+import InstructorDashboard from "./pages/InstructorDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 
 export default function App() {
   return (
@@ -78,7 +80,24 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-             
+
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <InstructorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+                <Route
+                path="/student-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Catch-all route */}
               <Route path="*" element={<div>Page Not Found</div>} />
             </Routes>
