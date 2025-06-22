@@ -16,7 +16,7 @@ export default function CreateFullExamPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
   const [error, setError] = useState(null);
-  const url = "https://localhost:7102";
+  const url = "http://localhost:5000";
   const navigate = useNavigate();
 
   // Handle file upload
