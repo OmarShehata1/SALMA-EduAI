@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
 import GeneratedQuestion from "../components/QuestionGenerator/GeneratedQuestion";
 import { usePDFContext } from "../context/PDFContext";
+import { useAuth } from "../context/AuthProvider";
 
 export default function QuestionGenerator() {
   const { selectedText, currentPdf } = usePDFContext();
+  const { currentUser } = useAuth();
 
   const [topic, setTopic] = useState(selectedText || "");
   const [difficulty, setDifficulty] = useState("medium");
@@ -14,36 +16,61 @@ export default function QuestionGenerator() {
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
-  const topicInputRef = useRef(null);
+  const navigate = useNavigate();  const topicInputRef = useRef(null);
   // const url = "https://localhost:7102";
+  // Helper function to safely get current user
+  const getCurrentUser = useCallback(() => {
+    try {
+      return currentUser || JSON.parse(localStorage.getItem('user'));
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  }, [currentUser]);
+
   useEffect(() => {
     if (selectedText && topicInputRef.current) {
       topicInputRef.current.focus();
     }
   }, [selectedText]);
 
+  // Check authentication on component mount
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user || !user.id || !user.token) {
+      setError("Authentication required. Please log in again.");
+      navigate("/login");
+    }
+  }, [currentUser, navigate, getCurrentUser]);
+
   const generateQuestions = async () => {
     setIsGenerating(true);
-    setError(null);
+    setError(null);    try {
+      // Get current user from localStorage or context
+      const user = getCurrentUser();
+      
+      if (!user || !user.id) {
+        throw new Error("User not authenticated. Please log in again.");
+      }
 
-    try {
-      // Updated API endpoint to match our backend
+      // Updated API endpoint to use dynamic teacher ID
       const response = await fetch(
-        `http://localhost:5000/teachers/684ac8388073978cf9483326/exams/genqa`,
+        `http://localhost:5000/teachers/${user.id}/exams/genqa`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.token}`,
           },
           body: JSON.stringify({
             pdfName: currentPdf ? currentPdf.name : null,
             paragraph: topic, // Changed from selectedText to paragraph to match backend
           }),
         }
-      );
-
-      if (!response.ok) {
+      );      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        }
         throw new Error(`API error: ${response.status}`);
       }
 
@@ -114,9 +141,17 @@ export default function QuestionGenerator() {
       }
 
       setGeneratedQuestions(formattedQuestions);
-      console.log("Formatted questions:", formattedQuestions);
-    } catch (err) {
+      console.log("Formatted questions:", formattedQuestions);    } catch (err) {
       console.error("Error generating questions:", err);
+      
+      // Handle specific authentication errors
+      if (err.message.includes("not authenticated") || err.message.includes("Authentication failed")) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        navigate("/login");
+        return;
+      }
+      
       setError(
         err.message || "Failed to generate questions. Please try again."
       );
@@ -201,11 +236,12 @@ export default function QuestionGenerator() {
           </svg>
           Back to PDF
         </button>
-      </div>
-
-      {currentPdf && (
+      </div>      {currentPdf && (
         <div className="mb-4 text-sm text-gray-600">
           <p>Source: {currentPdf.name}</p>
+          {currentUser && (
+            <p className="text-xs text-gray-500">Logged in as: {currentUser.email || 'User'}</p>
+          )}
         </div>
       )}
 

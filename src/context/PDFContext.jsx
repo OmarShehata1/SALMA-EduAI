@@ -141,6 +141,44 @@ export const PDFProvider = ({ children }) => {
     return false;
   };
 
+  // Delete PDF from server
+  const deletePdfFromServer = async (pdfId, userId = null, token = null) => {
+    // Get user data from localStorage if not provided
+    if (!userId || !token) {
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      if (!storedUser || !storedUser.id || !storedUser.token) {
+        console.error('No user found in localStorage');
+        return false;
+      }
+      userId = storedUser.id;
+      token = storedUser.token;
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:5000/teachers/${userId}/pdfs/${pdfId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete PDF from server');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting PDF from server:', error);
+      return false;
+    }
+  };
+
+  // Remove PDF from local state
+  const removePdfFile = (pdfId) => {
+    setPdfFiles(prevFiles => prevFiles.filter(pdf => pdf.id !== pdfId));
+  };
+
   // Value object provided by the context
   const value = {
     pdfFiles,
@@ -152,6 +190,8 @@ export const PDFProvider = ({ children }) => {
     addPdfFiles,
     uploadPdfsToServer,
     fetchPdfs,
+    deletePdfFromServer,
+    removePdfFile,
     currentPage,
     setCurrentPage,
     loading,

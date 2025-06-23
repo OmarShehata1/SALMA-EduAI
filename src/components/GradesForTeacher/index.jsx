@@ -1,5 +1,7 @@
 // main component for the Grades page
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthProvider";
 import { Header } from "./Header";
 import { FileUpload } from "./FileUpload";
 import { StudentsTable } from "./StudentsTable";
@@ -8,33 +10,52 @@ import { EmptyState } from "./EmptyState";
 import { ExamSelector } from "./ExamSelector";
 
 export default function Grades() {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  
   const [files, setFiles] = useState([]);
   const [studentsData, setStudentsData] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [error, setError] = useState(null);
-  const [exams, setExams] = useState([]);
+  const [error, setError] = useState(null);  const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [isLoadingExams, setIsLoadingExams] = useState(false);
+  const [studentId, setStudentId] = useState("");
+  // Helper function to safely get current user
+  const getCurrentUser = useCallback(() => {
+    try {
+      return currentUser || JSON.parse(localStorage.getItem('user'));
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  }, [currentUser]);
 
-  // You'll need to replace this with actual teacher ID from your app
-  const teacherId = "6857e47770f7a073fd047d19"; // Replace with actual teacher ID
-
-  // Fetch teacher's exams on component mount
-  useEffect(() => {
-    fetchTeacherExams();
-  }, []);
-
-  const fetchTeacherExams = async () => {
+  const fetchTeacherExams = useCallback(async () => {
     setIsLoadingExams(true);
     setError(null);
 
     try {
+      const user = getCurrentUser();
+      
+      if (!user || !user.id || !user.token) {
+        throw new Error("User not authenticated. Please log in again.");
+      }
+
       const response = await fetch(
-        `http://localhost:5000/teachers/${teacherId}`
+        `http://localhost:5000/teachers/${user.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        }
         throw new Error(`Failed to fetch exams: ${response.status}`);
       }
 
@@ -44,11 +65,30 @@ export default function Grades() {
       setExams(data.exams || []);
     } catch (err) {
       console.error("Error fetching exams:", err);
+      
+      // Handle authentication errors
+      if (err.message.includes("not authenticated") || err.message.includes("Authentication failed")) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        navigate("/login");
+        return;
+      }
+      
       setError("Failed to load exams. Please try again.");
     } finally {
-      setIsLoadingExams(false);
+      setIsLoadingExams(false);    }
+  }, [getCurrentUser, navigate]);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user || !user.id || !user.token) {
+      setError("Authentication required. Please log in again.");
+      navigate("/login");
+      return;
     }
-  };
+    fetchTeacherExams();
+  }, [getCurrentUser, navigate, fetchTeacherExams]);
 
   const handleExamSelect = (exam) => {
     setSelectedExam(exam);
@@ -56,17 +96,29 @@ export default function Grades() {
     setFiles([]);
     setStudentsData(null);
     setSelectedStudent(null);
+    setStudentId("");
     setError(null);
-  };
-
-  const handleEvaluate = async () => {
+  };const handleEvaluate = async () => {
     if (!selectedExam) {
       setError("Please select an exam first");
       return;
     }
 
+    if (!studentId.trim()) {
+      setError("Please enter a student ID");
+      return;
+    }
+
     if (files.length === 0) {
-      setError("Please upload at least one answer sheet");
+      setError("Please upload answer sheet photos");
+      return;
+    }
+
+    // Validate that the number of uploaded photos matches the number of questions
+    if (files.length !== selectedExam.num_of_questions) {
+      setError(
+        `This exam has ${selectedExam.num_of_questions} questions. Please upload exactly ${selectedExam.num_of_questions} photos (one photo per question).`
+      );
       return;
     }
 
@@ -76,59 +128,77 @@ export default function Grades() {
     setSelectedStudent(null);
 
     try {
-      // Process each uploaded file as a different student's exam
-      const gradingResults = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        // Generate a temporary student ID or use actual student ID
-        const studentId = `671aef5055912c5627ef8d10`; // You might want to make this dynamic
-
-        // Create FormData for the grading endpoint
-        const formData = new FormData();
-        formData.append("images", file);
-
-        // Call the grading endpoint with the selected exam ID
-        const response = await fetch(
-          `http://localhost:5000/teachers/${teacherId}/exams/${selectedExam._id}/grade/${studentId}`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || `Failed to grade exam for student ${i + 1}`
-          );
-        }
-
-        const gradingData = await response.json();
-        console.log("Grading result:", gradingData);
-
-        // Handle the new response structure
-        gradingResults.push({
-          id: `${studentId}_${i}`, // Make unique ID for multiple files
-          name: `Student ${i + 1}`,
-          totalGrade: gradingData.total_grade,
-          maxTotalGrade: gradingData.max_total_grade,
-          percentage: (
-            (gradingData.total_grade / gradingData.max_total_grade) *
-            100
-          ).toFixed(1),
-          questionDetails: gradingData.question_details || [],
-          fileName: file.name, // Store original file name
-        });
+      const user = getCurrentUser();
+      
+      if (!user || !user.id || !user.token) {
+        throw new Error("User not authenticated. Please log in again.");
       }
 
-      // Set the processed student data
-      setStudentsData(gradingResults);
+      // Create FormData for all the question photos
+      const formData = new FormData();
+        // Add all photos to the form data - each photo represents one question answer
+      files.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      console.log(`Uploading ${files.length} photos for ${selectedExam.num_of_questions} questions for student ID: ${studentId}`);
+
+      // Call the grading endpoint with all photos at once
+      const response = await fetch(
+        `http://localhost:5000/teachers/${user.id}/exams/${selectedExam._id}/grade/${studentId}`,
+        {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        }
+        let errorMessage = "Failed to grade exam";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          errorMessage = `Server error (${response.status}): ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const gradingData = await response.json();
+      console.log("Grading result:", gradingData);
+
+      // Process the single student's grading result
+      const studentResult = {
+        id: studentId,
+        name: "Student", // You might want to allow custom naming
+        totalGrade: gradingData.total_grade,
+        maxTotalGrade: gradingData.max_total_grade,
+        percentage: (
+          (gradingData.total_grade / gradingData.max_total_grade) * 100
+        ).toFixed(1),
+        questionDetails: gradingData.question_details || [],
+        examTitle: selectedExam.title,
+      };
+
+      // Set the processed student data as an array with one student
+      setStudentsData([studentResult]);
     } catch (err) {
       console.error("Error during evaluation:", err);
-      setError(
-        err.message || "Failed to evaluate submissions. Please try again."
-      );
+      
+      // Handle authentication errors
+      if (err.message.includes("not authenticated") || err.message.includes("Authentication failed")) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        navigate("/login");
+        return;
+      }
+      
+      setError(err.message || "Failed to evaluate exam. Please try again.");
     } finally {
       setIsEvaluating(false);
     }
@@ -185,12 +255,31 @@ export default function Grades() {
           isLoading={isLoadingExams}
           error={error}
         />
-      </div>
-
-      {/* Only show file upload and grading if an exam is selected */}
+      </div>      {/* Only show file upload and grading if an exam is selected */}
       {selectedExam && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
+            {/* Student ID Input */}
+            <div className="mb-6 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <label 
+                htmlFor="studentId" 
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Student ID
+              </label>
+              <input
+                type="text"
+                id="studentId"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
+                placeholder="Enter student ID..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Enter the ID of the student whose exam photos you're uploading
+              </p>
+            </div>
+
             <FileUpload
               files={files}
               setFiles={setFiles}

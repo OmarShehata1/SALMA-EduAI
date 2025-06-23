@@ -1,5 +1,5 @@
 // src/components/PDFViewer/index.jsx
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import PDFSidebar from "./PDFSidebar";
 import PDFContent from "./PDFContent";
@@ -17,6 +17,8 @@ const PDFViewer = () => {
     addPdfFiles,
     uploadPdfsToServer,
     fetchPdfs,
+    deletePdfFromServer,
+    removePdfFile,
     loading,
   } = usePDFContext();
 
@@ -30,17 +32,21 @@ const PDFViewer = () => {
   const pdfContainerRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  
-  // Track if initial fetch has been performed
+    // Track if initial fetch has been performed
   const fetchedRef = useRef(false);
+
+  // Memoized fetch function to avoid dependency issues
+  const memoizedFetchPdfs = useCallback(() => {
+    fetchPdfs();
+  }, [fetchPdfs]);
 
   // Fetch PDFs only once when component mounts
   useEffect(() => {
     if (!fetchedRef.current) {
-      fetchPdfs(); // This will now get user from localStorage
+      memoizedFetchPdfs(); // This will now get user from localStorage
       fetchedRef.current = true;
     }
-  }, []); // Empty dependency array means this only runs once on mount
+  }, [memoizedFetchPdfs]); // Now properly includes the dependency
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -73,6 +79,31 @@ const PDFViewer = () => {
 
   const handlePdfSelect = (pdf) => {
     setCurrentPdf(pdf);
+  };
+
+  const handlePdfDelete = async (pdfToDelete) => {
+    try {
+      // If this PDF is currently selected, clear the selection
+      if (currentPdf && currentPdf.id === pdfToDelete.id) {
+        setCurrentPdf(null);
+      }
+
+      // Remove from local state first for immediate UI feedback
+      removePdfFile(pdfToDelete.id);
+
+      // If the PDF was stored on server, delete it from there too
+      if (pdfToDelete.id && pdfToDelete.serverStored !== false) {
+        const deleted = await deletePdfFromServer(pdfToDelete.id);
+        if (!deleted) {
+          console.warn("Failed to delete PDF from server, but removed locally");
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting PDF:", error);
+      alert("Error deleting PDF. Please try again.");
+      // Refresh the list to ensure consistency
+      fetchPdfs();
+    }
   };
 
   const handleTextSelection = () => {
@@ -131,6 +162,7 @@ const PDFViewer = () => {
         triggerFileInput={triggerFileInput}
         isUploading={isUploading}
         isLoading={loading}
+        onPdfDelete={handlePdfDelete} // Pass the delete handler to sidebar
       />
 
       <PDFContent

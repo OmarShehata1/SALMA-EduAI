@@ -39,10 +39,11 @@ export function ExamSelector({
     );
   }
 
-  if (exams.length === 0) {
-    return (
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Select Exam to Grade</h2>
+  if (exams.length === 0) {    return (
+      <div className="bg-white shadow-md rounded-lg p-6">        <h2 className="text-xl font-semibold mb-4">Select Exam Template</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Choose the exam template that matches the student's answer sheets. This helps the AI understand which questions to grade.
+        </p>
         <div className="text-center py-8">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
@@ -67,16 +68,16 @@ export function ExamSelector({
       </div>
     );
   }
-
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Select Exam to Grade</h2>
+    <div className="bg-white shadow-md rounded-lg p-6">      <h2 className="text-xl font-semibold mb-4">Select Exam Template</h2>
+      <p className="text-sm text-gray-600 mb-4">
+        Choose the exam template that matches the student's answer sheets. This helps the AI understand which questions to grade.
+      </p>
 
       {selectedExam && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-700">
-            <strong>Selected:</strong> {selectedExam.title} (
-            {selectedExam.num_of_questions} questions)
+            <strong>Selected template:</strong> {selectedExam.title} ({selectedExam.num_of_questions} questions)
           </p>
         </div>
       )}

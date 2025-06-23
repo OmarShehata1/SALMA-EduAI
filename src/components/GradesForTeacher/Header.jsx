@@ -4,11 +4,10 @@ import React from 'react';
 
 export function Header() {
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-      <h1 className="text-3xl font-bold text-blue-700 mb-3">Grade Evaluation Dashboard</h1>
+    <div className="bg-white shadow-md rounded-lg p-6 mb-8">      <h1 className="text-3xl font-bold text-blue-700 mb-3">Photo-Based Exam Grading</h1>
       <p className="text-gray-600 mb-6">
-        Upload assessment files to evaluate student performance using our AI-powered grading system. 
-        The system analyzes responses question by question, providing detailed feedback and justifications for each grade.
+        Upload photos of student answer sheets for automatic grading. Each photo should contain the answer to one specific question. 
+        The AI system will grade each answer against the corresponding question from your exam template.
       </p>
       
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
@@ -20,7 +19,7 @@ export function Header() {
           </div>
           <div className="ml-3">
             <p className="text-sm text-blue-700">
-              Upload your answer sheets in PDF format. After evaluation, click on any student ID to view question-by-question analysis.
+              📸 <strong>How it works:</strong> Select an exam template → Upload photos in order (Photo 1 = Q1 answer, Photo 2 = Q2 answer, etc.) → Get instant AI grading results with detailed feedback.
             </p>
           </div>
         </div>
