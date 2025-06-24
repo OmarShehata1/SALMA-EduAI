@@ -41,9 +41,8 @@ export default function Sidebar({ currentPage, onPageChange }) {
       description: "Account settings",
     },
   ];
-
   return (
-    <div className="w-80 bg-white/60 backdrop-blur-sm border-r border-sky-200 min-h-screen shadow-lg">
+    <div className="w-full h-full bg-white/60 backdrop-blur-sm border-r border-sky-200 shadow-lg overflow-y-auto">
       {/* Header */}
       <div className="p-6 border-b border-sky-200">
         <div className="flex items-center space-x-3">

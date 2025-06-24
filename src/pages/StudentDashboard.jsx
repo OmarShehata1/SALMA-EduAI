@@ -29,7 +29,10 @@ export default function StudentDashboard() {
             exam={selectedExam}
             onBack={() => setCurrentPage("exams")}
             onAppeal={(examId, questionNumber) => {
-              setSelectedExam({ ...selectedExam, appealQuestionNumber: questionNumber });
+              setSelectedExam({
+                ...selectedExam,
+                appealQuestionNumber: questionNumber,
+              });
               setCurrentPage("appeal");
             }}
           />
@@ -47,15 +50,13 @@ export default function StudentDashboard() {
         return <TeacherList />;
     }
   };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-200 via-sky-100 to-white mt-16">
-      <div className="flex">
-        <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
-        <div className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            {renderCurrentPage()}
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-sky-200 via-sky-100 to-white">      <div className="flex">
+        <div className="fixed left-0 top-20 bottom-0 w-80 z-20">
+          <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
+        </div>
+        <div className="flex-1 ml-80 p-6 pb-12">
+          <div className="max-w-7xl mx-auto">{renderCurrentPage()}</div>
         </div>
       </div>
     </div>

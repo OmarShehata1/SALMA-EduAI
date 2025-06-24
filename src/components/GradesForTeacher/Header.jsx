@@ -2,9 +2,19 @@
 // src/components/Grades/Header.jsx for the Grade Evaluation Dashboard
 import React from 'react';
 
-export function Header() {
+export function Header({ selectedExam }) {
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mb-8">      <h1 className="text-3xl font-bold text-blue-700 mb-3">Photo-Based Exam Grading</h1>
+    <div className="bg-white shadow-md rounded-lg p-6 mb-8">
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="text-3xl font-bold text-blue-700">Photo-Based Exam Grading</h1>
+        {selectedExam && (
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 px-4 py-2 rounded-lg">
+            <p className="text-sm font-medium text-green-700">
+              📄 Currently Grading: <span className="font-bold">{selectedExam.name}</span>
+            </p>
+          </div>
+        )}
+      </div>
       <p className="text-gray-600 mb-6">
         Upload photos of student answer sheets for automatic grading. Each photo should contain the answer to one specific question. 
         The AI system will grade each answer against the corresponding question from your exam template.

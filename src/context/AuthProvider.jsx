@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { getRoleBasedRoute } from "../utils/navigation";
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -11,14 +13,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const url = "http://localhost:5000"; // Keep your original base URL
-
   // Check if user is already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
     if (token && user) {
-      setCurrentUser(JSON.parse(user));
+      try {
+        const parsedUser = JSON.parse(user);
+        // Ensure name field exists, fallback to email prefix if not
+        if (!parsedUser.name && parsedUser.email) {
+          parsedUser.name = parsedUser.email.split('@')[0];
+        }
+        setCurrentUser(parsedUser);
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        // Clear invalid data
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
     }
 
     setLoading(false);
@@ -59,20 +72,23 @@ export const AuthProvider = ({ children }) => {
         } catch (e) {
           console.warn("Could not decode JWT token", e);
         }
-      }
-      // Create user object
+      }      // Create user object
       const user =  {
-        name,
+        name: name || email.split('@')[0], // Use provided name or fallback to email prefix
         email,
         role,
         token: data.token,
         id: userId, // Include the ID if available
-      };
+      };      localStorage.setItem("user", JSON.stringify(user));
+      setCurrentUser(user);      console.log("Auth: User registered:", {
+        id: userId,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      });
 
-      localStorage.setItem("user", JSON.stringify(user));
-      setCurrentUser(user);
-
-      return { success: true };
+      const redirectRoute = getRoleBasedRoute(user);
+      return { success: true, redirectTo: redirectRoute };
     } catch (err) {
       setError(err.message);
       return { success: false, message: err.message };
@@ -130,23 +146,24 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Store the token
-      localStorage.setItem("token", data.token);
-
-      // Create user object with ID
+      localStorage.setItem("token", data.token);      // Create user object with ID
       const user = {
         email,
         token: data.token,
         id: userId, // Store the ID explicitly
-        role: data.role // Default role if not provided
+        role: data.role || 'student', // Default role if not provided
+        name: data.name || data.username || email.split('@')[0] // Use name from response, fallback to username or email prefix
         // Add other user fields as needed
-      };
+      };      localStorage.setItem("user", JSON.stringify(user));
+      setCurrentUser(user);      console.log("Auth: User logged in:", {
+        id: userId,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      });
 
-      localStorage.setItem("user", JSON.stringify(user));
-      setCurrentUser(user);
-
-      console.log("Auth: User logged in with ID:", userId);
-
-      return { success: true };
+      const redirectRoute = getRoleBasedRoute(user);
+      return { success: true, redirectTo: redirectRoute };
     } catch (err) {
       setError(err.message);
       return { success: false, message: err.message };

@@ -1,7 +1,7 @@
 // student detail component for displaying individual student grades
 import React from "react";
 
-export function StudentDetail({ selectedStudent }) {
+export function StudentDetail({ selectedStudent, selectedExam }) {
   const getGradeColor = (grade, maxGrade) => {
     const percentage = (grade / maxGrade) * 100;
     if (percentage >= 90) return "text-green-600 bg-green-50 border-green-200";
@@ -24,7 +24,14 @@ export function StudentDetail({ selectedStudent }) {
   return (
     <div className="mt-8 bg-white shadow-md rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Student Details</h2>
+        <div>
+          <h2 className="text-xl font-semibold">Student Details</h2>
+          {selectedExam && (
+            <p className="text-sm text-blue-600 mt-1">
+              📄 Exam: <span className="font-medium">{selectedExam.name}</span>
+            </p>
+          )}
+        </div>
         <div className="text-sm text-gray-500">
           File: {selectedStudent.fileName}
         </div>

@@ -10,7 +10,6 @@ export default function CreateFullExamPage() {
   const [files, setFiles] = useState([]);
   const [selectedFileIds, setSelectedFileIds] = useState([]);
   const [numQuestions, setNumQuestions] = useState(5);
-  const [difficulty, setDifficulty] = useState("Medium");
   const [topic, setTopic] = useState("");
   const [questions, setQuestions] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -62,11 +61,8 @@ export default function CreateFullExamPage() {
       const selectedFiles = files.filter((f) => selectedFileIds.includes(f.id));
       selectedFiles.forEach((fileObj) => {
         formData.append("Files", fileObj.file);
-      });
-
-      // Add other parameters
+      });      // Add other parameters
       formData.append("NumQuestions", numQuestions);
-      formData.append("Difficulty", difficulty);
       if (topic) {
         formData.append("Topic", topic);
       }
@@ -82,15 +78,13 @@ export default function CreateFullExamPage() {
         throw new Error(errorText || "Failed to generate questions");
       }
 
-      const data = await response.json();
-
-      // Transform the backend data structure to match our frontend needs
+      const data = await response.json();      // Transform the backend data structure to match our frontend needs
       const formattedQuestions = data.questions.map((q) => ({
         id: q.id.toString(),
         question: q.questionText,
         answer: q.answer,
-        difficulty: q.difficulty.toLowerCase(),
         isSelected: q.isSelected,
+        grade: q.grade || 10, // Use API grade or default
         source: q.source,
       }));
 
@@ -124,10 +118,8 @@ export default function CreateFullExamPage() {
   // Toggle back to file selection view
   const goBackToFileSelection = () => {
     setShowQuestions(false);
-  };
-
-  return (
-    <div className="container mx-auto px-4 py-8 mt-16">
+  };  return (
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-blue-600 mb-6">
         Create Full Exam
       </h1>
@@ -141,10 +133,9 @@ export default function CreateFullExamPage() {
 
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
           <div className="flex">
-            <AlertCircle className="text-blue-500 w-5 h-5 mr-2 flex-shrink-0" />
-            <p className="text-sm text-blue-700">
+            <AlertCircle className="text-blue-500 w-5 h-5 mr-2 flex-shrink-0" />            <p className="text-sm text-blue-700">
               Upload your content files in PDF format. Set the number of
-              questions and difficulty level, then generate your exam. You can
+              questions, then generate your exam. You can
               edit or remove questions as needed.
             </p>
           </div>
@@ -170,13 +161,9 @@ export default function CreateFullExamPage() {
                 handleFileUpload={handleFileUpload}
                 removeFile={removeFile}
                 toggleFileSelection={toggleFileSelection}
-              />
-
-              <ExamSettingsForm
+              />              <ExamSettingsForm
                 topic={topic}
                 setTopic={setTopic}
-                difficulty={difficulty}
-                setDifficulty={setDifficulty}
                 numQuestions={numQuestions}
                 setNumQuestions={setNumQuestions}
                 generateQuestions={generateQuestions}

@@ -1,7 +1,7 @@
 // src/services/apiService.js
 import axios from "axios";
 
-const API_URL = "https://localhost:5000";
+const API_URL = "http://localhost:5000";
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -45,5 +45,54 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Student-related API functions
+export const studentApi = {
+  // Get student by ID
+  getStudentById: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/students/${studentId}`);
+      return response.data; // Expected format: { student: {...} }
+    } catch (error) {
+      console.error("Error fetching student by ID:", error);
+      throw error;
+    }
+  },
+
+  // Search students by name/email
+  searchStudents: async (query) => {
+    try {
+      const response = await apiClient.get(`/students/search?q=${encodeURIComponent(query)}`);
+      return response.data; // Expected format: { students: [...] }
+    } catch (error) {
+      console.error("Error searching students:", error);
+      throw error;
+    }
+  },
+
+  // Get all students for a specific teacher
+  getTeacherStudents: async (teacherId) => {
+    try {
+      const response = await apiClient.get(`/teachers/${teacherId}/students`);
+      return response.data; // Expected format: { students: [...] }
+    } catch (error) {
+      console.error("Error fetching teacher's students:", error);
+      throw error;
+    }
+  },
+
+  // Add student to teacher's class
+  addStudentToTeacher: async (teacherId, studentId) => {
+    try {
+      const response = await apiClient.post(`/teachers/${teacherId}/students`, {
+        studentId
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error adding student to teacher:", error);
+      throw error;
+    }
+  }
+};
 
 export default apiClient;

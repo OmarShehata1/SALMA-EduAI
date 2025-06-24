@@ -8,25 +8,27 @@ import { StudentsTable } from "./StudentsTable";
 import { StudentDetail } from "./StudentDetail";
 import { EmptyState } from "./EmptyState";
 import { ExamSelector } from "./ExamSelector";
+import { StudentSelector } from "./StudentSelector";
 
 export default function Grades() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  
   const [files, setFiles] = useState([]);
   const [studentsData, setStudentsData] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [error, setError] = useState(null);  const [exams, setExams] = useState([]);
+  const [error, setError] = useState(null);
+  const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [isLoadingExams, setIsLoadingExams] = useState(false);
-  const [studentId, setStudentId] = useState("");
+  const [selectedStudentForGrading, setSelectedStudentForGrading] =
+    useState(null);
   // Helper function to safely get current user
   const getCurrentUser = useCallback(() => {
     try {
-      return currentUser || JSON.parse(localStorage.getItem('user'));
+      return currentUser || JSON.parse(localStorage.getItem("user"));
     } catch (error) {
-      console.error('Error getting current user:', error);
+      console.error("Error getting current user:", error);
       return null;
     }
   }, [currentUser]);
@@ -37,7 +39,7 @@ export default function Grades() {
 
     try {
       const user = getCurrentUser();
-      
+
       if (!user || !user.id || !user.token) {
         throw new Error("User not authenticated. Please log in again.");
       }
@@ -46,8 +48,8 @@ export default function Grades() {
         `http://localhost:5000/teachers/${user.id}`,
         {
           headers: {
-            'Authorization': `Bearer ${user.token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -65,18 +67,22 @@ export default function Grades() {
       setExams(data.exams || []);
     } catch (err) {
       console.error("Error fetching exams:", err);
-      
+
       // Handle authentication errors
-      if (err.message.includes("not authenticated") || err.message.includes("Authentication failed")) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+      if (
+        err.message.includes("not authenticated") ||
+        err.message.includes("Authentication failed")
+      ) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
         navigate("/login");
         return;
       }
-      
+
       setError("Failed to load exams. Please try again.");
     } finally {
-      setIsLoadingExams(false);    }
+      setIsLoadingExams(false);
+    }
   }, [getCurrentUser, navigate]);
 
   // Check authentication on component mount
@@ -89,23 +95,28 @@ export default function Grades() {
     }
     fetchTeacherExams();
   }, [getCurrentUser, navigate, fetchTeacherExams]);
-
   const handleExamSelect = (exam) => {
     setSelectedExam(exam);
     // Reset other states when selecting a new exam
     setFiles([]);
     setStudentsData(null);
     setSelectedStudent(null);
-    setStudentId("");
+    setSelectedStudentForGrading(null);
     setError(null);
-  };const handleEvaluate = async () => {
+  };
+
+  const handleStudentSelect = (student) => {
+    setSelectedStudentForGrading(student);
+    setError(null);
+  };
+  const handleEvaluate = async () => {
     if (!selectedExam) {
       setError("Please select an exam first");
       return;
     }
 
-    if (!studentId.trim()) {
-      setError("Please enter a student ID");
+    if (!selectedStudentForGrading) {
+      setError("Please select a student first");
       return;
     }
 
@@ -129,19 +140,28 @@ export default function Grades() {
 
     try {
       const user = getCurrentUser();
-      
+
       if (!user || !user.id || !user.token) {
         throw new Error("User not authenticated. Please log in again.");
       }
 
+      const studentId =
+        selectedStudentForGrading.id || selectedStudentForGrading._id;
+
       // Create FormData for all the question photos
       const formData = new FormData();
-        // Add all photos to the form data - each photo represents one question answer
+      // Add all photos to the form data - each photo represents one question answer
       files.forEach((file) => {
         formData.append("images", file);
       });
 
-      console.log(`Uploading ${files.length} photos for ${selectedExam.num_of_questions} questions for student ID: ${studentId}`);
+      console.log(
+        `Uploading ${files.length} photos for ${
+          selectedExam.num_of_questions
+        } questions for student: ${
+          selectedStudentForGrading.name || selectedStudentForGrading.firstName
+        } (ID: ${studentId})`
+      );
 
       // Call the grading endpoint with all photos at once
       const response = await fetch(
@@ -149,7 +169,7 @@ export default function Grades() {
         {
           method: "POST",
           headers: {
-            'Authorization': `Bearer ${user.token}`,
+            Authorization: `Bearer ${user.token}`,
           },
           body: formData,
         }
@@ -170,16 +190,19 @@ export default function Grades() {
       }
 
       const gradingData = await response.json();
-      console.log("Grading result:", gradingData);
-
-      // Process the single student's grading result
+      console.log("Grading result:", gradingData); // Process the single student's grading result
       const studentResult = {
         id: studentId,
-        name: "Student", // You might want to allow custom naming
+        name:
+          selectedStudentForGrading.name ||
+          selectedStudentForGrading.firstName +
+            " " +
+            (selectedStudentForGrading.lastName || ""),
         totalGrade: gradingData.total_grade,
         maxTotalGrade: gradingData.max_total_grade,
         percentage: (
-          (gradingData.total_grade / gradingData.max_total_grade) * 100
+          (gradingData.total_grade / gradingData.max_total_grade) *
+          100
         ).toFixed(1),
         questionDetails: gradingData.question_details || [],
         examTitle: selectedExam.title,
@@ -189,15 +212,18 @@ export default function Grades() {
       setStudentsData([studentResult]);
     } catch (err) {
       console.error("Error during evaluation:", err);
-      
+
       // Handle authentication errors
-      if (err.message.includes("not authenticated") || err.message.includes("Authentication failed")) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+      if (
+        err.message.includes("not authenticated") ||
+        err.message.includes("Authentication failed")
+      ) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
         navigate("/login");
         return;
       }
-      
+
       setError(err.message || "Failed to evaluate exam. Please try again.");
     } finally {
       setIsEvaluating(false);
@@ -241,11 +267,9 @@ export default function Grades() {
       setError("Failed to load student details");
     }
   };
-
   return (
     <div className="container mx-auto px-4 py-8 flex-1 mt-8">
-      <Header />
-
+      <Header selectedExam={selectedExam} />
       {/* Exam Selection Section */}
       <div className="mb-8">
         <ExamSelector
@@ -255,30 +279,18 @@ export default function Grades() {
           isLoading={isLoadingExams}
           error={error}
         />
-      </div>      {/* Only show file upload and grading if an exam is selected */}
+      </div>{" "}
+      {/* Only show file upload and grading if an exam is selected */}
       {selectedExam && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            {/* Student ID Input */}
-            <div className="mb-6 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-              <label 
-                htmlFor="studentId" 
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Student ID
-              </label>
-              <input
-                type="text"
-                id="studentId"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                placeholder="Enter student ID..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Enter the ID of the student whose exam photos you're uploading
-              </p>
-            </div>
+            {/* Student Selection */}
+            <StudentSelector
+              teacherId={getCurrentUser()?.id}
+              selectedStudent={selectedStudentForGrading}
+              onStudentSelect={handleStudentSelect}
+              error={null}
+            />
 
             <FileUpload
               files={files}
@@ -294,19 +306,19 @@ export default function Grades() {
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-700">{error}</p>
               </div>
-            )}
-
-            {studentsData ? (
+            )}            {studentsData ? (
               <StudentsTable
                 studentsData={studentsData}
                 handleStudentClick={handleStudentClick}
+                selectedExam={selectedExam}
               />
             ) : (
               <EmptyState />
-            )}
-
-            {selectedStudent && (
-              <StudentDetail selectedStudent={selectedStudent} />
+            )}            {selectedStudent && (
+              <StudentDetail 
+                selectedStudent={selectedStudent} 
+                selectedExam={selectedExam}
+              />
             )}
           </div>
         </div>

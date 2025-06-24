@@ -3,12 +3,6 @@ import React, { useState } from "react";
 const QuestionCard = ({ question, onEdit, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
 
-  const difficultyColor = {
-    easy: "bg-green-100 text-green-800 border-green-200",
-    medium: "bg-blue-100 text-blue-800 border-blue-200",
-    hard: "bg-red-100 text-red-800 border-red-200",
-  };
-
    // Function to determine grade color based on numeric value
    const gradeColor = (grade) => {
     if (grade >= 20) return "bg-red-100 text-red-800"; // A equivalent
@@ -19,7 +13,7 @@ const QuestionCard = ({ question, onEdit, onDelete }) => {
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-md border-l-4 ${difficultyColor[question.difficulty]}`}>
+    <div className="bg-white rounded-lg shadow-md border-l-4 border-blue-200">
       <div className="p-4">
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold text-gray-900">
@@ -35,14 +29,6 @@ const QuestionCard = ({ question, onEdit, onDelete }) => {
                 Grade: {question.grade}
               </span>
             )}
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                difficultyColor[question.difficulty]
-              }`}
-            >
-              {question.difficulty.charAt(0).toUpperCase() +
-                question.difficulty.slice(1)}
-            </span>
           </div>
         </div>
 

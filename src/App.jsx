@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthProvider";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -14,15 +14,24 @@ import CreateFullExam from "./pages/CreateFullExam";
 import ProtectedRoute, { GuestRoute } from "./components/ProtectedRoute";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import { useAuth } from "./context/AuthProvider";
+import { getRoleBasedRoute } from "./utils/navigation";
+
+// Component for handling 404/unauthorized access
+function NotFoundRedirect() {
+  const { currentUser } = useAuth();
+  const redirectTo = currentUser ? getRoleBasedRoute(currentUser) : "/";
+  return <Navigate to={redirectTo} replace />;
+}
 
 export default function App() {
   return (
     <PDFProvider>
-      <Router>
-        <AuthProvider>
+      <Router>        <AuthProvider>
           <div className="min-h-screen flex flex-col">
             <Navbar />
-            <Routes>
+            <main className="pt-20 flex-1">
+              <Routes>
               <Route path="/" element={<Home />} />
               <Route
                 path="/login"
@@ -39,11 +48,10 @@ export default function App() {
                     <Register />
                   </GuestRoute>
                 }
-              />
-              <Route
+              />              <Route
                 path="/create"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['teacher', 'instructor']}>
                     <CreateExam />
                   </ProtectedRoute>
                 }
@@ -51,7 +59,7 @@ export default function App() {
               <Route
                 path="/create/full"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['teacher', 'instructor']}>
                     <CreateFullExam />
                   </ProtectedRoute>
                 }
@@ -59,7 +67,7 @@ export default function App() {
               <Route
                 path="/grades"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['teacher', 'instructor']}>
                     <Grades />
                   </ProtectedRoute>
                 }
@@ -67,7 +75,7 @@ export default function App() {
               <Route
                 path="/generate"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['teacher', 'instructor']}>
                     <QuestionGenerator />
                   </ProtectedRoute>
                 }
@@ -75,7 +83,7 @@ export default function App() {
               <Route
                 path="/questions"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['teacher', 'instructor']}>
                     <QuestionsDisplay />
                   </ProtectedRoute>
                 }
@@ -84,7 +92,7 @@ export default function App() {
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['teacher', 'instructor']}>
                     <InstructorDashboard />
                   </ProtectedRoute>
                 }
@@ -92,15 +100,14 @@ export default function App() {
                 <Route
                 path="/student-dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['student']}>
                     <StudentDashboard />
                   </ProtectedRoute>
                 }
-              />
-
-              {/* Catch-all route */}
-              <Route path="*" element={<div>Page Not Found</div>} />
+              />              {/* Catch-all route */}
+              <Route path="*" element={<NotFoundRedirect />} />
             </Routes>
+            </main>
             <Footer />
           </div>
         </AuthProvider>

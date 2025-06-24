@@ -1,7 +1,7 @@
 // student tables component
 import React from "react";
 
-export function StudentsTable({ studentsData, handleStudentClick }) {
+export function StudentsTable({ studentsData, handleStudentClick, selectedExam }) {
   const getGradeColor = (percentage) => {
     if (percentage >= 90) return "text-green-600 bg-green-50";
     if (percentage >= 80) return "text-blue-600 bg-blue-50";
@@ -12,7 +12,16 @@ export function StudentsTable({ studentsData, handleStudentClick }) {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Grading Results</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Grading Results</h2>
+        {selectedExam && (
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 px-3 py-1 rounded-lg">
+            <p className="text-sm text-purple-700">
+              📊 <span className="font-medium">{selectedExam.name}</span>
+            </p>
+          </div>
+        )}
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">

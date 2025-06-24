@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import { navigateBasedOnRole } from "../../utils/navigation";
 import {
   LogIn,
   Mail,
@@ -23,8 +24,7 @@ export default function Login() {
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
-
-  const handleSubmit = async (e) => {
+  const navigate = useNavigate();  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -43,6 +43,17 @@ export default function Login() {
       }
 
       setSuccess(true);
+      
+      // Navigate based on user role after successful login
+      setTimeout(() => {
+        if (result.redirectTo) {
+          navigate(result.redirectTo);
+        } else {
+          // Fallback to role-based navigation
+          const user = JSON.parse(localStorage.getItem('user'));
+          navigateBasedOnRole(user, navigate);
+        }
+      }, 1000);
     } catch (err) {
       setError(err.message || "Failed to log in");
       setSuccess(false);
@@ -50,9 +61,8 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-
   return (
-    <div className="min-h-screen mt-12 bg-gradient-to-b from-sky-200 via-sky-100 to-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-sky-200 via-sky-100 to-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-30">
         <svg

@@ -110,9 +110,8 @@ export default function GeneratedQuestions({ questions, saveSelectedQuestions })
                         className="text-gray-900 font-medium cursor-pointer"
                       >
                         {question.question}
-                      </label>
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        {question.difficulty}
+                      </label>                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        Grade: {question.grade || 1}
                       </span>
                     </div>
                     <p className="text-gray-600 mt-2">{question.answer}</p>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import QuestionCard from "../components/QuestionsDisplay/QuestionCard";
 import QuestionEditor from "../components/QuestionGenerator/QuestionEditor";
@@ -7,20 +7,38 @@ import NotificationManager from "../components/Notification";
 export default function QuestionsDisplay() {
   const [questions, setQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
-  const [filter, setFilter] = useState("all");
   const [examName, setExamName] = useState("");
-  const [fullMark, setFullMark] = useState(100);
+  const [fullMark, setFullMark] = useState(0);
   const [showExamForm, setShowExamForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [, setError] = useState(null);
   const [teacherId, setTeacherId] = useState(null);
   const location = useLocation();
   const apiUrl = "http://localhost:5000";
+  const processedLocationRef = useRef(null);
 
   // Initialize notification manager
   const { addNotification, NotificationList } = NotificationManager();
-
   useEffect(() => {
+    const executionId = Math.random().toString(36).substr(2, 9);
+    console.log(`DEBUG: useEffect running with execution ID: ${executionId}`);
+
+    // Create a unique key for the current location state
+    const locationStateKey = location.state
+      ? JSON.stringify(location.state)
+      : "no-state";
+
+    // Check if we've already processed this exact location state
+    if (processedLocationRef.current === locationStateKey) {
+      console.log(
+        `DEBUG: [${executionId}] Skipping duplicate processing of same location state`
+      );
+      return;
+    }
+
+    // Mark this location state as processed
+    processedLocationRef.current = locationStateKey;
+
     // Load user information and extract teacher ID
     const userStr = localStorage.getItem("user");
     if (userStr) {
@@ -36,34 +54,96 @@ export default function QuestionsDisplay() {
       } catch (error) {
         console.error("Error parsing user from localStorage:", error);
       }
-    }
-
-    // Load questions from sessionStorage
+    } // Load questions from sessionStorage
     const savedQuestions = sessionStorage.getItem("selectedQuestions");
     const initialQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
+    console.log(
+      `DEBUG: [${executionId}] Loaded ${initialQuestions.length} questions from sessionStorage`
+    );
 
     // Check if we're coming from the generator with new questions
     if (location.state?.newQuestions) {
-      // Combine existing questions with new ones, avoiding duplicates by ID
-      const combinedQuestions = [
-        ...initialQuestions,
-        ...location.state.newQuestions.filter(
-          (newQ) =>
-            !initialQuestions.some((existingQ) => existingQ.id === newQ.id)
-        ),
-      ];
+      console.log(
+        `DEBUG: [${executionId}] Received new questions count:`,
+        location.state.newQuestions.length
+      );
+      console.log(
+        `DEBUG: [${executionId}] Existing questions count:`,
+        initialQuestions.length
+      );
+
+      // Since we now generate unique IDs with timestamps, we can simply append
+      // But let's double-check for any actual duplicates just in case
+      const existingIds = new Set(initialQuestions.map((q) => q.id));
+      const trulyNewQuestions = location.state.newQuestions.filter((newQ) => {
+        if (existingIds.has(newQ.id)) {
+          console.log(
+            `DEBUG: [${executionId}] Found actual duplicate ID (should be rare):`,
+            newQ.id
+          );
+          return false;
+        }
+        return true;
+      });
+
+      console.log(
+        `DEBUG: [${executionId}] Truly new questions count:`,
+        trulyNewQuestions.length
+      );
+
+      // Additional safety check: ensure we don't add empty question lists
+      if (trulyNewQuestions.length === 0) {
+        console.log(
+          `DEBUG: [${executionId}] No new questions to add, keeping existing state`
+        );
+        setQuestions(initialQuestions);
+        return;
+      }
+
+      // Combine existing questions with new ones
+      const combinedQuestions = [...initialQuestions, ...trulyNewQuestions];
+
+      console.log(
+        `DEBUG: [${executionId}] Final combined questions count:`,
+        combinedQuestions.length
+      );
+      console.log(
+        `DEBUG: [${executionId}] Combined questions IDs:`,
+        combinedQuestions.map((q) => q.id)
+      );
+
       setQuestions(combinedQuestions);
       sessionStorage.setItem(
         "selectedQuestions",
         JSON.stringify(combinedQuestions)
-      );
-
-      // Clear location state to prevent reappending on refresh
+      ); // Clear location state to prevent reappending on refresh
       window.history.replaceState({}, document.title);
     } else {
+      console.log(
+        `DEBUG: [${executionId}] No new questions, loading existing ${initialQuestions.length} questions`
+      );
       setQuestions(initialQuestions);
     }
   }, [location.state]);
+
+  // Cleanup ref when component unmounts
+  useEffect(() => {
+    return () => {
+      processedLocationRef.current = null;
+    };
+  }, []);
+
+  // Debug effect to track when questions change
+  useEffect(() => {
+    console.log(
+      "DEBUG: Questions state changed, current count:",
+      questions.length
+    );
+    console.log(
+      "DEBUG: Current question IDs:",
+      questions.map((q) => `${q.id} - ${q.question?.substring(0, 50)}...`)
+    );
+  }, [questions]);
 
   // Get current teacher ID - with fallback
   const getCurrentTeacherId = () => {
@@ -116,7 +196,6 @@ export default function QuestionsDisplay() {
       addNotification("Question deleted successfully", "info");
     }
   };
-
   const createAndSaveExam = async () => {
     if (!showExamForm) {
       console.log("DEBUG: First click - showing exam form modal");
@@ -124,34 +203,39 @@ export default function QuestionsDisplay() {
       setShowExamForm(true);
       return;
     }
-  
+
     console.log("DEBUG: Form submitted with values:", { examName, fullMark });
-    console.log("DEBUG: Available questions:", filteredQuestions.length);
-  
+    console.log("DEBUG: Available questions:", questions.length);
+
     // Form submit handler
-    if (filteredQuestions.length === 0) {
+    if (questions.length === 0) {
       console.log("DEBUG: No questions available - showing warning");
       addNotification("No questions available to save", "warning");
       return;
     }
-  
+
     if (!examName.trim()) {
       console.log("DEBUG: Empty exam name - showing warning");
       addNotification("Please enter an exam name", "warning");
       return;
     }
-  
+
     try {
       console.log("DEBUG: Starting exam creation process");
       setIsLoading(true);
       const currentTeacherId = getCurrentTeacherId();
       console.log("DEBUG: Using teacher ID:", currentTeacherId);
-  
+
       // Step 1: Create an empty exam with the name and full mark from the modal
-      console.log("DEBUG: Creating empty exam with name:", examName, "and full mark:", fullMark);
+      console.log(
+        "DEBUG: Creating empty exam with name:",
+        examName,
+        "and full mark:",
+        fullMark
+      );
       const createExamEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/create`;
       console.log("DEBUG: Calling endpoint:", createExamEndpoint);
-      
+
       const createExamResponse = await fetch(createExamEndpoint, {
         method: "POST",
         headers: {
@@ -159,57 +243,53 @@ export default function QuestionsDisplay() {
         },
         body: JSON.stringify({
           name: examName,
-          full_mark: fullMark
+          full_mark: fullMark,
         }),
       });
-  
-      console.log("DEBUG: Create exam response status:", createExamResponse.status);
-      
+
+      console.log(
+        "DEBUG: Create exam response status:",
+        createExamResponse.status
+      );
+
       if (!createExamResponse.ok) {
         const errorData = await createExamResponse.json();
         console.error("DEBUG: Failed to create exam. Error:", errorData);
         throw new Error(errorData.message || "Failed to create empty exam");
       }
-  
+
       const createExamData = await createExamResponse.json();
       console.log("DEBUG: Create exam response data:", createExamData);
-      
+
       const examId = createExamData.examId;
-      
+
       if (!examId) {
         console.error("DEBUG: No exam ID in response:", createExamData);
         throw new Error("Failed to retrieve exam ID from response");
       }
-      
+
       console.log("DEBUG: Successfully created exam with ID:", examId);
-      
+
       // Store the exam ID for future reference
       localStorage.setItem("examId", examId);
       console.log("DEBUG: Stored exam ID in localStorage");
-      
+
       // Step 2: Add each question to the exam one by one
       let finalBase64Pdf = null;
-      
-      console.log("DEBUG: Adding", filteredQuestions.length, "questions to exam");
-      
-      for (let i = 0; i < filteredQuestions.length; i++) {
-        const question = filteredQuestions[i];
-        console.log(`DEBUG: Adding question ${i+1}/${filteredQuestions.length}:`, question.id);
-        
-        // Map difficulty to grade
-        let grade;
-        switch (question.difficulty) {
-          case "easy": grade = 1; break;
-          case "medium": grade = 2; break;
-          case "hard": grade = 3; break;
-          default: grade = 1;
-        }
-        
-        console.log("DEBUG: Mapped difficulty", question.difficulty, "to grade", grade);
-        
+      console.log("DEBUG: Adding", questions.length, "questions to exam");
+
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+        console.log(
+          `DEBUG: Adding question ${i + 1}/${questions.length}:`,
+          question.id
+        );
+        // Use grade directly from question
+        console.log("DEBUG: Using grade from question:", question.grade);
+
         const addQuestionEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/${examId}/genqa/save`;
         console.log("DEBUG: Calling endpoint:", addQuestionEndpoint);
-        
+
         const addQuestionResponse = await fetch(addQuestionEndpoint, {
           method: "POST",
           headers: {
@@ -218,23 +298,31 @@ export default function QuestionsDisplay() {
           body: JSON.stringify({
             question: question.question,
             answer: question.answer,
-            grade: question.grade || grade,
+            grade: question.grade || 10, // Use question grade or default to 10
           }),
         });
-        
-        console.log("DEBUG: Add question response status:", addQuestionResponse.status);
-        
+
+        console.log(
+          "DEBUG: Add question response status:",
+          addQuestionResponse.status
+        );
+
         if (!addQuestionResponse.ok) {
           const errorData = await addQuestionResponse.json();
-          console.error(`DEBUG: Failed to add question ${i+1}. Error:`, errorData);
+          console.error(
+            `DEBUG: Failed to add question ${i + 1}. Error:`,
+            errorData
+          );
           // Continue with other questions even if one fails
           continue;
         }
-        
+
         const questionData = await addQuestionResponse.json();
-        console.log(`DEBUG: Successfully added question ${i+1}. Response:`, 
-          questionData.question ? questionData.question._id : "No question data");
-        
+        console.log(
+          `DEBUG: Successfully added question ${i + 1}. Response:`,
+          questionData.question ? questionData.question._id : "No question data"
+        );
+
         // Keep the latest PDF data from the response
         if (questionData.base64Pdf) {
           console.log("DEBUG: Received updated PDF data");
@@ -243,30 +331,32 @@ export default function QuestionsDisplay() {
           console.log("DEBUG: No PDF data in response for this question");
         }
       }
-      
+
       console.log("DEBUG: All questions processed");
-      
+
       // Clear questions after successful submission
       console.log("DEBUG: Clearing questions from state and session storage");
       setQuestions([]);
       sessionStorage.removeItem("selectedQuestions");
-  
+
       // Reset form and close it
       console.log("DEBUG: Resetting form and closing modal");
       setExamName("");
-      setFullMark(100);
+      setFullMark(0);
       setShowExamForm(false);
-  
+
       // Show success notification
       console.log("DEBUG: Showing success notification");
       addNotification(
         `Exam "${examName}" created and questions added successfully!`,
         "success"
       );
-  
+
       // Display PDF if available
       if (finalBase64Pdf) {
-        console.log("DEBUG: Processing final PDF data for display and download");
+        console.log(
+          "DEBUG: Processing final PDF data for display and download"
+        );
         // Convert Base64 to Blob
         const byteCharacters = atob(finalBase64Pdf);
         const byteNumbers = new Array(byteCharacters.length);
@@ -275,18 +365,21 @@ export default function QuestionsDisplay() {
         }
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: "application/pdf" });
-  
+
         // Create Object URL and Open in New Tab
         const blobUrl = URL.createObjectURL(blob);
         console.log("DEBUG: Created blob URL for PDF:", blobUrl);
         window.open(blobUrl, "_blank"); // Open PDF in a new tab
         console.log("DEBUG: Opened PDF in new tab");
-  
+
         // Create and trigger download
         const downloadLink = document.createElement("a");
         downloadLink.href = blobUrl;
         downloadLink.download = `${examName}.pdf`;
-        console.log("DEBUG: Triggering PDF download with filename:", `${examName}.pdf`);
+        console.log(
+          "DEBUG: Triggering PDF download with filename:",
+          `${examName}.pdf`
+        );
         downloadLink.click();
       } else {
         console.log("DEBUG: No final PDF data available");
@@ -305,16 +398,10 @@ export default function QuestionsDisplay() {
     }
   };
 
-  const filteredQuestions =
-    filter === "all"
-      ? questions
-      : questions.filter((q) => q.difficulty === filter);
-
   return (
-    <div className="container mx-auto px-4 py-8 mt-12 mb-10">
+    <div className="container mx-auto px-4 py-8 mb-10">
       {/* Notification component */}
       <NotificationList />
-
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">Your Questions</h1>
 
@@ -325,61 +412,9 @@ export default function QuestionsDisplay() {
             className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium"
           >
             Generate More Questions
-          </Link>
+          </Link>{" "}
         </div>
       </div>
-
-      {/* Filter Controls */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="flex items-center">
-          <span className="text-gray-700 font-medium mr-3">
-            Filter by difficulty:
-          </span>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setFilter("all")}
-              className={`px-3 py-1 rounded-md ${
-                filter === "all"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setFilter("easy")}
-              className={`px-3 py-1 rounded-md ${
-                filter === "easy"
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Easy
-            </button>
-            <button
-              onClick={() => setFilter("medium")}
-              className={`px-3 py-1 rounded-md ${
-                filter === "medium"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Medium
-            </button>
-            <button
-              onClick={() => setFilter("hard")}
-              className={`px-3 py-1 rounded-md ${
-                filter === "hard"
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Hard
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Teacher ID warning if not found */}
       {!teacherId && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
@@ -405,12 +440,11 @@ export default function QuestionsDisplay() {
             </div>
           </div>
         </div>
-      )}
-
+      )}{" "}
       {/* Questions List */}
-      {filteredQuestions.length > 0 ? (
+      {questions.length > 0 ? (
         <div className="space-y-4">
-          {filteredQuestions.map((question) => (
+          {questions.map((question) => (
             <QuestionCard
               key={question.id}
               question={question}
@@ -436,23 +470,12 @@ export default function QuestionsDisplay() {
           </svg>
           <h2 className="mt-2 text-lg font-medium text-gray-900">
             No questions found
-          </h2>
+          </h2>{" "}
           <p className="mt-1 text-gray-500">
-            {filter === "all"
-              ? "You haven't created any questions yet."
-              : `No ${filter} questions available.`}
+            You haven't created any questions yet.
           </p>
-          {filter !== "all" && (
-            <button
-              onClick={() => setFilter("all")}
-              className="mt-3 text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Show all questions
-            </button>
-          )}
         </div>
       )}
-
       {/* Question Editor Modal */}
       {editingQuestion && (
         <QuestionEditor
@@ -461,10 +484,9 @@ export default function QuestionsDisplay() {
           onCancel={() => setEditingQuestion(null)}
         />
       )}
-
       {/* Create and Save Exam Form */}
       {showExamForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[80]">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Create New Exam</h2>
             <form
@@ -519,13 +541,13 @@ export default function QuestionsDisplay() {
                   disabled={
                     isLoading ||
                     !examName ||
-                    filteredQuestions.length === 0 ||
+                    questions.length === 0 ||
                     !teacherId
                   }
                   className={`px-4 py-2 rounded-md font-medium ${
                     isLoading ||
                     !examName ||
-                    filteredQuestions.length === 0 ||
+                    questions.length === 0 ||
                     !teacherId
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-500 text-white"
@@ -538,14 +560,14 @@ export default function QuestionsDisplay() {
           </div>
         </div>
       )}
-
       {/* Action buttons */}
       <div className="flex justify-end mt-6 gap-2">
+        {" "}
         <button
           onClick={createAndSaveExam}
-          disabled={filteredQuestions.length === 0 || !teacherId || isLoading}
+          disabled={questions.length === 0 || !teacherId || isLoading}
           className={`py-2 px-4 rounded-md font-medium ${
-            filteredQuestions.length === 0 || !teacherId || isLoading
+            questions.length === 0 || !teacherId || isLoading
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-green-600 hover:bg-green-500 text-white"
           }`}

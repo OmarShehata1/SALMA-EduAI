@@ -8,10 +8,8 @@ import { useAuth } from "../context/AuthProvider";
 export default function QuestionGenerator() {
   const { selectedText, currentPdf } = usePDFContext();
   const { currentUser } = useAuth();
-
   const [topic, setTopic] = useState(selectedText || "");
-  const [difficulty, setDifficulty] = useState("medium");
-  const [numQuestions, setNumQuestions] = useState(5);
+  const [language, setLanguage] = useState("en");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
@@ -26,9 +24,7 @@ export default function QuestionGenerator() {
       console.error('Error getting current user:', error);
       return null;
     }
-  }, [currentUser]);
-
-  useEffect(() => {
+  }, [currentUser]);  useEffect(() => {
     if (selectedText && topicInputRef.current) {
       topicInputRef.current.focus();
     }
@@ -61,10 +57,10 @@ export default function QuestionGenerator() {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({
+          },          body: JSON.stringify({
             pdfName: currentPdf ? currentPdf.name : null,
             paragraph: topic, // Changed from selectedText to paragraph to match backend
+            lang: language, // Send language to backend
           }),
         }
       );      if (!response.ok) {
@@ -72,49 +68,36 @@ export default function QuestionGenerator() {
           throw new Error("Authentication failed. Please log in again.");
         }
         throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      }      const data = await response.json();
       console.log("Raw API response:", data);
 
       // Process the returned questions based on the actual API response structure
-      let formattedQuestions = [];
-
-      if (data && Array.isArray(data)) {
+      let formattedQuestions = [];      if (data && Array.isArray(data)) {
         // If data is directly an array of questions
         formattedQuestions = data.map((q, index) => ({
-          id: q.id || `question-${index + 1}`,
+          id: q.id || `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`,
           question:
             q.question || q.questionText || q.text || "Question not available",
           answer: q.answer || q.correctAnswer || "Answer not available",
           isSelected: true, // Auto-select all generated questions
-          difficulty: q.difficulty || difficulty, // Use API difficulty or fallback to form value
-          grade:
-            q.grade ||
-            q.points ||
-            getDifficultyGrade(q.difficulty || difficulty),
+          grade: q.grade || q.points || 10, // Use API grade or default
           source: currentPdf ? currentPdf.name : "PDF Source",
-        }));
-      } else if (data && data.questions && Array.isArray(data.questions)) {
+        }));      } else if (data && data.questions && Array.isArray(data.questions)) {
         // If data has a questions property that contains the array
         formattedQuestions = data.questions.map((q, index) => ({
-          id: q.id || `question-${index + 1}`,
+          id: q.id || `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`,
           question:
             q.question || q.questionText || q.text || "Question not available",
           answer: q.answer || q.correctAnswer || "Answer not available",
           isSelected: true,
-          difficulty: q.difficulty || difficulty,
-          grade:
-            q.grade ||
-            q.points ||
-            getDifficultyGrade(q.difficulty || difficulty),
-          source: currentPdf ? currentPdf.name : "PDF Source",
+          grade: q.grade || q.points || 10,          source: currentPdf ? currentPdf.name : "PDF Source",
         }));
+
       } else if (data && typeof data === "object") {
         // If data is a single question object, wrap it in an array
         formattedQuestions = [
           {
-            id: data.id || "question-1",
+            id: data.id || `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-single`,
             question:
               data.question ||
               data.questionText ||
@@ -122,11 +105,7 @@ export default function QuestionGenerator() {
               "Question not available",
             answer: data.answer || data.correctAnswer || "Answer not available",
             isSelected: true,
-            difficulty: data.difficulty || difficulty,
-            grade:
-              data.grade ||
-              data.points ||
-              getDifficultyGrade(data.difficulty || difficulty),
+            grade: data.grade || data.points || 10,
             source: currentPdf ? currentPdf.name : "PDF Source",
           },
         ];
@@ -140,8 +119,11 @@ export default function QuestionGenerator() {
         );
       }
 
+      // Set the newly generated questions (don't merge with existing ones here)
       setGeneratedQuestions(formattedQuestions);
-      console.log("Formatted questions:", formattedQuestions);    } catch (err) {
+      
+      console.log("Formatted questions:", formattedQuestions);
+    } catch (err) {
       console.error("Error generating questions:", err);
       
       // Handle specific authentication errors
@@ -158,23 +140,7 @@ export default function QuestionGenerator() {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  // Helper function to assign default grades based on difficulty
-  const getDifficultyGrade = (difficultyLevel) => {
-    switch (difficultyLevel) {
-      case "easy":
-        return 5;
-      case "medium":
-        return 10;
-      case "hard":
-        return 15;
-      default:
-        return 10;
-    }
-  };
-
-  const handleCheckboxChange = (id) => {
+  };  const handleCheckboxChange = (id) => {
     setGeneratedQuestions(
       generatedQuestions.map((q) =>
         q.id === id ? { ...q, isSelected: !q.isSelected } : q
@@ -185,7 +151,6 @@ export default function QuestionGenerator() {
   const handleEditQuestion = (question) => {
     setEditingQuestion(question);
   };
-
   const handleSaveEdit = (editedQuestion) => {
     setGeneratedQuestions(
       generatedQuestions.map((q) =>
@@ -194,7 +159,6 @@ export default function QuestionGenerator() {
     );
     setEditingQuestion(null);
   };
-
   const handleCancelEdit = () => {
     setEditingQuestion(null);
   };
@@ -211,9 +175,8 @@ export default function QuestionGenerator() {
   const handleBackToPDF = () => {
     navigate("/create");
   };
-
   return (
-    <div className="container mx-auto px-4 py-8 mt-12">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">Question Generator</h1>
         <button
@@ -245,8 +208,7 @@ export default function QuestionGenerator() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Topic
@@ -263,31 +225,16 @@ export default function QuestionGenerator() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Difficulty
+              Language
             </label>
             <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Questions
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="20"
-              value={numQuestions}
-              onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
           </div>
         </div>
 
@@ -306,19 +253,16 @@ export default function QuestionGenerator() {
         {error && <div className="mt-3 text-red-600 text-sm">{error}</div>}
       </div>
 
-      {generatedQuestions.length > 0 && (
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Generated Questions</h2>
+      {generatedQuestions.length > 0 && (        <div className="mb-8">          <div className="flex justify-between items-center mb-4">            <h2 className="text-xl font-semibold">
+              Generated Questions ({generatedQuestions.length})
+            </h2>
             <button
               onClick={handleSaveQuestions}
               className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md font-medium"
             >
               Save Selected Questions
             </button>
-          </div>
-
-          <div className="space-y-4">
+          </div>          <div className="space-y-4">
             {generatedQuestions.map((question) => (
               <GeneratedQuestion
                 key={question.id}
@@ -337,7 +281,8 @@ export default function QuestionGenerator() {
           onSave={handleSaveEdit}
           onCancel={handleCancelEdit}
         />
-      )}
+      )
+      }
     </div>
   );
 }

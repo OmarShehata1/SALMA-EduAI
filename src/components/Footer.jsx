@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Mail,
   Phone,
@@ -19,9 +19,16 @@ import {
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+    // Determine the left margin based on the dashboard type
+  const getLeftMargin = () => {
+    if (location.pathname === '/dashboard') return 'ml-80'; // Instructor dashboard (320px)
+    if (location.pathname === '/student-dashboard') return 'ml-80'; // Student dashboard (320px - now same width)
+    return '';
+  };
 
   return (
-    <footer className="bg-gradient-to-b from-sky-50 via-sky-25 to-white border-t border-sky-100 relative overflow-hidden">
+    <footer className={`bg-gradient-to-b from-sky-50 via-sky-25 to-white border-t border-sky-100 relative overflow-hidden ${getLeftMargin()}`}>
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <svg

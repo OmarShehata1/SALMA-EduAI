@@ -26,11 +26,9 @@ export default function Sidebar({ currentPage, onPageChange }) {
       icon: <User className="w-5 h-5" />,
       description: "Account settings",
     },
-  ];
-
-  return (
-    <div className="w-72 h-full bg-white/60 backdrop-blur-lg border-r border-sky-200 shadow-lg">
-      <div className="p-6">
+  ];  return (
+    <div className="w-full h-full bg-white/60 backdrop-blur-lg border-r border-sky-200 shadow-lg overflow-y-auto relative">
+      <div className="p-6 pb-24">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
@@ -84,9 +82,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
               </div>
             </button>
           ))}
-        </nav>
-
-        {/* Help Section */}
+        </nav>        {/* Help Section */}
         <div className="mt-8 p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
           <div className="flex items-center space-x-3 mb-2">
             <div className="bg-emerald-100 p-2 rounded-lg">
@@ -95,6 +91,23 @@ export default function Sidebar({ currentPage, onPageChange }) {
             <div>
               <p className="text-sm font-medium text-emerald-800">Need Help?</p>
               <p className="text-xs text-emerald-600">Contact support</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="bg-gradient-to-r from-sky-50 to-indigo-50 p-4 rounded-xl border border-sky-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-sky-400 to-indigo-500 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-800">
+                John Doe
+              </div>
+              <div className="text-xs text-gray-600">Computer Science Student</div>
             </div>
           </div>
         </div>

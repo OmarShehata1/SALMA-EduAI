@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import { navigateBasedOnRole } from "../../utils/navigation";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -86,9 +87,7 @@ export default function Register() {
     if (validateStep1()) {
       setStep(2);
     }
-  };
-
-  const handleSubmit = async (e) => {
+  };  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -107,8 +106,20 @@ export default function Register() {
 
       setStep(3);
 
+      // After successful registration, automatically navigate to appropriate dashboard
       setTimeout(() => {
-        navigate("/login");
+        if (result.redirectTo) {
+          navigate(result.redirectTo);
+        } else {
+          // Fallback to role-based navigation
+          const user = JSON.parse(localStorage.getItem('user'));
+          if (user) {
+            navigateBasedOnRole(user, navigate);
+          } else {
+            // Fallback if user data is not available
+            navigate("/login");
+          }
+        }
       }, 2000);
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
@@ -500,9 +511,8 @@ export default function Register() {
       </Link>
     </div>
   );
-
   return (
-    <div className="min-h-screen mt-12 bg-gradient-to-b from-sky-200 via-sky-100 to-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-sky-200 via-sky-100 to-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-30">
         <svg

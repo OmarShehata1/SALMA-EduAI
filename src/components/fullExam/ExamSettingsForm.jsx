@@ -1,8 +1,6 @@
 
 // ExamSettingsForm.jsx
 export default function ExamSettingsForm({
-    difficulty,
-    setDifficulty,
     numQuestions,
     setNumQuestions,
     generateQuestions,
@@ -13,24 +11,7 @@ export default function ExamSettingsForm({
       <div>
         <h2 className="text-xl font-semibold mb-4">Exam Settings</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-         
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Difficulty
-            </label>
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-            >
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-          </div>
-          
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Number of Questions

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 
-const QuestionEditor = ({ question, onSave, onCancel }) => {
-  const [editedQuestion, setEditedQuestion] = useState({
+const QuestionEditor = ({ question, onSave, onCancel }) => {  const [editedQuestion, setEditedQuestion] = useState({
     id: "",
     question: "",
     answer: "",
-    difficulty: "medium",
+    grade: 1,
     source: "",
     isSelected: true,
   });
@@ -17,12 +16,11 @@ const QuestionEditor = ({ question, onSave, onCancel }) => {
       });
     }
   }, [question]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditedQuestion((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === 'grade' ? (value === '' ? '' : Number(value)) : value,
     }));
   };
 
@@ -30,9 +28,8 @@ const QuestionEditor = ({ question, onSave, onCancel }) => {
     e.preventDefault();
     onSave(editedQuestion);
   };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[80]">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
         <h2 className="text-xl font-semibold mb-4">Edit Question</h2>
         <form onSubmit={handleSubmit}>
@@ -62,23 +59,21 @@ const QuestionEditor = ({ question, onSave, onCancel }) => {
               rows="4"
               required
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          </div>          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Difficulty
+                Grade
               </label>
-              <select
-                name="difficulty"
-                value={editedQuestion.difficulty}
+              <input
+                type="number"
+                name="grade"
+                value={editedQuestion.grade || ''}
                 onChange={handleChange}
+                min="0"
+                max="100"
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
+                placeholder="Enter grade (e.g., 10)"
+              />
               </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

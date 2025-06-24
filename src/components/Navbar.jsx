@@ -71,10 +71,9 @@ export default function Navbar() {
     setIsUserMenuOpen(false);
     navigate("/");
   };
-
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
         isScrolled
           ? "bg-white/95 backdrop-blur-lg shadow-lg border-b border-sky-100"
           : "bg-gradient-to-r from-sky-50/80 to-white/80 backdrop-blur-sm"
@@ -115,74 +114,80 @@ export default function Navbar() {
                 <Menu className="w-6 h-6" />
               )}
             </button>
-          </div>
-
-          {/* Navigation Links - Center */}
+          </div>          {/* Navigation Links - Center */}
           <div className="hidden md:flex items-center justify-center flex-1">
             <div className="flex space-x-2 bg-white/60 backdrop-blur-lg rounded-2xl p-2 shadow-lg border border-sky-100">
               <NavLink to="/" label="Home" />
-              <NavLink to="/student" label="Student" />
-
-              {/* Create Exam Dropdown */}
-              <div className="relative" id="create-exam-dropdown">
-                <button
-                  onClick={toggleCreateExamDropdown}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 text-gray-600 hover:text-sky-600 hover:bg-sky-50 flex items-center ${
-                    isCreateExamOpen ? "bg-sky-50 text-sky-600" : ""
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Create
-                  <ChevronDown
-                    className={`w-4 h-4 ml-1 transition-transform duration-300 ${
-                      isCreateExamOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {isCreateExamOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 z-50 overflow-hidden">
-                    <div className="py-2">
-                      <Link
-                        to="/create"
-                        onClick={() => setIsCreateExamOpen(false)}
-                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-300"
-                      >
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
-                          <GraduationCap className="w-4 h-4 text-white" />
+              
+              {/* Role-based navigation */}
+              {currentUser?.role === 'student' ? (
+                <NavLink to="/student-dashboard" label="Dashboard" />
+              ) : currentUser?.role === 'teacher' || currentUser?.role === 'instructor' ? (
+                <>
+                  <NavLink to="/dashboard" label="Dashboard" />
+                  
+                  {/* Create Exam Dropdown - Teachers only */}
+                  <div className="relative" id="create-exam-dropdown">
+                    <button
+                      onClick={toggleCreateExamDropdown}
+                      className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 text-gray-600 hover:text-sky-600 hover:bg-sky-50 flex items-center ${
+                        isCreateExamOpen ? "bg-sky-50 text-sky-600" : ""
+                      }`}
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Create
+                      <ChevronDown
+                        className={`w-4 h-4 ml-1 transition-transform duration-300 ${
+                          isCreateExamOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>                    {isCreateExamOpen && (
+                      <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 z-[110] overflow-hidden">
+                        <div className="py-2">
+                          <Link
+                            to="/create"
+                            onClick={() => setIsCreateExamOpen(false)}
+                            className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-300"
+                          >
+                            <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                              <GraduationCap className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Custom Exam</div>
+                              <div className="text-xs text-gray-500">
+                                Tailored questions
+                              </div>
+                            </div>
+                          </Link>
+                          <Link
+                            to="/create/full"
+                            onClick={() => setIsCreateExamOpen(false)}
+                            className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-300"
+                          >
+                            <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center mr-3">
+                              <BookOpen className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Full Exam</div>
+                              <div className="text-xs text-gray-500">
+                                Complete assessment
+                              </div>
+                            </div>
+                          </Link>
                         </div>
-                        <div>
-                          <div className="font-medium">Custom Exam</div>
-                          <div className="text-xs text-gray-500">
-                            Tailored questions
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/create/full"
-                        onClick={() => setIsCreateExamOpen(false)}
-                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-300"
-                      >
-                        <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center mr-3">
-                          <BookOpen className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-medium">Full Exam</div>
-                          <div className="text-xs text-gray-500">
-                            Complete assessment
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <NavLink
-                to="/grades"
-                label="Analytics"
-                icon={<BarChart3 className="w-4 h-4" />}
-              />
+                  <NavLink
+                    to="/grades"
+                    label="Analytics"
+                    icon={<BarChart3 className="w-4 h-4" />}
+                  />
+                </>
+              ) : !currentUser ? (
+                <NavLink to="/student-dashboard" label="Student" />
+              ) : null}
             </div>
           </div>
 
@@ -198,10 +203,9 @@ export default function Navbar() {
                 >
                   <div className="bg-gradient-to-r from-sky-400 to-indigo-500 text-white p-2 rounded-lg">
                     <User className="w-4 h-4" />
-                  </div>
-                  <div className="text-left">
+                  </div>                  <div className="text-left">
                     <div className="text-sm font-medium">
-                      {currentUser.name || "User"}
+                      {currentUser.name || currentUser.username || currentUser.email?.split('@')[0] || "User"}
                     </div>
                     <div className="text-xs text-gray-500">
                       {currentUser.email}
@@ -212,10 +216,8 @@ export default function Navbar() {
                       isUserMenuOpen ? "rotate-180" : ""
                     }`}
                   />
-                </button>
-
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 z-50 overflow-hidden">
+                </button>                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 z-[110] overflow-hidden">
                     <div className="py-2">
                       <Link
                         to="/profile"
@@ -261,53 +263,72 @@ export default function Navbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 overflow-hidden">
             <div className="py-4">
-              <div className="space-y-2 px-4">
-                <MobileNavLink
+              <div className="space-y-2 px-4">                <MobileNavLink
                   to="/"
                   label="Home"
                   onClick={() => setIsMobileMenuOpen(false)}
                 />
-                <MobileNavLink
-                  to="/student"
-                  label="Student"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                />
 
-                {/* Mobile Create Exam Section */}
-                <div className="py-2">
-                  <div className="font-medium text-gray-800 mb-3 px-2">
-                    Create Exams
-                  </div>
-                  <div className="ml-4 space-y-2">
+                {/* Role-based mobile navigation */}
+                {currentUser?.role === 'student' ? (
+                  <MobileNavLink
+                    to="/student-dashboard"
+                    label="Dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                ) : currentUser?.role === 'teacher' || currentUser?.role === 'instructor' ? (
+                  <>
                     <MobileNavLink
-                      to="/create"
-                      label="Custom Exam"
+                      to="/dashboard"
+                      label="Dashboard"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      icon={<GraduationCap className="w-4 h-4" />}
                     />
-                    <MobileNavLink
-                      to="/create/full"
-                      label="Full Exam"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      icon={<BookOpen className="w-4 h-4" />}
-                    />
-                  </div>
-                </div>
 
-                <MobileNavLink
-                  to="/grades"
-                  label="Analytics"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  icon={<BarChart3 className="w-4 h-4" />}
-                />
+                    {/* Mobile Create Exam Section - Teachers only */}
+                    <div className="py-2">
+                      <div className="font-medium text-gray-800 mb-3 px-2">
+                        Create Exams
+                      </div>
+                      <div className="ml-4 space-y-2">
+                        <MobileNavLink
+                          to="/create"
+                          label="Custom Exam"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          icon={<GraduationCap className="w-4 h-4" />}
+                        />
+                        <MobileNavLink
+                          to="/create/full"
+                          label="Full Exam"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          icon={<BookOpen className="w-4 h-4" />}
+                        />
+                      </div>
+                    </div>
+
+                    <MobileNavLink
+                      to="/grades"
+                      label="Analytics"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      icon={<BarChart3 className="w-4 h-4" />}
+                    />
+                  </>
+                ) : (
+                  // Show general navigation for non-authenticated users
+                  !currentUser && (
+                    <MobileNavLink
+                      to="/login"
+                      label="Get Started"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                  )
+                )}
               </div>
 
               <div className="border-t border-sky-100 mt-4 pt-4 px-4">
                 {currentUser ? (
-                  <div className="space-y-2">
-                    <div className="px-2 py-2">
+                  <div className="space-y-2">                    <div className="px-2 py-2">
                       <div className="font-medium text-gray-800">
-                        {currentUser.name || "User"}
+                        {currentUser.name || currentUser.username || currentUser.email?.split('@')[0] || "User"}
                       </div>
                       <div className="text-sm text-gray-500">
                         {currentUser.email}
