@@ -40,10 +40,9 @@ export default function Toast({ message, type = "info", duration = 5000, onClose
   };
 
   if (!isVisible) return null;
-
   return (
     <div
-      className={`fixed top-4 right-4 z-50 max-w-md p-4 rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-300 ${
+      className={`fixed top-4 right-4 z-[120] max-w-md p-4 rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-300 ${
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"
       } ${getColors()}`}
     >

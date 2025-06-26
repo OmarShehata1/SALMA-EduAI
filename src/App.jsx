@@ -16,6 +16,7 @@ import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import { useAuth } from "./context/AuthProvider";
 import { getRoleBasedRoute } from "./utils/navigation";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 // Component for handling 404/unauthorized access
 function NotFoundRedirect() {
@@ -27,7 +28,9 @@ function NotFoundRedirect() {
 export default function App() {
   return (
     <PDFProvider>
-      <Router>        <AuthProvider>
+      <Router>
+        <ScrollToTop />
+        <AuthProvider>
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="pt-20 flex-1">

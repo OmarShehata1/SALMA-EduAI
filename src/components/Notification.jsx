@@ -75,7 +75,7 @@ const Notification = ({ message, type, onClose }) => {
     }
   };
   return (
-    <div className="fixed top-4 right-4 z-[90] animate-fadeIn">
+    <div className="fixed top-4 right-4 z-[9999] animate-fadeIn">
       <div
         className={`p-4 rounded-md border-l-4 shadow-md max-w-md flex items-start ${getNotificationStyles()}`}
       >
