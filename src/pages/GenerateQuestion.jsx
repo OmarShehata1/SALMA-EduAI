@@ -168,6 +168,7 @@ export default function QuestionGenerator() {
     navigate("/questions", {
       state: {
         newQuestions: selectedQuestions,
+        lang: language, // Pass the selected language
       },
     });
   };

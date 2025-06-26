@@ -13,6 +13,7 @@ export default function QuestionsDisplay() {
   const [isLoading, setIsLoading] = useState(false);
   const [, setError] = useState(null);
   const [teacherId, setTeacherId] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState("en"); // Track language for exam creation
   const location = useLocation();
   const apiUrl = "http://localhost:5000";
   const processedLocationRef = useRef(null);
@@ -54,9 +55,17 @@ export default function QuestionsDisplay() {
       } catch (error) {
         console.error("Error parsing user from localStorage:", error);
       }
-    } // Load questions from sessionStorage
+    }    // Load questions from sessionStorage
     const savedQuestions = sessionStorage.getItem("selectedQuestions");
+    const savedLanguage = sessionStorage.getItem("examLanguage");
     const initialQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
+    
+    // Set saved language if available
+    if (savedLanguage) {
+      console.log(`DEBUG: [${executionId}] Setting language from sessionStorage:`, savedLanguage);
+      setSelectedLanguage(savedLanguage);
+    }
+    
     console.log(
       `DEBUG: [${executionId}] Loaded ${initialQuestions.length} questions from sessionStorage`
     );
@@ -71,6 +80,19 @@ export default function QuestionsDisplay() {
         `DEBUG: [${executionId}] Existing questions count:`,
         initialQuestions.length
       );
+
+      // Capture language from navigation state if provided
+      if (location.state.lang) {
+        console.log(`DEBUG: [${executionId}] Setting language from navigation:`, location.state.lang);
+        setSelectedLanguage(location.state.lang);
+        // Save language to sessionStorage for persistence
+        sessionStorage.setItem("examLanguage", location.state.lang);
+      }
+
+      // Show success message if provided
+      if (location.state.successMessage) {
+        addNotification(location.state.successMessage, "success");
+      }
 
       // Since we now generate unique IDs with timestamps, we can simply append
       // But let's double-check for any actual duplicates just in case
@@ -116,7 +138,11 @@ export default function QuestionsDisplay() {
       sessionStorage.setItem(
         "selectedQuestions",
         JSON.stringify(combinedQuestions)
-      ); // Clear location state to prevent reappending on refresh
+      );
+      // Ensure language is also saved
+      if (location.state.lang) {
+        sessionStorage.setItem("examLanguage", location.state.lang);
+      } // Clear location state to prevent reappending on refresh
       window.history.replaceState({}, document.title);
     } else {
       console.log(
@@ -124,7 +150,7 @@ export default function QuestionsDisplay() {
       );
       setQuestions(initialQuestions);
     }
-  }, [location.state]);
+  }, [location.state, addNotification]);
 
   // Cleanup ref when component unmounts
   useEffect(() => {
@@ -181,6 +207,10 @@ export default function QuestionsDisplay() {
       "selectedQuestions",
       JSON.stringify(updatedQuestions)
     );
+    // Preserve language in sessionStorage
+    if (selectedLanguage) {
+      sessionStorage.setItem("examLanguage", selectedLanguage);
+    }
     setEditingQuestion(null);
     addNotification("Question updated successfully", "success");
   };
@@ -193,6 +223,10 @@ export default function QuestionsDisplay() {
         "selectedQuestions",
         JSON.stringify(updatedQuestions)
       );
+      // Preserve language in sessionStorage
+      if (selectedLanguage) {
+        sessionStorage.setItem("examLanguage", selectedLanguage);
+      }
       addNotification("Question deleted successfully", "info");
     }
   };
@@ -231,7 +265,9 @@ export default function QuestionsDisplay() {
         "DEBUG: Creating empty exam with name:",
         examName,
         "and full mark:",
-        fullMark
+        fullMark,
+        "and language:",
+        selectedLanguage
       );
       const createExamEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/create`;
       console.log("DEBUG: Calling endpoint:", createExamEndpoint);
@@ -244,6 +280,7 @@ export default function QuestionsDisplay() {
         body: JSON.stringify({
           name: examName,
           full_mark: fullMark,
+          lang: selectedLanguage, // Include the selected language
         }),
       });
 
@@ -286,6 +323,7 @@ export default function QuestionsDisplay() {
         );
         // Use grade directly from question
         console.log("DEBUG: Using grade from question:", question.grade);
+        console.log("DEBUG: Using language:", selectedLanguage);
 
         const addQuestionEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/${examId}/genqa/save`;
         console.log("DEBUG: Calling endpoint:", addQuestionEndpoint);
@@ -299,6 +337,7 @@ export default function QuestionsDisplay() {
             question: question.question,
             answer: question.answer,
             grade: question.grade || 10, // Use question grade or default to 10
+            lang: selectedLanguage, // Include the selected language
           }),
         });
 
@@ -338,6 +377,7 @@ export default function QuestionsDisplay() {
       console.log("DEBUG: Clearing questions from state and session storage");
       setQuestions([]);
       sessionStorage.removeItem("selectedQuestions");
+      sessionStorage.removeItem("examLanguage"); // Also clear the saved language
 
       // Reset form and close it
       console.log("DEBUG: Resetting form and closing modal");
