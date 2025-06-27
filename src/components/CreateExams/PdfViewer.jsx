@@ -5,6 +5,7 @@ import PDFSidebar from "./PDFSidebar";
 import PDFContent from "./PDFContent";
 import PDFSelectionModal from "./PDFSelectionModal";
 import { usePDFContext } from "../../context/PDFContext";
+import NotificationManager from "../Notification";
 // import { useAuth } from "../../context/AuthProvider";
 
 const PDFViewer = () => {
@@ -34,6 +35,9 @@ const PDFViewer = () => {
   const navigate = useNavigate();
     // Track if initial fetch has been performed
   const fetchedRef = useRef(false);
+  
+  // Initialize notification manager
+  const { addNotification, NotificationList } = NotificationManager();
 
   // Memoized fetch function to avoid dependency issues
   const memoizedFetchPdfs = useCallback(() => {
@@ -52,28 +56,67 @@ const PDFViewer = () => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // First add files locally for immediate display
-    const added = addPdfFiles(files);
-
-    if (!added) {
-      alert("Please select valid PDF files");
+    // Validate file types before processing
+    const invalidFiles = files.filter(file => file.type !== "application/pdf");
+    if (invalidFiles.length > 0) {
+      const invalidNames = invalidFiles.map(f => f.name).join(', ');
+      addNotification(`Invalid file type(s): ${invalidNames}. Please select only PDF files.`, "error");
       return;
     }
 
-    // Then upload to server
+    // Validate file sizes (50MB limit per file)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    const oversizedFiles = files.filter(file => file.size > maxSize);
+    if (oversizedFiles.length > 0) {
+      const oversizedNames = oversizedFiles.map(f => f.name).join(', ');
+      addNotification(`File(s) too large: ${oversizedNames}. Maximum file size is 50MB.`, "error");
+      return;
+    }
+
+    console.log(`Attempting to add ${files.length} PDF files...`);
+
+    // First add files locally for immediate display (now with duplicate checking)
+    const addedCount = addPdfFiles(files, (message) => {
+      addNotification(message, "warning");
+    });
+
+    if (addedCount === false) {
+      addNotification("Please select valid PDF files", "error");
+      return;
+    }
+
+    if (addedCount === 0) {
+      // All files were duplicates, no need to upload
+      return;
+    }
+
+    console.log(`Successfully added ${addedCount} new PDF files`);
+
+    // Then upload to server only the newly added files
     setIsUploading(true);
     try {
       const uploaded = await uploadPdfsToServer(files); // Will get user from localStorage
       if (!uploaded) {
-        alert(
-          "Failed to upload PDFs to server. They are available temporarily."
+        addNotification(
+          "Failed to upload PDFs to server. They are available temporarily for this session.",
+          "warning"
+        );
+      } else {
+        console.log("PDFs uploaded successfully to server");
+        addNotification(
+          `Successfully uploaded ${addedCount} PDF${addedCount > 1 ? 's' : ''} to server`,
+          "success"
         );
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Error uploading files. Please try again.");
+      addNotification("Error uploading files. Please check your connection and try again.", "error");
     } finally {
       setIsUploading(false);
+      // Clear the file input to allow re-uploading the same file if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -100,7 +143,7 @@ const PDFViewer = () => {
       }
     } catch (error) {
       console.error("Error deleting PDF:", error);
-      alert("Error deleting PDF. Please try again.");
+      addNotification("Error deleting PDF. Please try again.", "error");
       // Refresh the list to ensure consistency
       fetchPdfs();
     }
@@ -153,6 +196,9 @@ const PDFViewer = () => {
 
   return (
     <div className="flex h-screen w-full bg-gray-100">
+      {/* Notification component */}
+      <NotificationList />
+      
       <PDFSidebar
         pdfFiles={pdfFiles}
         currentPdf={currentPdf}

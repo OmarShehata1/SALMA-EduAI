@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Header } from "./Header";
 import { FileUpload } from "./FileUpload";
 import { StudentsTable } from "./StudentsTable";
@@ -9,6 +10,7 @@ import { StudentDetail } from "./StudentDetail";
 import { EmptyState } from "./EmptyState";
 import { ExamSelector } from "./ExamSelector";
 import { StudentSelector } from "./StudentSelector";
+import { Notification } from "../Notification";
 
 export default function Grades() {
   const { currentUser } = useAuth();
@@ -21,9 +23,14 @@ export default function Grades() {
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [isLoadingExams, setIsLoadingExams] = useState(false);
-  const [selectedStudentForGrading, setSelectedStudentForGrading] =
-    useState(null);
-  // Helper function to safely get current user
+  const [selectedStudentForGrading, setSelectedStudentForGrading] = useState(null);
+  const [gradingProgress, setGradingProgress] = useState(0);
+  const [processingStatus, setProcessingStatus] = useState('');
+
+  // Use the stable notifications hook
+  const { notifications, addNotification, removeNotification } = useNotifications();
+
+  // Helper function to safely get current user - stable with useCallback
   const getCurrentUser = useCallback(() => {
     try {
       return currentUser || JSON.parse(localStorage.getItem("user"));
@@ -75,15 +82,18 @@ export default function Grades() {
       ) {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        addNotification("Session expired. Please log in again.", "error");
         navigate("/login");
         return;
       }
 
-      setError("Failed to load exams. Please try again.");
+      const errorMessage = "Failed to load exams. Please try again.";
+      setError(errorMessage);
+      addNotification(errorMessage, "error");
     } finally {
       setIsLoadingExams(false);
     }
-  }, [getCurrentUser, navigate]);
+  }, [getCurrentUser, navigate, addNotification]);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -95,14 +105,21 @@ export default function Grades() {
     }
     fetchTeacherExams();
   }, [getCurrentUser, navigate, fetchTeacherExams]);
+
+  // Separate effect to handle exam selection changes
+  useEffect(() => {
+    if (selectedExam) {
+      // Reset other states when selecting a new exam
+      setStudentsData(null);
+      setSelectedStudent(null);
+      setFiles([]);
+      setSelectedStudentForGrading(null);
+      setError(null);
+    }
+  }, [selectedExam]);
   const handleExamSelect = (exam) => {
     setSelectedExam(exam);
-    // Reset other states when selecting a new exam
-    setFiles([]);
-    setStudentsData(null);
-    setSelectedStudent(null);
-    setSelectedStudentForGrading(null);
-    setError(null);
+    addNotification(`Selected exam: ${exam.name}`, "info");
   };
 
   const handleStudentSelect = (student) => {
@@ -111,29 +128,37 @@ export default function Grades() {
   };
   const handleEvaluate = async () => {
     if (!selectedExam) {
-      setError("Please select an exam first");
+      const errorMessage = "Please select an exam first";
+      setError(errorMessage);
+      addNotification(errorMessage, "warning");
       return;
     }
 
     if (!selectedStudentForGrading) {
-      setError("Please select a student first");
+      const errorMessage = "Please select a student first";
+      setError(errorMessage);
+      addNotification(errorMessage, "warning");
       return;
     }
 
     if (files.length === 0) {
-      setError("Please upload answer sheet photos");
+      const errorMessage = "Please upload answer sheet photos";
+      setError(errorMessage);
+      addNotification(errorMessage, "warning");
       return;
     }
 
     // Validate that the number of uploaded photos matches the number of questions
     if (files.length !== selectedExam.num_of_questions) {
-      setError(
-        `This exam has ${selectedExam.num_of_questions} questions. Please upload exactly ${selectedExam.num_of_questions} photos (one photo per question).`
-      );
+      const errorMessage = `This exam has ${selectedExam.num_of_questions} questions. Please upload exactly ${selectedExam.num_of_questions} photos (one photo per question).`;
+      setError(errorMessage);
+      addNotification(errorMessage, "warning");
       return;
     }
 
     setIsEvaluating(true);
+    setGradingProgress(0);
+    setProcessingStatus('Preparing for evaluation...');
     setError(null);
     setStudentsData(null);
     setSelectedStudent(null);
@@ -145,15 +170,22 @@ export default function Grades() {
         throw new Error("User not authenticated. Please log in again.");
       }
 
-      const studentId =
-        selectedStudentForGrading.id || selectedStudentForGrading._id;
+      const studentId = selectedStudentForGrading.id || selectedStudentForGrading._id;
 
+      setProcessingStatus('Uploading answer sheets...');
+      setGradingProgress(20);
+      
       // Create FormData for all the question photos
       const formData = new FormData();
       // Add all photos to the form data - each photo represents one question answer
       files.forEach((file) => {
         formData.append("images", file);
       });
+
+      addNotification(
+        `Starting evaluation for ${selectedStudentForGrading.name} - ${files.length} answer sheets`,
+        "info"
+      );
 
       console.log(
         `Uploading ${files.length} photos for ${
@@ -162,6 +194,9 @@ export default function Grades() {
           selectedStudentForGrading.name || selectedStudentForGrading.firstName
         } (ID: ${studentId})`
       );
+
+      setProcessingStatus('AI is analyzing answers...');
+      setGradingProgress(60);
 
       // Call the grading endpoint with all photos at once
       const response = await fetch(
@@ -174,6 +209,9 @@ export default function Grades() {
           body: formData,
         }
       );
+
+      setGradingProgress(90);
+      setProcessingStatus('Finalizing results...');
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -190,7 +228,12 @@ export default function Grades() {
       }
 
       const gradingData = await response.json();
-      console.log("Grading result:", gradingData); // Process the single student's grading result
+      console.log("Grading result:", gradingData);
+      
+      setGradingProgress(100);
+      setProcessingStatus('Evaluation complete!');
+
+      // Process the single student's grading result
       const studentResult = {
         id: studentId,
         name:
@@ -210,6 +253,16 @@ export default function Grades() {
 
       // Set the processed student data as an array with one student
       setStudentsData([studentResult]);
+      
+      // Show success notification
+      addNotification(
+        `Successfully evaluated ${selectedStudentForGrading.name}! Score: ${studentResult.percentage}%`,
+        "success"
+      );
+      
+      // Clear files after successful evaluation
+      setFiles([]);
+      
     } catch (err) {
       console.error("Error during evaluation:", err);
 
@@ -220,13 +273,18 @@ export default function Grades() {
       ) {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        addNotification("Session expired. Please log in again.", "error");
         navigate("/login");
         return;
       }
 
-      setError(err.message || "Failed to evaluate exam. Please try again.");
+      const errorMessage = err.message || "Failed to evaluate exam. Please try again.";
+      setError(errorMessage);
+      addNotification(errorMessage, "error");
     } finally {
       setIsEvaluating(false);
+      setGradingProgress(0);
+      setProcessingStatus('');
     }
   };
 
@@ -269,6 +327,16 @@ export default function Grades() {
   };
   return (
     <div className="container mx-auto px-4 py-8 flex-1 mt-8">
+      {/* Notification components */}
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+      
       <Header selectedExam={selectedExam} />
       {/* Exam Selection Section */}
       <div className="mb-8">
@@ -298,6 +366,8 @@ export default function Grades() {
               handleEvaluate={handleEvaluate}
               isEvaluating={isEvaluating}
               selectedExam={selectedExam}
+              gradingProgress={gradingProgress}
+              processingStatus={processingStatus}
             />
           </div>
 

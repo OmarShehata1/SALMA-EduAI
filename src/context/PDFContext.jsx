@@ -120,7 +120,7 @@ export const PDFProvider = ({ children }) => {
   };
   
   // Local method to handle file selection (without server upload)
-  const addPdfFiles = (files) => {
+  const addPdfFiles = (files, onDuplicate = null) => {
     const newPdfFiles = Array.from(files)
       .filter((file) => file.type === "application/pdf")
       .map((file) => ({
@@ -132,11 +132,38 @@ export const PDFProvider = ({ children }) => {
       }));
 
     if (newPdfFiles.length > 0) {
-      setPdfFiles((prev) => [...prev, ...newPdfFiles]);
-      if (!currentPdf) {
-        setCurrentPdf(newPdfFiles[0]);
+      // Check for duplicates by comparing file names
+      const existingNames = new Set(pdfFiles.map(pdf => pdf.name));
+      const duplicateFiles = [];
+      const uniqueFiles = [];
+      
+      newPdfFiles.forEach(newFile => {
+        if (existingNames.has(newFile.name)) {
+          duplicateFiles.push(newFile.name);
+        } else {
+          uniqueFiles.push(newFile);
+          existingNames.add(newFile.name); // Add to set to prevent duplicates within the same batch
+        }
+      });
+      
+      // If there are duplicates, call the callback function instead of alert
+      if (duplicateFiles.length > 0 && onDuplicate) {
+        const duplicateMessage = duplicateFiles.length === 1 
+          ? `File "${duplicateFiles[0]}" is already uploaded.`
+          : `Files ${duplicateFiles.map(name => `"${name}"`).join(', ')} are already uploaded.`;
+        onDuplicate(`${duplicateMessage} ${uniqueFiles.length > 0 ? 'Other files will be added.' : 'No new files were added.'}`);
       }
-      return true;
+      
+      // Only add unique files
+      if (uniqueFiles.length > 0) {
+        setPdfFiles((prev) => [...prev, ...uniqueFiles]);
+        if (!currentPdf) {
+          setCurrentPdf(uniqueFiles[0]);
+        }
+        return uniqueFiles.length; // Return number of files actually added
+      }
+      
+      return 0; // No files added
     }
     return false;
   };

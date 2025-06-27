@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // Notification component
 const Notification = ({ message, type, onClose }) => {
@@ -104,35 +104,39 @@ const Notification = ({ message, type, onClose }) => {
 export const NotificationManager = () => {
   const [notifications, setNotifications] = useState([]);
 
-  // Add a notification
-  const addNotification = (message, type = "info") => {
+  // Add a notification with useCallback for stability
+  const addNotification = useCallback((message, type = "info") => {
     const id = Date.now();
     setNotifications((prev) => [...prev, { id, message, type }]);
     return id;
-  };
+  }, []);
 
-  // Remove a notification
-  const removeNotification = (id) => {
+  // Remove a notification with useCallback for stability
+  const removeNotification = useCallback((id) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
-  };
+  }, []);
+
+  // Stable NotificationList component
+  const NotificationList = useCallback(() => (
+    <div className="notification-container">
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+    </div>
+  ), [notifications, removeNotification]);
 
   return {
     notifications,
     addNotification,
     removeNotification,
-    NotificationList: () => (
-      <div className="notification-container">
-        {notifications.map((notification) => (
-          <Notification
-            key={notification.id}
-            message={notification.message}
-            type={notification.type}
-            onClose={() => removeNotification(notification.id)}
-          />
-        ))}
-      </div>
-    ),
+    NotificationList,
   };
 };
 
 export default NotificationManager;
+export { Notification };
