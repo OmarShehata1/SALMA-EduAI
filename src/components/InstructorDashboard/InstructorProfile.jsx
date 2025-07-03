@@ -1,8 +1,16 @@
-import { useState } from "react";
-import { User, Mail, Phone, MapPin, BookOpen, Save, Edit2, Camera } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Mail, Phone, MapPin, BookOpen, Save, Edit2, Camera, Plus, X, RefreshCw } from "lucide-react";
+import { teacherApi } from "../../service/apiService";
+import { useAuth } from "../../context/AuthProvider";
 
 export default function InstructorProfile() {
+  const { currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [subjects, setSubjects] = useState([]);
+  const [newSubject, setNewSubject] = useState("");
+  const [isAddingSubject, setIsAddingSubject] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [profile, setProfile] = useState({
     name: "Dr. Sarah Johnson",
     email: "sarah.johnson@university.edu",
@@ -23,6 +31,48 @@ export default function InstructorProfile() {
       "CS401 - Software Engineering"
     ]
   });
+
+  // Fetch teacher subjects on component mount
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      if (!currentUser?.id) return;
+      
+      try {
+        setLoading(true);
+        const response = await teacherApi.getTeacherSubjects(currentUser.id);
+        setSubjects(response.subjects || []);
+      } catch (err) {
+        console.error("Error fetching subjects:", err);
+        setError("Failed to load subjects");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubjects();
+  }, [currentUser?.id]);
+
+  const handleAddSubject = async () => {
+    if (!newSubject.trim() || !currentUser?.id) return;
+
+    try {
+      setLoading(true);
+      setError("");
+      await teacherApi.addSubjectToTeacher(currentUser.id, newSubject.trim());
+      
+      // Refresh subjects list
+      const response = await teacherApi.getTeacherSubjects(currentUser.id);
+      setSubjects(response.subjects || []);
+      
+      setNewSubject("");
+      setIsAddingSubject(false);
+    } catch (err) {
+      console.error("Error adding subject:", err);
+      setError(err.response?.data?.message || "Failed to add subject");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = () => {
     setIsEditing(false);
@@ -167,52 +217,115 @@ export default function InstructorProfile() {
             )}
           </div>
 
-          {/* Specializations */}
+          {/* Subjects */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-sky-200 shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Specializations</h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.specializations.map((spec, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-gradient-to-r from-sky-100 to-indigo-100 text-sky-700 rounded-full text-sm font-medium border border-sky-200"
-                >
-                  {spec}
-                </span>
-              ))}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                <BookOpen className="w-5 h-5 mr-2" />
+                Teaching Subjects
+              </h3>
+              <button
+                onClick={() => setIsAddingSubject(true)}
+                className="flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-sky-500 to-indigo-600 text-white rounded-lg hover:from-sky-600 hover:to-indigo-700 transition-all duration-300 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Subject</span>
+              </button>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">
+                {error}
+                <button
+                  onClick={() => setError("")}
+                  className="ml-2 text-red-500 hover:text-red-700"
+                >
+                  <X className="w-4 h-4 inline" />
+                </button>
+              </div>
+            )}
+
+            {isAddingSubject && (
+              <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="text"
+                    value={newSubject}
+                    onChange={(e) => setNewSubject(e.target.value)}
+                    placeholder="Enter subject name..."
+                    className="flex-1 px-3 py-2 border border-sky-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400"
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddSubject()}
+                  />
+                  <button
+                    onClick={handleAddSubject}
+                    disabled={loading || !newSubject.trim()}
+                    className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                  >
+                    {loading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )}
+                    <span>Add</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsAddingSubject(false);
+                      setNewSubject("");
+                      setError("");
+                    }}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {loading && !isAddingSubject ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-5 h-5 animate-spin text-sky-600 mr-2" />
+                <span className="text-gray-600">Loading subjects...</span>
+              </div>
+            ) : subjects.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No subjects added yet. Click "Add Subject" to get started.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {subjects.map((subject) => (
+                  <div
+                    key={subject.id}
+                    className="px-4 py-3 bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200 rounded-xl"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-sky-700">
+                          {subject.name}
+                        </h4>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <p className="text-sm text-gray-600">
+                            {subject.students_count} student{subject.students_count !== 1 ? 's' : ''}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {subject.exams_count} exam{subject.exams_count !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-1 bg-sky-100 text-sky-700 rounded-full text-xs font-medium">
+                          Active
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Education */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-sky-200 shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Education</h3>
-            <div className="space-y-3">
-              {profile.education.map((edu, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-sky-500 rounded-full"></div>
-                  <span className="text-gray-700">{edu}</span>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Current Courses */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-sky-200 shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
-              <BookOpen className="w-5 h-5 inline mr-2" />
-              Current Courses
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {profile.courses.map((course, index) => (
-                <div
-                  key={index}
-                  className="bg-gradient-to-r from-sky-50 to-indigo-50 p-4 rounded-xl border border-sky-200"
-                >
-                  <div className="font-semibold text-gray-800">{course.split(' - ')[0]}</div>
-                  <div className="text-sm text-gray-600">{course.split(' - ')[1]}</div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -99,26 +99,6 @@ export default function CreateExam() {
           </div>
         </Link>
       </div>
-
-      {/* Recent Exams */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-sky-200 shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Exams</h2>
-        <div className="space-y-3">
-          {[
-            { name: "Midterm Exam - CS101", date: "2024-10-15", questions: 15 },
-            { name: "Final Exam - Database Systems", date: "2024-12-10", questions: 25 },
-            { name: "Quiz - Data Structures", date: "2024-11-20", questions: 10 },
-          ].map((exam, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <div>
-                <div className="font-medium text-gray-800">{exam.name}</div>
-                <div className="text-sm text-gray-600">{exam.date} • {exam.questions} questions</div>
-              </div>
-              <button className="text-sky-600 hover:text-sky-700 font-medium">View</button>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

@@ -95,4 +95,53 @@ export const studentApi = {
   }
 };
 
+// Teacher-related API functions
+export const teacherApi = {
+  // Get teacher subjects
+  getTeacherSubjects: async (teacherId) => {
+    try {
+      const response = await apiClient.get(`/teachers/${teacherId}/subjects`);
+      return response.data; // Expected format: { teacher_name: string, subjects: [{id, name, students_count, exams_count}], message?: string }
+    } catch (error) {
+      console.error("Error fetching teacher subjects:", error);
+      throw error;
+    }
+  },
+
+  // Add subject to teacher
+  addSubjectToTeacher: async (teacherId, name) => {
+    try {
+      const response = await apiClient.post(`/teachers/${teacherId}/subjects`, {
+        name
+      });
+      return response.data; // Expected format: { message: string, teacher: {...} }
+    } catch (error) {
+      console.error("Error adding subject to teacher:", error);
+      throw error;
+    }
+  },
+
+  // Get students for a teacher's subject
+  getSubjectStudents: async (teacherId, subjectId) => {
+    try {
+      const response = await apiClient.get(`/teachers/${teacherId}/subjects/${subjectId}/students`);
+      return response.data; // Expected format: { subject: {id, name}, students: [...], message?: string }
+    } catch (error) {
+      console.error("Error fetching subject students:", error);
+      throw error;
+    }
+  },
+
+  // Get exams a student took for a specific subject
+  getStudentSubjectExams: async (teacherId, subjectId, studentId) => {
+    try {
+      const response = await apiClient.get(`/teachers/${teacherId}/subjects/${subjectId}/students/${studentId}/exams`);
+      return response.data; // Expected format: { subject: {id, name}, student: {id, name}, exams: [...], message?: string }
+    } catch (error) {
+      console.error("Error fetching student subject exams:", error);
+      throw error;
+    }
+  }
+};
+
 export default apiClient;

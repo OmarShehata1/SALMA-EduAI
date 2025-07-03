@@ -9,11 +9,13 @@ export default function QuestionsDisplay() {
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [examName, setExamName] = useState("");
   const [fullMark, setFullMark] = useState(0);
+  const [subjectId, setSubjectId] = useState("");
+  const [availableSubjects, setAvailableSubjects] = useState([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
   const [showExamForm, setShowExamForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [, setError] = useState(null);
   const [teacherId, setTeacherId] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState("en"); // Track language for exam creation
   const location = useLocation();
   const apiUrl = "http://localhost:5000";
   const processedLocationRef = useRef(null);
@@ -55,17 +57,10 @@ export default function QuestionsDisplay() {
       } catch (error) {
         console.error("Error parsing user from localStorage:", error);
       }
-    }    // Load questions from sessionStorage
+    } // Load questions from sessionStorage
     const savedQuestions = sessionStorage.getItem("selectedQuestions");
-    const savedLanguage = sessionStorage.getItem("examLanguage");
     const initialQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
-    
-    // Set saved language if available
-    if (savedLanguage) {
-      console.log(`DEBUG: [${executionId}] Setting language from sessionStorage:`, savedLanguage);
-      setSelectedLanguage(savedLanguage);
-    }
-    
+
     console.log(
       `DEBUG: [${executionId}] Loaded ${initialQuestions.length} questions from sessionStorage`
     );
@@ -82,12 +77,7 @@ export default function QuestionsDisplay() {
       );
 
       // Capture language from navigation state if provided
-      if (location.state.lang) {
-        console.log(`DEBUG: [${executionId}] Setting language from navigation:`, location.state.lang);
-        setSelectedLanguage(location.state.lang);
-        // Save language to sessionStorage for persistence
-        sessionStorage.setItem("examLanguage", location.state.lang);
-      }
+      // Note: Language handling removed as new endpoint doesn't use it
 
       // Show success message if provided
       if (location.state.successMessage) {
@@ -139,10 +129,7 @@ export default function QuestionsDisplay() {
         "selectedQuestions",
         JSON.stringify(combinedQuestions)
       );
-      // Ensure language is also saved
-      if (location.state.lang) {
-        sessionStorage.setItem("examLanguage", location.state.lang);
-      } // Clear location state to prevent reappending on refresh
+      // Clear location state to prevent reappending on refresh
       window.history.replaceState({}, document.title);
     } else {
       console.log(
@@ -170,6 +157,111 @@ export default function QuestionsDisplay() {
       questions.map((q) => `${q.id} - ${q.question?.substring(0, 50)}...`)
     );
   }, [questions]);
+
+  // Load available subjects for the teacher
+  const loadAvailableSubjects = async () => {
+    setLoadingSubjects(true);
+
+    try {
+      const currentTeacherId = getCurrentTeacherId();
+      console.log("DEBUG: Loading subjects for teacher:", currentTeacherId);
+
+      // Call the API endpoint to get teacher's subjects
+      const response = await fetch(
+        `${apiUrl}/teachers/${currentTeacherId}/subjects`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("DEBUG: Loaded subjects from API:", data);
+
+        if (data.subjects && data.subjects.length > 0) {
+          // Map the response format to our expected format
+          const mappedSubjects = data.subjects.map((subject) => ({
+            _id: subject.id, // Your API returns 'id', not '_id'
+            name: subject.name,
+            students_count: subject.students_count,
+            exams_count: subject.exams_count,
+          }));
+
+          setAvailableSubjects(mappedSubjects);
+          console.log("DEBUG: Mapped subjects:", mappedSubjects);
+
+          // If there's only one subject, select it automatically
+          if (mappedSubjects.length === 1) {
+            setSubjectId(mappedSubjects[0]._id);
+            console.log("DEBUG: Auto-selected subject:", mappedSubjects[0]._id);
+          }
+          return;
+        } else {
+          console.log("DEBUG: No subjects found for teacher");
+          // No subjects found, show appropriate message
+          setAvailableSubjects([]);
+          addNotification(
+            "No subjects found. Please contact administrator to assign subjects.",
+            "warning"
+          );
+          return;
+        }
+      } else {
+        console.log("DEBUG: API call failed with status:", response.status);
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error loading subjects:", error);
+
+      // Try fallback to localStorage as backup
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          console.log(
+            "DEBUG: Trying localStorage fallback, user object:",
+            user
+          );
+
+          // Look for subject in various possible fields
+          const fallbackSubjectId =
+            user.subjectId ||
+            user.subject ||
+            user.subjects?.[0]?._id ||
+            user.subjects?.[0];
+
+          if (fallbackSubjectId) {
+            console.log(
+              "DEBUG: Found subject in localStorage:",
+              fallbackSubjectId
+            );
+            setSubjectId(fallbackSubjectId);
+
+            // Create a subject object for display
+            const subjectName =
+              user.subjects?.[0]?.name || user.subjectName || "Your Subject";
+            setAvailableSubjects([
+              { _id: fallbackSubjectId, name: subjectName },
+            ]);
+            return;
+          }
+        } catch (parseError) {
+          console.error("Error parsing user for fallback subject:", parseError);
+        }
+      }
+
+      // Final fallback - create a default subject
+      console.log("DEBUG: Using final fallback subject");
+      const defaultSubjectId = "default-subject-id";
+      setSubjectId(defaultSubjectId);
+      setAvailableSubjects([
+        { _id: defaultSubjectId, name: "General Subject" },
+      ]);
+      addNotification(
+        "Could not load subjects. Using default subject.",
+        "warning"
+      );
+    } finally {
+      setLoadingSubjects(false);
+    }
+  };
 
   // Get current teacher ID - with fallback
   const getCurrentTeacherId = () => {
@@ -207,10 +299,6 @@ export default function QuestionsDisplay() {
       "selectedQuestions",
       JSON.stringify(updatedQuestions)
     );
-    // Preserve language in sessionStorage
-    if (selectedLanguage) {
-      sessionStorage.setItem("examLanguage", selectedLanguage);
-    }
     setEditingQuestion(null);
     addNotification("Question updated successfully", "success");
   };
@@ -223,10 +311,6 @@ export default function QuestionsDisplay() {
         "selectedQuestions",
         JSON.stringify(updatedQuestions)
       );
-      // Preserve language in sessionStorage
-      if (selectedLanguage) {
-        sessionStorage.setItem("examLanguage", selectedLanguage);
-      }
       addNotification("Question deleted successfully", "info");
     }
   };
@@ -235,22 +319,53 @@ export default function QuestionsDisplay() {
       console.log("DEBUG: First click - showing exam form modal");
       // First click - show the form modal
       setShowExamForm(true);
+      // Load available subjects when showing the form
+      await loadAvailableSubjects();
       return;
     }
 
     console.log("DEBUG: Form submitted with values:", { examName, fullMark });
+    console.log("DEBUG: examName type:", typeof examName, "value:", examName);
     console.log("DEBUG: Available questions:", questions.length);
 
     // Form submit handler
+    console.log("DEBUG: Form validation starting...");
+    console.log(
+      "DEBUG: Current state - examName:",
+      examName,
+      "subjectId:",
+      subjectId,
+      "questions.length:",
+      questions.length
+    );
+
     if (questions.length === 0) {
       console.log("DEBUG: No questions available - showing warning");
       addNotification("No questions available to save", "warning");
       return;
     }
 
-    if (!examName.trim()) {
-      console.log("DEBUG: Empty exam name - showing warning");
+    if (!examName) {
+      console.log("DEBUG: Empty or invalid exam name - showing warning");
       addNotification("Please enter an exam name", "warning");
+      return;
+    }
+
+    if (!subjectId && availableSubjects.length > 0) {
+      console.log(
+        "DEBUG: No subject selected but subjects are available - showing warning"
+      );
+      addNotification("Please select a subject", "warning");
+      return;
+    }
+
+    // If no subjects are available but we have a fallback subjectId, that's okay
+    if (!subjectId && availableSubjects.length === 0) {
+      console.log("DEBUG: No subjects available and no fallback subjectId");
+      addNotification(
+        "No subject available. Please contact administrator.",
+        "error"
+      );
       return;
     }
 
@@ -260,16 +375,48 @@ export default function QuestionsDisplay() {
       const currentTeacherId = getCurrentTeacherId();
       console.log("DEBUG: Using teacher ID:", currentTeacherId);
 
-      // Step 1: Create an empty exam with the name and full mark from the modal
-      console.log(
-        "DEBUG: Creating empty exam with name:",
-        examName,
-        "and full mark:",
-        fullMark,
-        "and language:",
-        selectedLanguage
-      );
-      const createExamEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/create`;
+      // Prepare questions data for the new endpoint with comprehensive validation
+      const questionsData = questions.map((question, index) => {
+        console.log(`DEBUG: Processing question ${index}:`, question);
+        return {
+          question:
+            question.question && typeof question.question === "string"
+              ? question.question.trim()
+              : "",
+          answer:
+            question.answer && typeof question.answer === "string"
+              ? question.answer.trim()
+              : "",
+          grade:
+            question.grade && typeof question.grade === "number"
+              ? question.grade
+              : 10,
+        };
+      });
+
+      console.log("DEBUG: Prepared questions data:", questionsData);
+      console.log("DEBUG: Subject ID being sent:", subjectId);
+      console.log("DEBUG: Subject ID type:", typeof subjectId);
+      console.log("DEBUG: Exam name being sent:", examName);
+      console.log("DEBUG: Exam name type:", typeof examName);
+
+      // Prepare the request body with full validation
+      const requestBody = {
+        exam_name: examName || "",
+        subject: subjectId || "",
+        questions: questionsData,
+        students: [],
+      };
+      console.log("DEBUG: Full request body:", requestBody);
+
+      // Additional validation to ensure we have a valid subject
+      if (!requestBody.subject) {
+        throw new Error("Subject ID is required and cannot be empty");
+      }
+
+      // Create exam with questions in one operation using the new endpoint
+      console.log("DEBUG: Creating exam with questions using new endpoint");
+      const createExamEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/create-with-questions`;
       console.log("DEBUG: Calling endpoint:", createExamEndpoint);
 
       const createExamResponse = await fetch(createExamEndpoint, {
@@ -277,11 +424,7 @@ export default function QuestionsDisplay() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: examName,
-          full_mark: fullMark,
-          lang: selectedLanguage, // Include the selected language
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       console.log(
@@ -290,115 +433,63 @@ export default function QuestionsDisplay() {
       );
 
       if (!createExamResponse.ok) {
-        const errorData = await createExamResponse.json();
+        let errorData;
+        let errorText = "";
+
+        try {
+          errorText = await createExamResponse.text();
+          console.error("DEBUG: Raw response text:", errorText);
+          errorData = JSON.parse(errorText);
+        } catch (parseError) {
+          console.error("DEBUG: Could not parse error response:", parseError);
+          errorData = { message: errorText || "Unknown error occurred" };
+        }
+
         console.error("DEBUG: Failed to create exam. Error:", errorData);
-        throw new Error(errorData.message || "Failed to create empty exam");
+        console.error("DEBUG: Response status:", createExamResponse.status);
+        console.error("DEBUG: Response headers:", createExamResponse.headers);
+
+        throw new Error(
+          errorData.message || "Failed to create exam with questions"
+        );
       }
 
-      const createExamData = await createExamResponse.json();
-      console.log("DEBUG: Create exam response data:", createExamData);
-
-      const examId = createExamData.examId;
-
-      if (!examId) {
-        console.error("DEBUG: No exam ID in response:", createExamData);
-        throw new Error("Failed to retrieve exam ID from response");
-      }
-
-      console.log("DEBUG: Successfully created exam with ID:", examId);
+      const responseData = await createExamResponse.json();
+      console.log("DEBUG: Create exam response data:", responseData);
 
       // Store the exam ID for future reference
-      localStorage.setItem("examId", examId);
-      console.log("DEBUG: Stored exam ID in localStorage");
-
-      // Step 2: Add each question to the exam one by one
-      let finalBase64Pdf = null;
-      console.log("DEBUG: Adding", questions.length, "questions to exam");
-
-      for (let i = 0; i < questions.length; i++) {
-        const question = questions[i];
+      if (responseData.exam?._id) {
+        localStorage.setItem("examId", responseData.exam._id);
         console.log(
-          `DEBUG: Adding question ${i + 1}/${questions.length}:`,
-          question.id
+          "DEBUG: Stored exam ID in localStorage:",
+          responseData.exam._id
         );
-        // Use grade directly from question
-        console.log("DEBUG: Using grade from question:", question.grade);
-        console.log("DEBUG: Using language:", selectedLanguage);
-
-        const addQuestionEndpoint = `${apiUrl}/teachers/${currentTeacherId}/exams/${examId}/genqa/save`;
-        console.log("DEBUG: Calling endpoint:", addQuestionEndpoint);
-
-        const addQuestionResponse = await fetch(addQuestionEndpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question: question.question,
-            answer: question.answer,
-            grade: question.grade || 10, // Use question grade or default to 10
-            lang: selectedLanguage, // Include the selected language
-          }),
-        });
-
-        console.log(
-          "DEBUG: Add question response status:",
-          addQuestionResponse.status
-        );
-
-        if (!addQuestionResponse.ok) {
-          const errorData = await addQuestionResponse.json();
-          console.error(
-            `DEBUG: Failed to add question ${i + 1}. Error:`,
-            errorData
-          );
-          // Continue with other questions even if one fails
-          continue;
-        }
-
-        const questionData = await addQuestionResponse.json();
-        console.log(
-          `DEBUG: Successfully added question ${i + 1}. Response:`,
-          questionData.question ? questionData.question._id : "No question data"
-        );
-
-        // Keep the latest PDF data from the response
-        if (questionData.base64Pdf) {
-          console.log("DEBUG: Received updated PDF data");
-          finalBase64Pdf = questionData.base64Pdf;
-        } else {
-          console.log("DEBUG: No PDF data in response for this question");
-        }
       }
-
-      console.log("DEBUG: All questions processed");
 
       // Clear questions after successful submission
       console.log("DEBUG: Clearing questions from state and session storage");
       setQuestions([]);
       sessionStorage.removeItem("selectedQuestions");
-      sessionStorage.removeItem("examLanguage"); // Also clear the saved language
 
       // Reset form and close it
       console.log("DEBUG: Resetting form and closing modal");
       setExamName("");
       setFullMark(0);
+      setSubjectId("");
       setShowExamForm(false);
 
       // Show success notification
       console.log("DEBUG: Showing success notification");
       addNotification(
-        `Exam "${examName}" created and questions added successfully!`,
+        responseData.message || `Exam "${examName}" created successfully!`,
         "success"
       );
 
       // Display PDF if available
-      if (finalBase64Pdf) {
-        console.log(
-          "DEBUG: Processing final PDF data for display and download"
-        );
+      if (responseData.base64Pdf) {
+        console.log("DEBUG: Processing PDF data for display and download");
         // Convert Base64 to Blob
-        const byteCharacters = atob(finalBase64Pdf);
+        const byteCharacters = atob(responseData.base64Pdf);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -422,9 +513,9 @@ export default function QuestionsDisplay() {
         );
         downloadLink.click();
       } else {
-        console.log("DEBUG: No final PDF data available");
+        console.log("DEBUG: No PDF data available");
         addNotification(
-          "Exam saved but PDF not returned. Please check with administrator.",
+          "Exam created but PDF not returned. Please check with administrator.",
           "warning"
         );
       }
@@ -545,11 +636,50 @@ export default function QuestionsDisplay() {
                 <input
                   type="text"
                   id="examName"
-                  value={examName}
-                  onChange={(e) => setExamName(e.target.value)}
+                  value={examName || ""}
+                  onChange={(e) => setExamName(e.target.value || "")}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="subject"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  Subject
+                </label>
+                {loadingSubjects ? (
+                  <div className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-500">
+                    Loading subjects...
+                  </div>
+                ) : availableSubjects.length > 0 ? (
+                  <select
+                    id="subject"
+                    value={subjectId}
+                    onChange={(e) => {
+                      console.log(
+                        "DEBUG: Subject selection changed to:",
+                        e.target.value
+                      );
+                      setSubjectId(e.target.value);
+                    }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select a subject</option>
+                    {availableSubjects.map((subject) => (
+                      <option key={subject._id} value={subject._id}>
+                        {subject.name} ({subject.students_count || 0} students,{" "}
+                        {subject.exams_count || 0} exams)
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="w-full border border-red-300 rounded-md px-3 py-2 bg-red-50 text-red-700">
+                    No subjects available. Please contact administrator.
+                  </div>
+                )}
               </div>
               <div className="mb-4">
                 <label
@@ -580,20 +710,30 @@ export default function QuestionsDisplay() {
                   type="submit"
                   disabled={
                     isLoading ||
+                    loadingSubjects ||
                     !examName ||
+                    !examName ||
+                    (!subjectId && availableSubjects.length > 0) ||
                     questions.length === 0 ||
                     !teacherId
                   }
                   className={`px-4 py-2 rounded-md font-medium ${
                     isLoading ||
+                    loadingSubjects ||
                     !examName ||
+                    !examName ||
+                    (!subjectId && availableSubjects.length > 0) ||
                     questions.length === 0 ||
                     !teacherId
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-500 text-white"
                   }`}
                 >
-                  {isLoading ? "Creating..." : "Create & Save Exam"}
+                  {isLoading
+                    ? "Creating..."
+                    : loadingSubjects
+                    ? "Loading..."
+                    : "Create & Save Exam"}
                 </button>
               </div>
             </form>

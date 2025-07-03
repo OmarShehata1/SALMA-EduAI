@@ -140,10 +140,10 @@ export default function TeacherList() {
               <div className="flex flex-wrap gap-2">
                 {teacher.subjects.map((subject, index) => (
                   <span
-                    key={index}
+                    key={typeof subject === 'object' ? subject.id : index}
                     className="bg-gradient-to-r from-sky-50 to-indigo-50 text-sky-700 px-3 py-1 rounded-full text-xs font-medium border border-sky-100"
                   >
-                    {subject}
+                    {typeof subject === 'string' ? subject : subject.name}
                   </span>
                 ))}
               </div>
