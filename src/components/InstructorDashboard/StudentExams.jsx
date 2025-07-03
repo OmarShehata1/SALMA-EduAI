@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, BookOpen, Calendar, Trophy, FileText, AlertCircle, RefreshCw, User, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Calendar, Trophy, FileText, AlertCircle, RefreshCw, User, CheckCircle2, Eye } from "lucide-react";
 import { teacherApi } from "../../service/apiService";
 import { useAuth } from "../../context/AuthProvider";
 
-export default function StudentExams({ student, subject, onBack }) {
+export default function StudentExams({ student, subject, onBack, onViewExamDetails }) {
   const { currentUser } = useAuth();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -273,6 +273,17 @@ export default function StudentExams({ student, subject, onBack }) {
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
+                  </div>
+
+                  {/* View Details Button */}
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={() => onViewExamDetails && onViewExamDetails(exam.exam_id, student._id)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white rounded-lg hover:from-sky-600 hover:to-indigo-700 transition-all duration-200 font-medium"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>View Details</span>
+                    </button>
                   </div>
                 </div>
               );

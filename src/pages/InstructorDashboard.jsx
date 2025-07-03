@@ -9,12 +9,22 @@ import CreateExam from "../components/InstructorDashboard/CreateExam";
 import CorrectExam from "../components/InstructorDashboard/CorrectExam";
 import InstructorProfile from "../components/InstructorDashboard/InstructorProfile";
 import Appeals from "../components/InstructorDashboard/Appeals";
+import ExamDetails from "../components/InstructorDashboard/ExamDetails";
+import { useAuth } from "../context/AuthProvider";
 
 export default function InstructorDashboard() {
+  const { currentUser } = useAuth();
   const [currentPage, setCurrentPage] = useState("overview");
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedExamId, setSelectedExamId] = useState(null);
+
+  const handleViewExamDetails = (examId, studentId) => {
+    setSelectedExamId(examId);
+    setSelectedStudent({ _id: studentId, ...selectedStudent });
+    setCurrentPage("exam-details");
+  };
 
   const renderCurrentPage = () => {
     switch (currentPage) {
@@ -46,6 +56,16 @@ export default function InstructorDashboard() {
             student={selectedStudent}
             subject={selectedSubject}
             onBack={() => setCurrentPage("subject-students")}
+            onViewExamDetails={handleViewExamDetails}
+          />
+        );
+      case "exam-details":
+        return (
+          <ExamDetails
+            teacherId={currentUser?.id}
+            examId={selectedExamId}
+            studentId={selectedStudent?._id}
+            onBack={() => setCurrentPage("student-exams")}
           />
         );
       case "group-details":

@@ -141,6 +141,17 @@ export const teacherApi = {
       console.error("Error fetching student subject exams:", error);
       throw error;
     }
+  },
+
+  // Get detailed student grade for an exam
+  getStudentExamDetails: async (teacherId, examId, studentId) => {
+    try {
+      const response = await apiClient.get(`/teachers/${teacherId}/exams/${examId}/grade/${studentId}`);
+      return response.data; // Expected format: { exam: {...}, student: {...}, teacher: {...}, grade_summary: {...}, question_details: [...] }
+    } catch (error) {
+      console.error("Error fetching student exam details:", error);
+      throw error;
+    }
   }
 };
 
