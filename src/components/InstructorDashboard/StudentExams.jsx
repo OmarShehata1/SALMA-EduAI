@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, BookOpen, Calendar, Trophy, FileText, AlertCircle, RefreshCw, User, CheckCircle2, Eye } from "lucide-react";
-import { teacherApi } from "../../service/apiService";
+import { studentApi } from "../../service/apiService";
 import { useAuth } from "../../context/AuthProvider";
 
 export default function StudentExams({ student, subject, onBack, onViewExamDetails }) {
@@ -18,7 +18,7 @@ export default function StudentExams({ student, subject, onBack, onViewExamDetai
       try {
         setLoading(true);
         setError("");
-        const response = await teacherApi.getStudentSubjectExams(
+        const response = await studentApi.getStudentSubjectExams(
           currentUser.id, 
           subject.id, 
           student._id
@@ -42,7 +42,7 @@ export default function StudentExams({ student, subject, onBack, onViewExamDetai
 
     try {
       setLoading(true);
-      const response = await teacherApi.getStudentSubjectExams(
+      const response = await studentApi.getStudentSubjectExams(
         currentUser.id, 
         subject.id, 
         student._id

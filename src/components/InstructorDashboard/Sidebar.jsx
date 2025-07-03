@@ -7,8 +7,10 @@ import {
   GraduationCap,
   Sparkles,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthProvider";
 
 export default function Sidebar({ currentPage, onPageChange }) {
+  const { currentUser } = useAuth();
   const menuItems = [
     {
       id: "overview",
@@ -100,9 +102,9 @@ export default function Sidebar({ currentPage, onPageChange }) {
             </div>
             <div>
               <div className="text-sm font-semibold text-gray-800">
-                Dr. Sarah Johnson
+                {currentUser?.name || 'Instructor'}
               </div>
-              <div className="text-xs text-gray-600">Computer Science Dept.</div>
+              <div className="text-xs text-gray-600">{currentUser?.email || 'instructor@university.edu'}</div>
             </div>
           </div>
         </div>

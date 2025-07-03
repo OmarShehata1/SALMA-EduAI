@@ -1,6 +1,8 @@
 import { Users, FileText, MessageSquare, User, Bell } from "lucide-react";
+import { useAuth } from "../../context/AuthProvider";
 
 export default function Sidebar({ currentPage, onPageChange }) {
+  const { currentUser } = useAuth();
   const menuItems = [
     {
       id: "teachers",
@@ -41,18 +43,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
             </div>
           </div>
           
-          {/* Quick Stats */}
-          <div className="bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl p-4 border border-sky-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Active Courses</p>
-                <p className="text-2xl font-bold text-sky-600">4</p>
-              </div>
-              <div className="bg-sky-100 p-2 rounded-lg">
-                <Bell className="w-5 h-5 text-sky-600" />
-              </div>
-            </div>
-          </div>
+
         </div>
 
         {/* Navigation Menu */}
@@ -82,18 +73,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
               </div>
             </button>
           ))}
-        </nav>        {/* Help Section */}
-        <div className="mt-8 p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="bg-emerald-100 p-2 rounded-lg">
-              <MessageSquare className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-emerald-800">Need Help?</p>
-              <p className="text-xs text-emerald-600">Contact support</p>
-            </div>
-          </div>
-        </div>
+        </nav>   
       </div>
 
       {/* Footer */}
@@ -105,9 +85,11 @@ export default function Sidebar({ currentPage, onPageChange }) {
             </div>
             <div>
               <div className="text-sm font-semibold text-gray-800">
-                John Doe
+                {currentUser?.name || "Student"}
               </div>
-              <div className="text-xs text-gray-600">Computer Science Student</div>
+              <div className="text-xs text-gray-600">
+                {currentUser?.email || "student@university.edu"}
+              </div>
             </div>
           </div>
         </div>

@@ -1,167 +1,276 @@
-import { FileText, Calendar, Clock, TrendingUp, Award, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Clock, TrendingUp, Award, AlertTriangle, Loader2, BookOpen, User, BarChart3, ChevronRight } from "lucide-react";
+import { studentApi } from "../../service/apiService";
+import { useAuth } from "../../context/AuthProvider";
 
 export default function ExamsOverview({ onExamSelect }) {
-  // Mock data for exams
-  const exams = [
-    {
-      id: 1,
-      title: "Advanced Calculus Midterm",
-      course: "Advanced Mathematics",
-      instructor: "Dr. Sarah Wilson",
-      date: "2024-03-15",
-      totalGrade: 87,
-      maxGrade: 100,
-      status: "completed",
-      questions: [
-        { number: 1, grade: 18, maxGrade: 20, aiExplanation: "Excellent understanding of derivative concepts. Minor calculation error in step 3." },
-        { number: 2, grade: 15, maxGrade: 20, aiExplanation: "Good approach to integration by parts. Could improve setup clarity." },
-        { number: 3, grade: 19, maxGrade: 20, aiExplanation: "Perfect application of chain rule. Well-organized solution." },
-        { number: 4, grade: 17, maxGrade: 20, aiExplanation: "Correct method for optimization problem. Small error in final calculation." },
-        { number: 5, grade: 18, maxGrade: 20, aiExplanation: "Strong understanding of limits. Clear step-by-step approach." }
-      ]
-    },
-    {
-      id: 2,
-      title: "Data Structures Quiz",
-      course: "Computer Science Fundamentals",
-      instructor: "Prof. Ahmed Hassan",
-      date: "2024-03-10",
-      totalGrade: 92,
-      maxGrade: 100,
-      status: "completed",
-      questions: [
-        { number: 1, grade: 19, maxGrade: 20, aiExplanation: "Excellent implementation of binary search tree. Clean and efficient code." },
-        { number: 2, grade: 18, maxGrade: 20, aiExplanation: "Good understanding of hash tables. Minor optimization possible." },
-        { number: 3, grade: 20, maxGrade: 20, aiExplanation: "Perfect sorting algorithm implementation. Optimal time complexity." },
-        { number: 4, grade: 17, maxGrade: 20, aiExplanation: "Correct graph traversal approach. Could improve space complexity." },
-        { number: 5, grade: 18, maxGrade: 20, aiExplanation: "Strong grasp of dynamic programming. Well-structured solution." }
-      ]
-    },
-    {
-      id: 3,
-      title: "Signal Processing Lab",
-      course: "Digital Signal Processing",
-      instructor: "Dr. Maria Rodriguez",
-      date: "2024-03-08",
-      totalGrade: 78,
-      maxGrade: 100,
-      status: "completed",
-      questions: [
-        { number: 1, grade: 16, maxGrade: 20, aiExplanation: "Good understanding of FFT concepts. Some confusion in frequency domain analysis." },
-        { number: 2, grade: 14, maxGrade: 20, aiExplanation: "Basic filter design is correct. Missing key considerations for practical implementation." },
-        { number: 3, grade: 18, maxGrade: 20, aiExplanation: "Excellent MATLAB implementation. Clear visualization of results." },
-        { number: 4, grade: 15, maxGrade: 20, aiExplanation: "Correct sampling theorem application. Could elaborate on aliasing effects." },
-        { number: 5, grade: 15, maxGrade: 20, aiExplanation: "Adequate convolution analysis. Missing edge case considerations." }
-      ]
-    },
-    {
-      id: 4,
-      title: "Machine Learning Assignment",
-      course: "Machine Learning",
-      instructor: "Prof. David Chen",
-      date: "2024-03-20",
-      totalGrade: 0,
-      maxGrade: 100,
-      status: "upcoming",
-      questions: []
-    }
-  ];
+  const [examsData, setExamsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { currentUser } = useAuth();
 
-  const getGradeColor = (grade, maxGrade) => {
-    const percentage = (grade / maxGrade) * 100;
+  useEffect(() => {
+    const fetchStudentExams = async () => {
+      if (!currentUser?.id) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await studentApi.getStudentAllExams(currentUser.id);
+        console.log("ExamsOverview - Received data:", data);
+        console.log("ExamsOverview - First exam:", data?.exams?.[0]);
+        setExamsData(data);
+      } catch (err) {
+        console.error("Error fetching student exams:", err);
+        setError(err.message || "Failed to load exams");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudentExams();
+  }, [currentUser]);
+
+  const getGradeColor = (percentage) => {
     if (percentage >= 90) return "text-emerald-600";
     if (percentage >= 80) return "text-blue-600";
     if (percentage >= 70) return "text-amber-600";
     return "text-red-600";
   };
 
-  const getGradeBg = (grade, maxGrade) => {
-    const percentage = (grade / maxGrade) * 100;
+  const getGradeBg = (percentage) => {
     if (percentage >= 90) return "from-emerald-50 to-green-50 border-emerald-100";
     if (percentage >= 80) return "from-blue-50 to-sky-50 border-blue-100";
     if (percentage >= 70) return "from-amber-50 to-orange-50 border-amber-100";
     return "from-red-50 to-rose-50 border-red-100";
   };
 
-  const completedExams = exams.filter(exam => exam.status === "completed");
-  const upcomingExams = exams.filter(exam => exam.status === "upcoming");
-  const averageGrade = completedExams.length > 0 
-    ? Math.round(completedExams.reduce((sum, exam) => sum + (exam.totalGrade / exam.maxGrade) * 100, 0) / completedExams.length)
-    : 0;
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl shadow-lg">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Exams Overview</h1>
+              <p className="text-gray-600">Track your academic performance</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-12 shadow-xl border border-sky-100">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 text-sky-500 animate-spin" />
+            <p className="text-gray-600 text-lg">Loading your exam data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl shadow-lg">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Exams Overview</h1>
+              <p className="text-gray-600">Track your academic performance</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-12 shadow-xl border border-red-100">
+          <div className="flex flex-col items-center gap-4">
+            <div className="p-4 bg-red-100 rounded-full">
+              <AlertTriangle className="w-12 h-12 text-red-600" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Failed to Load Exams</h3>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!examsData || examsData.exams.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl shadow-lg">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Exams Overview</h1>
+              <p className="text-gray-600">Track your academic performance</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-12 shadow-xl border border-sky-100">
+          <div className="flex flex-col items-center gap-4">
+            <div className="p-4 bg-sky-100 rounded-full">
+              <FileText className="w-12 h-12 text-sky-600" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Exams Yet</h3>
+              <p className="text-gray-600">{examsData?.message || "You haven't taken any exams yet. Check back later!"}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { overall_statistics: overallStats, performance_by_subject: performanceBySubject, exams } = examsData;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-3 rounded-xl shadow-lg">
-            <FileText className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Exams Overview</h1>
-            <p className="text-gray-600">Track your exam performance and grades</p>
+      {/* Student Info Header */}
+      {examsData.student && (
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl shadow-lg">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Welcome, {examsData.student.name}</h1>
+              <p className="text-gray-600">Student ID: {examsData.student.id}</p>
+            </div>
           </div>
         </div>
-        
-        {/* Performance Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-r from-sky-50 to-blue-50 p-4 rounded-xl border border-sky-100">
-            <div className="flex items-center space-x-3">
-              <FileText className="w-5 h-5 text-sky-600" />
-              <div>
-                <p className="text-sm text-gray-600">Total Exams</p>
-                <p className="text-xl font-bold text-sky-700">{exams.length}</p>
-              </div>
+      )}
+
+      <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl shadow-lg">
+            <BarChart3 className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">Academic Performance Overview</h2>
+            <p className="text-gray-600">Comprehensive view of your exam results and progress</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl shadow-lg">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Exams</p>
+              <p className="text-2xl font-bold text-gray-800">{examsData.total_exams}</p>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-4 rounded-xl border border-emerald-100">
-            <div className="flex items-center space-x-3">
-              <Award className="w-5 h-5 text-emerald-600" />
-              <div>
-                <p className="text-sm text-gray-600">Average Grade</p>
-                <p className="text-xl font-bold text-emerald-700">{averageGrade}%</p>
-              </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-emerald-100">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl shadow-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Overall Score</p>
+              <p className={`text-2xl font-bold ${getGradeColor(overallStats.overall_percentage)}`}>
+                {overallStats.overall_percentage}%
+              </p>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100">
-            <div className="flex items-center space-x-3">
-              <TrendingUp className="w-5 h-5 text-indigo-600" />
-              <div>
-                <p className="text-sm text-gray-600">Completed</p>
-                <p className="text-xl font-bold text-indigo-700">{completedExams.length}</p>
-              </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-amber-100">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shadow-lg">
+              <Award className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Points</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {overallStats.total_grade}/{overallStats.total_max_grade}
+              </p>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-100">
-            <div className="flex items-center space-x-3">
-              <Clock className="w-5 h-5 text-amber-600" />
-              <div>
-                <p className="text-sm text-gray-600">Upcoming</p>
-                <p className="text-xl font-bold text-amber-700">{upcomingExams.length}</p>
-              </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-purple-100">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl shadow-lg">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Subjects</p>
+              <p className="text-2xl font-bold text-gray-800">{overallStats.subjects_count}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Upcoming Exams */}
-      {upcomingExams.length > 0 && (
+      {performanceBySubject && performanceBySubject.length > 0 && (
         <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
-            <Clock className="w-5 h-5 text-amber-600" />
-            <span>Upcoming Exams</span>
-          </h2>
-          <div className="space-y-3">
-            {upcomingExams.map((exam) => (
-              <div key={exam.id} className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-100">
-                <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg">
+              <BookOpen className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Performance by Subject</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {performanceBySubject.map((subject) => (
+              <div 
+                key={subject.subject_name}
+                className={`p-4 rounded-xl border bg-gradient-to-br ${getGradeBg(subject.average_percentage)}`}
+              >
+                <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h3 className="font-bold text-gray-800">{exam.title}</h3>
-                    <p className="text-sm text-gray-600">{exam.course} • {exam.instructor}</p>
+                    <h3 className="font-semibold text-gray-800">{subject.subject_name}</h3>
+                    <p className="text-xs text-gray-600">👨‍🏫 {subject.teacher_name}</p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-amber-600" />
-                    <span className="text-sm font-medium text-amber-700">{exam.date}</span>
+                  <span className={`text-lg font-bold ${getGradeColor(subject.average_percentage)}`}>
+                    {subject.average_percentage}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  <div className="flex justify-between">
+                    <span>Exams:</span>
+                    <span className="font-medium">{subject.exams_count}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Points:</span>
+                    <span className="font-medium">{subject.total_grade}/{subject.total_max_grade}</span>
+                  </div>
+                </div>
+                {/* Progress bar for subject performance */}
+                <div className="mt-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-sky-500 to-indigo-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${subject.average_percentage}%` }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -170,57 +279,96 @@ export default function ExamsOverview({ onExamSelect }) {
         </div>
       )}
 
-      {/* Completed Exams */}
       <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
-          <Award className="w-5 h-5 text-emerald-600" />
-          <span>Completed Exams</span>
-        </h2>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {completedExams.map((exam) => (
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg">
+            <FileText className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-800">All Exams</h2>
+        </div>
+
+        <div className="space-y-4">
+          {exams.map((exam) => (
             <div 
-              key={exam.id} 
-              className={`bg-gradient-to-r ${getGradeBg(exam.totalGrade, exam.maxGrade)} p-6 rounded-2xl border cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
-              onClick={() => onExamSelect(exam)}
+              key={exam.exam_id} 
+              className={`bg-gradient-to-r ${getGradeBg(exam.percentage)} p-6 rounded-2xl border cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
+              onClick={() => onExamSelect && onExamSelect({
+                examId: exam.exam_id,
+                title: exam.exam_name,
+                subjectId: exam.subject_id,
+                subjectName: exam.subject_name,
+                teacherId: exam.teacher_id,
+                teacherName: exam.teacher_name,
+                teacherEmail: exam.teacher_email,
+                score: exam.percentage,
+                studentGrade: exam.student_grade,
+                maxGrade: exam.max_grade,
+                totalQuestions: exam.num_of_questions,
+                submittedAt: exam.date_taken,
+                questionGrades: exam.question_grades,
+                status: exam.status
+              })}
             >
               {/* Exam Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-800 mb-1">{exam.title}</h3>
-                  <p className="text-sm text-gray-600">{exam.course}</p>
-                  <p className="text-xs text-gray-500">{exam.instructor}</p>
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">{exam.exam_name}</h3>
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                    <div className="flex items-center space-x-1">
+                      <BookOpen className="w-4 h-4" />
+                      <span>{exam.subject_name}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <User className="w-4 h-4" />
+                      <span>{exam.teacher_name}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <FileText className="w-4 h-4" />
+                      <span>{exam.num_of_questions} questions</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4 text-xs text-gray-500">
+                    {exam.date_taken && (
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatDate(exam.date_taken)}</span>
+                      </div>
+                    )}
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      exam.status === 'Completed' 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {exam.status}
+                    </div>
+                  </div>
                 </div>
-                <div className={`text-right ${getGradeColor(exam.totalGrade, exam.maxGrade)}`}>
-                  <div className="text-2xl font-bold">{exam.totalGrade}</div>
-                  <div className="text-sm">/ {exam.maxGrade}</div>
+                <div className={`text-right ${getGradeColor(exam.percentage)}`}>
+                  <div className="text-2xl font-bold">{exam.student_grade}</div>
+                  <div className="text-sm">/ {exam.max_grade}</div>
+                  <div className="text-xs text-gray-600 mt-1">{exam.percentage}%</div>
                 </div>
               </div>
 
               {/* Grade Bar */}
               <div className="mb-4">
-                <div className="bg-white/60 rounded-full h-2 overflow-hidden">
+                <div className="bg-white/60 rounded-full h-3 overflow-hidden">
                   <div 
                     className="bg-gradient-to-r from-sky-500 to-indigo-600 h-full transition-all duration-500"
-                    style={{ width: `${(exam.totalGrade / exam.maxGrade) * 100}%` }}
+                    style={{ width: `${exam.percentage}%` }}
                   ></div>
                 </div>
                 <div className="flex justify-between text-xs text-gray-600 mt-1">
-                  <span>Grade: {Math.round((exam.totalGrade / exam.maxGrade) * 100)}%</span>
-                  <span>{exam.date}</span>
+                  <span>Score: {exam.percentage}%</span>
+                  <span>{exam.student_grade} / {exam.max_grade} points</span>
                 </div>
               </div>
 
-              {/* Quick Stats */}
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-1">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{exam.questions.length} Questions</span>
-                  </div>
-                </div>
-                <button className="bg-white/60 hover:bg-white/80 text-sky-700 px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 border border-sky-200">
-                  View Details
+              {/* Action Button */}
+              <div className="flex justify-end">
+                <button className="bg-white/60 hover:bg-white/80 text-sky-700 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border border-sky-200 flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span>View Details</span>
                 </button>
               </div>
             </div>

@@ -1,23 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Mail, Phone, MapPin, Calendar, BookOpen, Award, Edit3, Save, X, Camera } from "lucide-react";
+import { useAuth } from "../../context/AuthProvider";
 
 export default function StudentProfile() {
+  const { currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: "Alex Johnson",
-    email: "alex.johnson@university.edu",
-    phone: "+1 (555) 123-4567",
-    address: "123 College Ave, University City, UC 12345",
-    dateOfBirth: "1999-08-15",
-    studentId: "ST2021001234",
-    major: "Computer Science",
-    year: "3rd Year",
-    gpa: "3.85",
-    enrollmentDate: "2021-09-01",
-    avatar: "https://via.placeholder.com/120?text=AJ"
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    dateOfBirth: "",
+    studentId: "",
+    major: "",
+    year: "",
+    gpa: "",
+    enrollmentDate: "",
+    avatar: ""
   });
 
   const [editData, setEditData] = useState({ ...profileData });
+
+  // Initialize profile data from auth context
+  useEffect(() => {
+    if (currentUser) {
+      const initialData = {
+        name: currentUser.name || "",
+        email: currentUser.email || "",
+        phone: currentUser.phone || "",
+        address: currentUser.address || "",
+        dateOfBirth: currentUser.dateOfBirth || "",
+        studentId: currentUser.id || "",
+        major: currentUser.major || "",
+        year: currentUser.year || "",
+        gpa: currentUser.gpa || "",
+        enrollmentDate: currentUser.enrollmentDate || "",
+        avatar: currentUser.avatar || ""
+      };
+      setProfileData(initialData);
+      setEditData(initialData);
+    }
+  }, [currentUser]);
 
   const handleSave = () => {
     setProfileData({ ...editData });
@@ -30,10 +53,10 @@ export default function StudentProfile() {
   };
 
   const stats = [
-    { label: "Total Courses", value: "12", icon: BookOpen, color: "from-sky-50 to-blue-50 border-sky-100 text-sky-600" },
-    { label: "Current GPA", value: profileData.gpa, icon: Award, color: "from-emerald-50 to-green-50 border-emerald-100 text-emerald-600" },
-    { label: "Years Enrolled", value: "3", icon: Calendar, color: "from-indigo-50 to-purple-50 border-indigo-100 text-indigo-600" },
-    { label: "Completed Credits", value: "84", icon: BookOpen, color: "from-amber-50 to-orange-50 border-amber-100 text-amber-600" }
+    { label: "Student ID", value: profileData.studentId || "N/A", icon: User, color: "from-sky-50 to-blue-50 border-sky-100 text-sky-600" },
+    { label: "Current GPA", value: profileData.gpa || "N/A", icon: Award, color: "from-emerald-50 to-green-50 border-emerald-100 text-emerald-600" },
+    { label: "Academic Year", value: profileData.year || "N/A", icon: Calendar, color: "from-indigo-50 to-purple-50 border-indigo-100 text-indigo-600" },
+    { label: "Major", value: profileData.major || "N/A", icon: BookOpen, color: "from-amber-50 to-orange-50 border-amber-100 text-amber-600" }
   ];
 
   return (
@@ -86,20 +109,30 @@ export default function StudentProfile() {
           <div className="lg:col-span-1">
             <div className="text-center">
               <div className="relative inline-block mb-4">
-                <img
-                  src={isEditing ? editData.avatar : profileData.avatar}
-                  alt="Profile"
-                  className="w-32 h-32 rounded-2xl object-cover border-4 border-sky-200 shadow-lg"
-                />
+                {(isEditing ? editData.avatar : profileData.avatar) ? (
+                  <img
+                    src={isEditing ? editData.avatar : profileData.avatar}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-2xl object-cover border-4 border-sky-200 shadow-lg"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white border-4 border-sky-200 shadow-lg flex items-center justify-center text-3xl font-bold">
+                    {(isEditing ? editData.name : profileData.name)
+                      .split(' ')
+                      .map(name => name[0])
+                      .join('')
+                      .toUpperCase() || 'U'}
+                  </div>
+                )}
                 {isEditing && (
                   <button className="absolute bottom-2 right-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-2 rounded-lg shadow-lg hover:from-sky-600 hover:to-indigo-700 transition-all duration-300">
                     <Camera className="w-4 h-4" />
                   </button>
                 )}
               </div>
-              <h2 className="text-xl font-bold text-gray-800">{isEditing ? editData.name : profileData.name}</h2>
-              <p className="text-sky-600 font-medium">{profileData.major}</p>
-              <p className="text-sm text-gray-500">Student ID: {profileData.studentId}</p>
+              <h2 className="text-xl font-bold text-gray-800">{(isEditing ? editData.name : profileData.name) || "Student"}</h2>
+              <p className="text-sky-600 font-medium">{profileData.major || "Major not specified"}</p>
+              <p className="text-sm text-gray-500">Student ID: {profileData.studentId || "N/A"}</p>
             </div>
           </div>
 
@@ -121,7 +154,7 @@ export default function StudentProfile() {
                   ) : (
                     <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl border border-sky-100">
                       <User className="w-4 h-4 text-sky-600" />
-                      <span className="text-gray-800">{profileData.name}</span>
+                      <span className="text-gray-800">{profileData.name || "Not provided"}</span>
                     </div>
                   )}
                 </div>
@@ -139,7 +172,7 @@ export default function StudentProfile() {
                   ) : (
                     <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl border border-sky-100">
                       <Mail className="w-4 h-4 text-sky-600" />
-                      <span className="text-gray-800">{profileData.email}</span>
+                      <span className="text-gray-800">{profileData.email || "Not provided"}</span>
                     </div>
                   )}
                 </div>
@@ -157,7 +190,7 @@ export default function StudentProfile() {
                   ) : (
                     <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl border border-sky-100">
                       <Phone className="w-4 h-4 text-sky-600" />
-                      <span className="text-gray-800">{profileData.phone}</span>
+                      <span className="text-gray-800">{profileData.phone || "Not provided"}</span>
                     </div>
                   )}
                 </div>
@@ -175,7 +208,9 @@ export default function StudentProfile() {
                   ) : (
                     <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl border border-sky-100">
                       <Calendar className="w-4 h-4 text-sky-600" />
-                      <span className="text-gray-800">{new Date(profileData.dateOfBirth).toLocaleDateString()}</span>
+                      <span className="text-gray-800">
+                        {profileData.dateOfBirth ? new Date(profileData.dateOfBirth).toLocaleDateString() : "Not provided"}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -195,7 +230,7 @@ export default function StudentProfile() {
               ) : (
                 <div className="flex items-start space-x-3 px-4 py-3 bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl border border-sky-100">
                   <MapPin className="w-4 h-4 text-sky-600 mt-0.5" />
-                  <span className="text-gray-800">{profileData.address}</span>
+                  <span className="text-gray-800">{profileData.address || "Not provided"}</span>
                 </div>
               )}
             </div>
@@ -208,7 +243,7 @@ export default function StudentProfile() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Major</label>
                   <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100">
                     <BookOpen className="w-4 h-4 text-emerald-600" />
-                    <span className="text-gray-800">{profileData.major}</span>
+                    <span className="text-gray-800">{profileData.major || "Not specified"}</span>
                   </div>
                 </div>
                 
@@ -216,7 +251,7 @@ export default function StudentProfile() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Academic Year</label>
                   <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
                     <Calendar className="w-4 h-4 text-indigo-600" />
-                    <span className="text-gray-800">{profileData.year}</span>
+                    <span className="text-gray-800">{profileData.year || "Not specified"}</span>
                   </div>
                 </div>
 
@@ -224,7 +259,9 @@ export default function StudentProfile() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Enrollment Date</label>
                   <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100">
                     <Calendar className="w-4 h-4 text-amber-600" />
-                    <span className="text-gray-800">{new Date(profileData.enrollmentDate).toLocaleDateString()}</span>
+                    <span className="text-gray-800">
+                      {profileData.enrollmentDate ? new Date(profileData.enrollmentDate).toLocaleDateString() : "Not provided"}
+                    </span>
                   </div>
                 </div>
 
@@ -232,7 +269,7 @@ export default function StudentProfile() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Current GPA</label>
                   <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100">
                     <Award className="w-4 h-4 text-emerald-600" />
-                    <span className="text-gray-800 font-bold">{profileData.gpa}</span>
+                    <span className="text-gray-800 font-bold">{profileData.gpa || "N/A"}</span>
                   </div>
                 </div>
               </div>

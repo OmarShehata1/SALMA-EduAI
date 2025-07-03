@@ -48,6 +48,50 @@ apiClient.interceptors.response.use(
 
 // Student-related API functions
 export const studentApi = {
+  // Get all teachers with subjects that a student is enrolled in
+  getStudentTeachersAndSubjects: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/teachers/student/${studentId}/teachers-subjects`);
+      return response.data; // Expected format: { student: {id, name}, teachers: [...], total_teachers, total_subjects, message? }
+    } catch (error) {
+      console.error("Error fetching student teachers and subjects:", error);
+      throw error;
+    }
+  },
+
+  // Get subjects that a student has with a specific teacher
+  getStudentTeacherSubjects: async (studentId, teacherId) => {
+    try {
+      const response = await apiClient.get(`/teachers/student/${studentId}/teacher/${teacherId}/subjects`);
+      return response.data; // Expected format: { student: {...}, teacher: {...}, subjects: [...], total_shared_subjects }
+    } catch (error) {
+      console.error("Error fetching student-teacher subjects:", error);
+      throw error;
+    }
+  },
+
+  // Get exams a student took for a specific subject
+  getStudentSubjectExams: async (teacherId, subjectId, studentId) => {
+    try {
+      const response = await apiClient.get(`/teachers/${teacherId}/subjects/${subjectId}/students/${studentId}/exams`);
+      return response.data; // Expected format: { subject: {...}, student: {...}, exams: [...], message? }
+    } catch (error) {
+      console.error("Error fetching student subject exams:", error);
+      throw error;
+    }
+  },
+
+  // Get all exams that a student has taken
+  getStudentAllExams: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/teachers/student/${studentId}/exams`);
+      return response.data; // Expected format: { student: {...}, exams: [...], total_exams, overall_statistics, performance_by_subject }
+    } catch (error) {
+      console.error("Error fetching student exams:", error);
+      throw error;
+    }
+  },
+
   // Get student by ID
   getStudentById: async (studentId) => {
     try {
@@ -128,17 +172,6 @@ export const teacherApi = {
       return response.data; // Expected format: { subject: {id, name}, students: [...], message?: string }
     } catch (error) {
       console.error("Error fetching subject students:", error);
-      throw error;
-    }
-  },
-
-  // Get exams a student took for a specific subject
-  getStudentSubjectExams: async (teacherId, subjectId, studentId) => {
-    try {
-      const response = await apiClient.get(`/teachers/${teacherId}/subjects/${subjectId}/students/${studentId}/exams`);
-      return response.data; // Expected format: { subject: {id, name}, student: {id, name}, exams: [...], message?: string }
-    } catch (error) {
-      console.error("Error fetching student subject exams:", error);
       throw error;
     }
   },
