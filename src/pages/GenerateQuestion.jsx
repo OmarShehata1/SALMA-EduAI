@@ -9,22 +9,23 @@ export default function QuestionGenerator() {
   const { selectedText, currentPdf } = usePDFContext();
   const { currentUser } = useAuth();
   const [topic, setTopic] = useState(selectedText || "");
-  const [language, setLanguage] = useState("en");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();  const topicInputRef = useRef(null);
+  const navigate = useNavigate();
+  const topicInputRef = useRef(null);
   // const url = "https://localhost:7102";
   // Helper function to safely get current user
   const getCurrentUser = useCallback(() => {
     try {
-      return currentUser || JSON.parse(localStorage.getItem('user'));
+      return currentUser || JSON.parse(localStorage.getItem("user"));
     } catch (error) {
-      console.error('Error getting current user:', error);
+      console.error("Error getting current user:", error);
       return null;
     }
-  }, [currentUser]);  useEffect(() => {
+  }, [currentUser]);
+  useEffect(() => {
     if (selectedText && topicInputRef.current) {
       topicInputRef.current.focus();
     }
@@ -41,10 +42,11 @@ export default function QuestionGenerator() {
 
   const generateQuestions = async () => {
     setIsGenerating(true);
-    setError(null);    try {
+    setError(null);
+    try {
       // Get current user from localStorage or context
       const user = getCurrentUser();
-      
+
       if (!user || !user.id) {
         throw new Error("User not authenticated. Please log in again.");
       }
@@ -56,48 +58,65 @@ export default function QuestionGenerator() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.token}`,
-          },          body: JSON.stringify({
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
             pdfName: currentPdf ? currentPdf.name : null,
             paragraph: topic, // Changed from selectedText to paragraph to match backend
-            lang: language, // Send language to backend
+            lang: "en", // Default language
           }),
         }
-      );      if (!response.ok) {
+      );
+      if (!response.ok) {
         if (response.status === 401) {
           throw new Error("Authentication failed. Please log in again.");
         }
         throw new Error(`API error: ${response.status}`);
-      }      const data = await response.json();
+      }
+      const data = await response.json();
       console.log("Raw API response:", data);
 
       // Process the returned questions based on the actual API response structure
-      let formattedQuestions = [];      if (data && Array.isArray(data)) {
+      let formattedQuestions = [];
+      if (data && Array.isArray(data)) {
         // If data is directly an array of questions
         formattedQuestions = data.map((q, index) => ({
-          id: q.id || `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`,
+          id:
+            q.id ||
+            `question-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}-${index}`,
           question:
             q.question || q.questionText || q.text || "Question not available",
           answer: q.answer || q.correctAnswer || "Answer not available",
           isSelected: true, // Auto-select all generated questions
           grade: q.grade || q.points || 10, // Use API grade or default
           source: currentPdf ? currentPdf.name : "PDF Source",
-        }));      } else if (data && data.questions && Array.isArray(data.questions)) {
+        }));
+      } else if (data && data.questions && Array.isArray(data.questions)) {
         // If data has a questions property that contains the array
         formattedQuestions = data.questions.map((q, index) => ({
-          id: q.id || `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`,
+          id:
+            q.id ||
+            `question-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}-${index}`,
           question:
             q.question || q.questionText || q.text || "Question not available",
           answer: q.answer || q.correctAnswer || "Answer not available",
           isSelected: true,
-          grade: q.grade || q.points || 10,          source: currentPdf ? currentPdf.name : "PDF Source",
+          grade: q.grade || q.points || 10,
+          source: currentPdf ? currentPdf.name : "PDF Source",
         }));
-
       } else if (data && typeof data === "object") {
         // If data is a single question object, wrap it in an array
         formattedQuestions = [
           {
-            id: data.id || `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-single`,
+            id:
+              data.id ||
+              `question-${Date.now()}-${Math.random()
+                .toString(36)
+                .substr(2, 9)}-single`,
             question:
               data.question ||
               data.questionText ||
@@ -121,26 +140,30 @@ export default function QuestionGenerator() {
 
       // Set the newly generated questions (don't merge with existing ones here)
       setGeneratedQuestions(formattedQuestions);
-      
+
       console.log("Formatted questions:", formattedQuestions);
     } catch (err) {
       console.error("Error generating questions:", err);
-      
+
       // Handle specific authentication errors
-      if (err.message.includes("not authenticated") || err.message.includes("Authentication failed")) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+      if (
+        err.message.includes("not authenticated") ||
+        err.message.includes("Authentication failed")
+      ) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
         navigate("/login");
         return;
       }
-      
+
       setError(
         err.message || "Failed to generate questions. Please try again."
       );
     } finally {
       setIsGenerating(false);
     }
-  };  const handleCheckboxChange = (id) => {
+  };
+  const handleCheckboxChange = (id) => {
     setGeneratedQuestions(
       generatedQuestions.map((q) =>
         q.id === id ? { ...q, isSelected: !q.isSelected } : q
@@ -168,7 +191,6 @@ export default function QuestionGenerator() {
     navigate("/questions", {
       state: {
         newQuestions: selectedQuestions,
-        lang: language, // Pass the selected language
       },
     });
   };
@@ -200,17 +222,21 @@ export default function QuestionGenerator() {
           </svg>
           Back to PDF
         </button>
-      </div>      {currentPdf && (
+      </div>{" "}
+      {currentPdf && (
         <div className="mb-4 text-sm text-gray-600">
           <p>Source: {currentPdf.name}</p>
           {currentUser && (
-            <p className="text-xs text-gray-500">Logged in as: {currentUser.email || 'User'}</p>
+            <p className="text-xs text-gray-500">
+              Logged in as: {currentUser.email || "User"}
+            </p>
           )}
         </div>
       )}
-
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="col-span-2">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        {" "}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="col-span-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Topic
             </label>
@@ -223,22 +249,7 @@ export default function QuestionGenerator() {
               rows="8"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Language
-            </label>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="en">English</option>
-              <option value="ar">Arabic</option>
-            </select>
-          </div>
         </div>
-
         <button
           onClick={generateQuestions}
           disabled={!topic || isGenerating}
@@ -250,11 +261,14 @@ export default function QuestionGenerator() {
         >
           {isGenerating ? "Generating..." : "Generate Questions"}
         </button>
-
         {error && <div className="mt-3 text-red-600 text-sm">{error}</div>}
       </div>
-
-      {generatedQuestions.length > 0 && (        <div className="mb-8">          <div className="flex justify-between items-center mb-4">            <h2 className="text-xl font-semibold">
+      {generatedQuestions.length > 0 && (
+        <div className="mb-8">
+          {" "}
+          <div className="flex justify-between items-center mb-4">
+            {" "}
+            <h2 className="text-xl font-semibold">
               Generated Questions ({generatedQuestions.length})
             </h2>
             <button
@@ -263,7 +277,8 @@ export default function QuestionGenerator() {
             >
               Save Selected Questions
             </button>
-          </div>          <div className="space-y-4">
+          </div>{" "}
+          <div className="space-y-4">
             {generatedQuestions.map((question) => (
               <GeneratedQuestion
                 key={question.id}
@@ -275,15 +290,13 @@ export default function QuestionGenerator() {
           </div>
         </div>
       )}
-
       {editingQuestion && (
         <QuestionEditor
           question={editingQuestion}
           onSave={handleSaveEdit}
           onCancel={handleCancelEdit}
         />
-      )
-      }
+      )}
     </div>
   );
 }

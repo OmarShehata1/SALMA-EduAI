@@ -15,7 +15,6 @@ export default function CreateFullExam() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [generationProgress, setGenerationProgress] = useState(0);
@@ -104,11 +103,6 @@ export default function CreateFullExam() {
     );
   };
 
-  // Handle language change
-  const handleLanguageChange = (language) => {
-    setSelectedLanguage(language);
-  };
-
   // Generate questions based on selected files and settings
   const generateQuestions = async () => {
     // Reset previous errors
@@ -117,13 +111,6 @@ export default function CreateFullExam() {
     // Validation checks
     if (selectedFileIds.length === 0) {
       const errorMsg = "Please select at least one PDF file to generate questions.";
-      setError(errorMsg);
-      addNotification(errorMsg, "warning");
-      return;
-    }
-
-    if (!selectedLanguage) {
-      const errorMsg = "Please select a language for question generation.";
       setError(errorMsg);
       addNotification(errorMsg, "warning");
       return;
@@ -163,7 +150,6 @@ export default function CreateFullExam() {
       console.log("Starting full exam generation...");
       console.log("Teacher ID:", teacherId);
       console.log("Selected files:", selectedFileIds.length);
-      console.log("Selected language:", selectedLanguage);
 
       addNotification("Starting PDF upload...", "info");
 
@@ -250,7 +236,7 @@ export default function CreateFullExam() {
 
       const requestBody = { 
         pdfNames: pdfNames,
-        lang: selectedLanguage 
+        lang: "en" // Default language, will be set later when creating exam
       };
       console.log("Request body:", JSON.stringify(requestBody, null, 2));
       
@@ -468,14 +454,6 @@ export default function CreateFullExam() {
         return;
       }
 
-      // Validate language selection
-      if (!selectedLanguage) {
-        const errorMsg = "Language selection is missing. Please go back and select a language.";
-        setError(errorMsg);
-        addNotification(errorMsg, "warning");
-        return;
-      }
-
       addNotification(`Adding ${selectedQuestions.length} questions to your collection...`, "info");
 
       // Navigate to DisplayQuestions page with the selected questions
@@ -483,7 +461,6 @@ export default function CreateFullExam() {
         state: {
           newQuestions: selectedQuestions,
           addToExisting: true,
-          lang: selectedLanguage, // Pass the selected language
           successMessage: `🎉 Successfully added ${selectedQuestions.length} questions to your collection! You can now create an exam with them.`,
         },
       });
@@ -669,8 +646,6 @@ export default function CreateFullExam() {
                 generateQuestions={generateQuestions}
                 isGenerating={isGenerating}
                 selectedFileIds={selectedFileIds}
-                selectedLanguage={selectedLanguage}
-                onLanguageChange={handleLanguageChange}
               />
             </div>
           </div>

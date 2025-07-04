@@ -8,8 +8,8 @@ export default function QuestionsDisplay() {
   const [questions, setQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [examName, setExamName] = useState("");
-  const [fullMark, setFullMark] = useState(0);
   const [subjectId, setSubjectId] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [availableSubjects, setAvailableSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
   const [showExamForm, setShowExamForm] = useState(false);
@@ -22,6 +22,11 @@ export default function QuestionsDisplay() {
 
   // Initialize notification manager
   const { addNotification, NotificationList } = NotificationManager();
+
+  // Calculate total marks from all questions
+  const fullMark = questions.reduce((total, question) => {
+    return total + (question.grade || 0);
+  }, 0);
   useEffect(() => {
     const executionId = Math.random().toString(36).substr(2, 9);
     console.log(`DEBUG: useEffect running with execution ID: ${executionId}`);
@@ -324,7 +329,11 @@ export default function QuestionsDisplay() {
       return;
     }
 
-    console.log("DEBUG: Form submitted with values:", { examName, fullMark });
+    console.log("DEBUG: Form submitted with values:", { 
+      examName, 
+      fullMark: fullMark, 
+      calculatedFromQuestions: true 
+    });
     console.log("DEBUG: examName type:", typeof examName, "value:", examName);
     console.log("DEBUG: Available questions:", questions.length);
 
@@ -369,6 +378,12 @@ export default function QuestionsDisplay() {
       return;
     }
 
+    if (!selectedLanguage) {
+      console.log("DEBUG: No language selected - showing warning");
+      addNotification("Please select a language", "warning");
+      return;
+    }
+
     try {
       console.log("DEBUG: Starting exam creation process");
       setIsLoading(true);
@@ -406,6 +421,7 @@ export default function QuestionsDisplay() {
         subject: subjectId || "",
         questions: questionsData,
         students: [],
+        lang: selectedLanguage, // Include language for PDF generation
       };
       console.log("DEBUG: Full request body:", requestBody);
 
@@ -474,7 +490,6 @@ export default function QuestionsDisplay() {
       // Reset form and close it
       console.log("DEBUG: Resetting form and closing modal");
       setExamName("");
-      setFullMark(0);
       setSubjectId("");
       setShowExamForm(false);
 
@@ -546,6 +561,33 @@ export default function QuestionsDisplay() {
           </Link>{" "}
         </div>
       </div>
+
+      {/* Questions Summary Card */}
+      {questions.length > 0 && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                {questions.length}
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-blue-900">
+                  {questions.length} Question{questions.length !== 1 ? 's' : ''} Ready
+                </h3>
+                <p className="text-sm text-blue-700">
+                  Total exam marks: {fullMark} points
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-blue-600">Average per question:</p>
+              <p className="text-lg font-semibold text-blue-800">
+                {questions.length > 0 ? (fullMark / questions.length).toFixed(1) : 0} points
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Teacher ID warning if not found */}
       {!teacherId && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
@@ -686,17 +728,38 @@ export default function QuestionsDisplay() {
                   htmlFor="fullMark"
                   className="block text-gray-700 font-medium mb-2"
                 >
-                  Full Mark
+                  Full Mark (Auto-calculated)
                 </label>
                 <input
                   type="number"
                   id="fullMark"
                   value={fullMark}
-                  onChange={(e) => setFullMark(Number(e.target.value))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min="1"
-                  required
+                  readOnly
+                  disabled
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
+                <p className="text-sm text-gray-500 mt-1">
+                  Total marks calculated from all questions: {fullMark} points
+                  {fullMark === 0 && " (No questions added yet)"}
+                </p>
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="language"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  Language
+                </label>
+                <select
+                  id="language"
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="en">🇺🇸 English</option>
+                  <option value="ar">🇸🇦 العربية (Arabic)</option>
+                </select>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
@@ -715,7 +778,8 @@ export default function QuestionsDisplay() {
                     !examName ||
                     (!subjectId && availableSubjects.length > 0) ||
                     questions.length === 0 ||
-                    !teacherId
+                    !teacherId ||
+                    !selectedLanguage
                   }
                   className={`px-4 py-2 rounded-md font-medium ${
                     isLoading ||
@@ -724,7 +788,8 @@ export default function QuestionsDisplay() {
                     !examName ||
                     (!subjectId && availableSubjects.length > 0) ||
                     questions.length === 0 ||
-                    !teacherId
+                    !teacherId ||
+                    !selectedLanguage
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-500 text-white"
                   }`}

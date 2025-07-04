@@ -1,13 +1,11 @@
 
 // ExamSettingsForm.jsx
-import { Sparkles, Globe, FileText } from "lucide-react";
+import { Sparkles, FileText } from "lucide-react";
 
 export default function ExamSettingsForm({
     generateQuestions,
     isGenerating,
-    selectedFileIds,
-    selectedLanguage,
-    onLanguageChange
+    selectedFileIds
   }) {
     return (
       <div>
@@ -21,36 +19,7 @@ export default function ExamSettingsForm({
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
-              <Globe className="w-4 h-4 mr-2 text-blue-500" />
-              Question Language
-            </label>
-            <div className="relative">
-              <select
-                value={selectedLanguage}
-                onChange={(e) => onLanguageChange(e.target.value)}
-                className="appearance-none w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm font-medium cursor-pointer hover:border-blue-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
-                disabled={isGenerating}
-              >
-                <option value="en" className="py-2">🇺🇸 English</option>
-                <option value="ar" className="py-2">🇸🇦 العربية (Arabic)</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            <div className="flex items-center mt-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              <p className="text-xs text-gray-600">
-                Choose the language for generated questions
-              </p>
-            </div>
-          </div>
-          
+        <div className="grid grid-cols-1 gap-6 mb-6">
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
               <FileText className="w-4 h-4 mr-2 text-green-500" />
