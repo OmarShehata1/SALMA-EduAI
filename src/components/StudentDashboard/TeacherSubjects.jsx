@@ -7,17 +7,28 @@ export default function TeacherSubjects({ teacher, onBack, onViewExams }) {
   const [subjectDetails, setSubjectDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastFetchedTeacherId, setLastFetchedTeacherId] = useState(null);
   const { currentUser } = useAuth();
+
+  // Extract stable IDs to prevent unnecessary re-renders
+  const teacherId = teacher?.teacher_id || teacher?.id || teacher?._id;
+  const studentId = currentUser?.id || currentUser?._id;
 
   useEffect(() => {
     const fetchSubjectDetails = async () => {
-      if (!currentUser?.id || !teacher?.teacher_id) return;
+      if (!studentId || !teacherId) return;
+      
+      // Prevent refetching if we already have data for this teacher
+      if (lastFetchedTeacherId === teacherId && subjectDetails) {
+        return;
+      }
       
       try {
         setLoading(true);
         setError(null);
-        const data = await studentApi.getStudentTeacherSubjects(currentUser.id, teacher.teacher_id);
+        const data = await studentApi.getStudentTeacherSubjects(studentId, teacherId);
         setSubjectDetails(data);
+        setLastFetchedTeacherId(teacherId);
       } catch (err) {
         console.error("Error fetching teacher subjects:", err);
         setError(err.message || "Failed to load subject details");
@@ -27,7 +38,23 @@ export default function TeacherSubjects({ teacher, onBack, onViewExams }) {
     };
 
     fetchSubjectDetails();
-  }, [currentUser, teacher]);
+  }, [studentId, teacherId, lastFetchedTeacherId, subjectDetails]);
+
+  // Reset cache when component unmounts or teacher changes
+  useEffect(() => {
+    return () => {
+      // Clean up when component unmounts
+      setLastFetchedTeacherId(null);
+    };
+  }, []);
+
+  // Reset cache when teacher changes
+  useEffect(() => {
+    if (teacherId !== lastFetchedTeacherId) {
+      setSubjectDetails(null);
+      setLastFetchedTeacherId(null);
+    }
+  }, [teacherId, lastFetchedTeacherId]);
 
   if (loading) {
     return (

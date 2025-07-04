@@ -164,17 +164,7 @@ export default function ExamsOverview({ onExamSelect }) {
         </div>
       )}
 
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl shadow-lg">
-            <BarChart3 className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Academic Performance Overview</h2>
-            <p className="text-gray-600">Comprehensive view of your exam results and progress</p>
-          </div>
-        </div>
-      </div>
+      
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">

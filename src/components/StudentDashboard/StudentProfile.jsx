@@ -53,7 +53,6 @@ export default function StudentProfile() {
   };
 
   const stats = [
-    { label: "Student ID", value: profileData.studentId || "N/A", icon: User, color: "from-sky-50 to-blue-50 border-sky-100 text-sky-600" },
     { label: "Current GPA", value: profileData.gpa || "N/A", icon: Award, color: "from-emerald-50 to-green-50 border-emerald-100 text-emerald-600" },
     { label: "Academic Year", value: profileData.year || "N/A", icon: Calendar, color: "from-indigo-50 to-purple-50 border-indigo-100 text-indigo-600" },
     { label: "Major", value: profileData.major || "N/A", icon: BookOpen, color: "from-amber-50 to-orange-50 border-amber-100 text-amber-600" }
@@ -87,7 +86,7 @@ export default function StudentProfile() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {stats.map((stat, index) => (
             <div key={index} className={`bg-gradient-to-r ${stat.color} p-4 rounded-xl border`}>
               <div className="flex items-center space-x-3">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Sidebar from "../components/StudentDashboard/Sidebar";
 import TeacherList from "../components/StudentDashboard/TeacherList";
 import TeacherSubjects from "../components/StudentDashboard/TeacherSubjects";
@@ -15,27 +15,52 @@ export default function StudentDashboard() {
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
 
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleViewTeacherSubjects = useCallback((teacher) => {
+    setSelectedTeacher(teacher);
+    setCurrentPage("teacher-subjects");
+  }, []);
+
+  const handleBackToTeachers = useCallback(() => {
+    setCurrentPage("teachers");
+  }, []);
+
+  const handleViewExams = useCallback((subject, teacher) => {
+    setSelectedSubject(subject);
+    // Only update teacher if it's different to prevent unnecessary re-renders
+    if (!selectedTeacher || selectedTeacher.teacher_id !== teacher.teacher_id) {
+      setSelectedTeacher(teacher);
+    }
+    setCurrentPage("subject-exams");
+  }, [selectedTeacher]);
+
+  const handleBackToTeacherSubjects = useCallback(() => {
+    setCurrentPage("teacher-subjects");
+  }, []);
+
+  const handleViewExamDetails = useCallback((exam) => {
+    setSelectedExam(exam);
+    setCurrentPage("exam-details-view");
+  }, []);
+
+  const handleBackToSubjectExams = useCallback(() => {
+    setCurrentPage("subject-exams");
+  }, []);
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "teachers":
         return (
           <TeacherList 
-            onViewTeacherSubjects={(teacher) => {
-              setSelectedTeacher(teacher);
-              setCurrentPage("teacher-subjects");
-            }}
+            onViewTeacherSubjects={handleViewTeacherSubjects}
           />
         );
       case "teacher-subjects":
         return (
           <TeacherSubjects
             teacher={selectedTeacher}
-            onBack={() => setCurrentPage("teachers")}
-            onViewExams={(subject, teacher) => {
-              setSelectedSubject(subject);
-              setSelectedTeacher(teacher); // Update teacher with full details from API
-              setCurrentPage("subject-exams");
-            }}
+            onBack={handleBackToTeachers}
+            onViewExams={handleViewExams}
           />
         );
       case "subject-exams":
@@ -43,11 +68,8 @@ export default function StudentDashboard() {
           <SubjectExams
             teacher={selectedTeacher}
             subject={selectedSubject}
-            onBack={() => setCurrentPage("teacher-subjects")}
-            onViewExamDetails={(exam) => {
-              setSelectedExam(exam);
-              setCurrentPage("exam-details-view");
-            }}
+            onBack={handleBackToTeacherSubjects}
+            onViewExamDetails={handleViewExamDetails}
           />
         );
       case "exam-details-view":
@@ -56,7 +78,7 @@ export default function StudentDashboard() {
             teacher={selectedTeacher}
             exam={selectedExam}
             subject={selectedSubject}
-            onBack={() => setCurrentPage("subject-exams")}
+            onBack={handleBackToSubjectExams}
             onAppeal={(examId, questionNumber, question) => {
               setSelectedExam({
                 ...selectedExam,
@@ -109,10 +131,7 @@ export default function StudentDashboard() {
       default:
         return (
           <TeacherList 
-            onViewTeacherSubjects={(teacher) => {
-              setSelectedTeacher(teacher);
-              setCurrentPage("teacher-subjects");
-            }}
+            onViewTeacherSubjects={handleViewTeacherSubjects}
           />
         );
     }

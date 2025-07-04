@@ -7,19 +7,27 @@ export default function SubjectExams({ teacher, subject, onBack, onViewExamDetai
   const [examsData, setExamsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastFetchedKey, setLastFetchedKey] = useState(null);
   const { currentUser } = useAuth();
+
+  // Extract stable IDs to prevent unnecessary re-renders
+  const teacherId = teacher?.teacher_id || teacher?.id || teacher?._id;
+  const subjectId = subject?.subject_id || subject?.id || subject?._id;
+  const studentId = currentUser?.id || currentUser?._id;
 
   useEffect(() => {
     const fetchSubjectExams = async () => {
-      // Try to get the teacher ID from various possible field names
-      const teacherId = teacher?.teacher_id || teacher?.id || teacher?._id;
-      // Try to get the subject ID from various possible field names
-      const subjectId = subject?.subject_id || subject?.id || subject?._id;
-      const studentId = currentUser?.id || currentUser?._id;
-      
       if (!studentId || !teacherId || !subjectId) {
         setError("Missing required information to load exams");
         setLoading(false);
+        return;
+      }
+      
+      // Create a unique key for this combination
+      const fetchKey = `${studentId}-${teacherId}-${subjectId}`;
+      
+      // Prevent refetching if we already have data for this combination
+      if (lastFetchedKey === fetchKey && examsData) {
         return;
       }
       
@@ -28,6 +36,7 @@ export default function SubjectExams({ teacher, subject, onBack, onViewExamDetai
         setError(null);
         const data = await studentApi.getStudentSubjectExams(teacherId, subjectId, studentId);
         setExamsData(data);
+        setLastFetchedKey(fetchKey);
       } catch (err) {
         console.error("Error fetching subject exams:", err);
         setError(err.message || "Failed to load exam details");
@@ -37,7 +46,23 @@ export default function SubjectExams({ teacher, subject, onBack, onViewExamDetai
     };
 
     fetchSubjectExams();
-  }, [currentUser, teacher, subject]);
+  }, [studentId, teacherId, subjectId, lastFetchedKey, examsData]);
+
+  // Reset cache when component unmounts
+  useEffect(() => {
+    return () => {
+      setLastFetchedKey(null);
+    };
+  }, []);
+
+  // Reset cache when teacher or subject changes
+  useEffect(() => {
+    const currentKey = `${studentId}-${teacherId}-${subjectId}`;
+    if (currentKey !== lastFetchedKey) {
+      setExamsData(null);
+      setLastFetchedKey(null);
+    }
+  }, [studentId, teacherId, subjectId, lastFetchedKey]);
 
   const getGradeColor = (grade, maxGrade) => {
     const percentage = (grade / maxGrade) * 100;
