@@ -1,5 +1,4 @@
 // ExamSelector component for selecting an exam to grade
-import React from "react";
 
 export function ExamSelector({
   exams,

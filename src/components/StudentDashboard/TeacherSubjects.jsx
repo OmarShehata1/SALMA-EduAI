@@ -157,18 +157,7 @@ export default function TeacherSubjects({ teacher, onBack, onViewExams }) {
           </div>
         </div>
 
-        {/* Teacher Info */}
-        <div className="bg-gradient-to-r from-sky-50 to-indigo-50 p-4 rounded-xl border border-sky-100">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-sky-500 to-indigo-600 text-white rounded-xl flex items-center justify-center text-lg font-bold">
-              {subjectDetails.teacher.name.split(' ').map(name => name[0]).join('').toUpperCase()}
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-800">{subjectDetails.teacher.name}</h3>
-              <p className="text-sky-600">{subjectDetails.teacher.email}</p>
-            </div>
-          </div>
-        </div>
+       
       </div>
 
       {/* Summary Stats */}

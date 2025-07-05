@@ -1,5 +1,4 @@
 // student tables component
-import React from "react";
 import { Eye, Download, Award, TrendingUp, TrendingDown } from "lucide-react";
 
 export function StudentsTable({ studentsData, handleStudentClick, selectedExam }) {

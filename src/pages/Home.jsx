@@ -1,9 +1,3 @@
-import {
-  ArrowRightIcon,
-  AcademicCapIcon,
-  ClipboardDocumentCheckIcon,
-  ChartBarIcon,
-} from "@heroicons/react/24/outline";
 import AnimatedHeroSection from "../components/Home/AnimationHeroSection";
 import HowItWorksSection from "../components/Home/HowItWorksSection";
 import SALMAUniqueSection from "../components/Home/SALMAUniqueSection";

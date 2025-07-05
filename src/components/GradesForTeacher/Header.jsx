@@ -1,6 +1,5 @@
 
 // src/components/Grades/Header.jsx for the Grade Evaluation Dashboard
-import React from 'react';
 
 export function Header({ selectedExam }) {
   return (

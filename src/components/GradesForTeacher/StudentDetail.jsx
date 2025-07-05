@@ -1,5 +1,4 @@
 // student detail component for displaying individual student grades
-import React from "react";
 import { Award, TrendingUp, TrendingDown, Target, FileText, Star } from "lucide-react";
 
 export function StudentDetail({ selectedStudent, selectedExam }) {

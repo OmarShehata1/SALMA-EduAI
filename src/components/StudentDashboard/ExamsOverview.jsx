@@ -245,11 +245,11 @@ export default function ExamsOverview({ onExamSelect }) {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                  <div className="flex justify-between">
+                  <div className="flex justify-start">
                     <span>Exams:</span>
                     <span className="font-medium">{subject.exams_count}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-end">
                     <span>Points:</span>
                     <span className="font-medium">{subject.total_grade}/{subject.total_max_grade}</span>
                   </div>

@@ -1,6 +1,4 @@
-import React from 'react';
 import PDFViewer from '../components/CreateExams/PdfViewer';
-import {Header}  from '../components/CreateExams/Header';
 
 function CreateExam() {
   return (

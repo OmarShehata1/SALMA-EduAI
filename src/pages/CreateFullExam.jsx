@@ -1,6 +1,6 @@
 // CreateFullExamPage.jsx - Main Component
 import { useState } from "react";
-import { ArrowLeft, AlertCircle, CheckCircle, Upload, Settings, List, Plus } from "lucide-react";
+import { ArrowLeft, AlertCircle, CheckCircle, Upload, Settings, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FileUploadSection from "../components/fullExam/FileUploadSection";
 import ExamSettingsForm from "../components/fullExam/ExamSettingsForm";
@@ -147,10 +147,6 @@ export default function CreateFullExam() {
         throw new Error("Authentication token missing. Please log in again.");
       }
 
-      console.log("Starting full exam generation...");
-      console.log("Teacher ID:", teacherId);
-      console.log("Selected files:", selectedFileIds.length);
-
       addNotification("Starting PDF upload...", "info");
 
       // Step 1: Upload selected PDFs to teacher's collection first
@@ -176,7 +172,6 @@ export default function CreateFullExam() {
         formData.append("pdf", fileObj.file);
       });
 
-      console.log("Uploading PDFs to teacher's collection...");
       setUploadProgress(30);
       
       let uploadResponse;
@@ -193,14 +188,12 @@ export default function CreateFullExam() {
         throw new Error("Network connection failed. Please check your internet connection and try again.");
       }
 
-      console.log("Upload response status:", uploadResponse.status);
       setUploadProgress(100);
 
       if (!uploadResponse.ok) {
         let errorMessage = "Failed to upload PDFs to server";
         try {
           const errorData = await uploadResponse.json();
-          console.log("Upload error response:", errorData);
           
           // Handle specific error codes
           if (uploadResponse.status === 401) {
@@ -215,20 +208,16 @@ export default function CreateFullExam() {
             errorMessage = errorData.message || errorData.error || errorMessage;
           }
         } catch (parseError) {
-          console.log("Could not parse upload error response:", parseError);
           errorMessage = `Upload failed with status ${uploadResponse.status}. Please try again.`;
         }
         throw new Error(errorMessage);
       }
 
-      console.log("PDFs uploaded successfully to teacher's collection");
       addNotification("PDFs uploaded successfully! Generating questions...", "success");
       setCurrentStep(3); // Move to generation step
       
       // Step 2: Now call the generation API with PDF names
       const pdfNames = selectedFiles.map((fileObj) => fileObj.name);
-      console.log("Generating full exam from uploaded PDFs:", pdfNames);
-      console.log("Number of PDFs:", pdfNames.length);
 
       if (pdfNames.length === 0) {
         throw new Error("No PDF names available for generation. Please try uploading again.");
@@ -238,10 +227,7 @@ export default function CreateFullExam() {
         pdfNames: pdfNames,
         lang: "en" // Default language, will be set later when creating exam
       };
-      console.log("Request body:", JSON.stringify(requestBody, null, 2));
-      
       // Call the new full exam generation endpoint
-      console.log("Making request to:", `${url}/teachers/${teacherId}/exams/genqa_full`);
       setGenerationProgress(20);
       
       let response;
@@ -259,14 +245,12 @@ export default function CreateFullExam() {
         throw new Error("Network connection failed during question generation. Please check your connection and try again.");
       }
 
-      console.log("Question generation response status:", response.status);
       setGenerationProgress(80);
 
       if (!response.ok) {
         let errorMessage = "Failed to generate questions from PDFs";
         try {
           const errorData = await response.json();
-          console.log("Generation error response:", errorData);
           
           // Handle specific error codes
           if (response.status === 401) {
@@ -283,8 +267,7 @@ export default function CreateFullExam() {
             errorMessage = errorData.message || errorData.error || errorMessage;
           }
         } catch (parseError) {
-          const errorText = await response.text().catch(() => "Unknown error");
-          console.log("Raw error response:", errorText);
+          // Unable to parse error response
           errorMessage = `Generation failed with status ${response.status}. Please try again.`;
         }
         throw new Error(errorMessage);
@@ -298,7 +281,6 @@ export default function CreateFullExam() {
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      console.log("Question generation successful");
       setGenerationProgress(100);
       
       // Handle the response - it might be an array directly or an object with questions
@@ -306,13 +288,10 @@ export default function CreateFullExam() {
       
       if (Array.isArray(data)) {
         questionsArray = data;
-        console.log("Backend returned questions as direct array");
       } else if (data && data.questions && Array.isArray(data.questions)) {
         questionsArray = data.questions;
-        console.log("Backend returned questions in object wrapper");
       } else if (data && typeof data === 'object') {
         // Handle case where response might have different structure
-        console.log("Backend response structure:", Object.keys(data));
         throw new Error("Unexpected response format from server. Please contact support if this persists.");
       } else {
         console.error("Invalid response format - expected questions array or object with questions property");
@@ -350,8 +329,6 @@ export default function CreateFullExam() {
 
       // Transform the backend data structure to match our frontend needs
       const formattedQuestions = questionsArray.map((q, index) => {
-        console.log(`Processing question ${index + 1}:`, q);
-        
         try {
           return {
             id: `full-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`,
@@ -362,7 +339,6 @@ export default function CreateFullExam() {
             source: q.source || `Generated from ${pdfNames.join(", ")}`,
           };
         } catch (processingError) {
-          console.error(`Error processing question ${index + 1}:`, processingError);
           // Return a default question structure
           return {
             id: `full-error-${Date.now()}-${index}`,
@@ -391,7 +367,6 @@ export default function CreateFullExam() {
         addNotification(`Warning: ${invalidCount} questions could not be processed properly`, "warning");
       }
 
-      console.log(`Successfully processed ${validQuestions.length} questions for selection`);
       setQuestions(validQuestions);
       setShowQuestions(true); // Show the questions for selection
       setCurrentStep(4); // Move to selection step

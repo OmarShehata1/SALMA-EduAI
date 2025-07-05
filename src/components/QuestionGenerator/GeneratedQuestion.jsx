@@ -1,4 +1,4 @@
-import React from "react";
+// No React import needed for React 17+
 
 const GeneratedQuestion = ({ question, onCheckboxChange, onEdit, onDelete }) => {
   // Function to determine grade color based on numeric value

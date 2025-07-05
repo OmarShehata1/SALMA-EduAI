@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { MessageSquare } from "lucide-react";
 import Sidebar from "../components/StudentDashboard/Sidebar";
 import TeacherList from "../components/StudentDashboard/TeacherList";
 import TeacherSubjects from "../components/StudentDashboard/TeacherSubjects";
@@ -6,8 +7,8 @@ import SubjectExams from "../components/StudentDashboard/SubjectExams";
 import ExamDetailsView from "../components/StudentDashboard/ExamDetailsView";
 import ExamsOverview from "../components/StudentDashboard/ExamsOverview";
 import ExamDetails from "../components/StudentDashboard/ExamDetails";
-import SubmitAppeal from "../components/StudentDashboard/SubmitAppeal";
 import StudentProfile from "../components/StudentDashboard/StudentProfile";
+import JoinSubjects from "../components/StudentDashboard/JoinSubjects";
 
 export default function StudentDashboard() {
   const [currentPage, setCurrentPage] = useState("teachers");
@@ -79,16 +80,10 @@ export default function StudentDashboard() {
             exam={selectedExam}
             subject={selectedSubject}
             onBack={handleBackToSubjectExams}
-            onAppeal={(examId, questionNumber, question) => {
-              setSelectedExam({
-                ...selectedExam,
-                appealQuestionNumber: questionNumber,
-                appealQuestion: question
-              });
-              setCurrentPage("appeal");
-            }}
           />
         );
+      case "join-subjects":
+        return <JoinSubjects />;
       case "exams":
         return (
           <ExamsOverview
@@ -103,28 +98,38 @@ export default function StudentDashboard() {
           <ExamDetails
             exam={selectedExam}
             onBack={() => setCurrentPage("exams")}
-            onAppeal={(examId, questionNumber) => {
-              setSelectedExam({
-                ...selectedExam,
-                appealQuestionNumber: questionNumber,
-              });
-              setCurrentPage("appeal");
-            }}
           />
         );
       case "appeal":
         return (
-          <SubmitAppeal
-            preSelectedExam={selectedExam}
-            onBack={() => {
-              // Go back to the appropriate page based on where we came from
-              if (selectedExam?.appealQuestion) {
-                setCurrentPage("exam-details-view");
-              } else {
-                setCurrentPage("exams");
-              }
-            }}
-          />
+          <div className="space-y-6">
+            <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-12 shadow-xl border border-sky-100 text-center">
+              <div className="mb-6">
+                <div className="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-10 h-10" />
+                </div>
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">Appeal System</h1>
+                <p className="text-lg text-gray-600 mb-4">Coming Soon</p>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  We're working on implementing a comprehensive appeal system that will allow students to contest exam grades. This feature will be available in a future update.
+                </p>
+              </div>
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={() => setCurrentPage("exams")}
+                  className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:from-sky-600 hover:to-indigo-700 transition-all duration-300 shadow-lg"
+                >
+                  View Exams
+                </button>
+                <button
+                  onClick={() => setCurrentPage("teachers")}
+                  className="bg-gradient-to-r from-sky-50 to-indigo-50 text-sky-700 px-6 py-3 rounded-xl font-medium hover:from-sky-100 hover:to-indigo-100 transition-all duration-300 border border-sky-200"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
         );
       case "profile":
         return <StudentProfile />;

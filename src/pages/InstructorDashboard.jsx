@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MessageSquare } from "lucide-react";
 import Sidebar from "../components/InstructorDashboard/Sidebar";
 import GroupOverview from "../components/InstructorDashboard/GroupOverview";
 import SubjectStudents from "../components/InstructorDashboard/SubjectStudents";
@@ -6,7 +7,6 @@ import StudentExams from "../components/InstructorDashboard/StudentExams";
 import CreateExam from "../components/InstructorDashboard/CreateExam";
 import CorrectExam from "../components/InstructorDashboard/CorrectExam";
 import InstructorProfile from "../components/InstructorDashboard/InstructorProfile";
-import Appeals from "../components/InstructorDashboard/Appeals";
 import ExamDetails from "../components/InstructorDashboard/ExamDetails";
 import { useAuth } from "../context/AuthProvider";
 
@@ -139,7 +139,30 @@ export default function InstructorDashboard() {
       case "profile":
         return <InstructorProfile />;
       case "appeals":
-        return <Appeals />;
+        return (
+          <div className="space-y-6">
+            <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-12 shadow-xl border border-sky-100 text-center">
+              <div className="mb-6">
+                <div className="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-10 h-10" />
+                </div>
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">Appeals Management</h1>
+                <p className="text-lg text-gray-600 mb-4">Coming Soon</p>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  We're developing a comprehensive appeals management system that will allow instructors to review and respond to student grade appeals. This feature will be available in a future update.
+                </p>
+              </div>
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={() => navigateToPage("overview")}
+                  className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:from-sky-600 hover:to-indigo-700 transition-all duration-300 shadow-lg"
+                >
+                  Back to Overview
+                </button>
+              </div>
+            </div>
+          </div>
+        );
       default:
         return (
           <GroupOverview

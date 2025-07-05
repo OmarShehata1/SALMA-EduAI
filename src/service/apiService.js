@@ -185,6 +185,17 @@ export const teacherApi = {
       console.error("Error fetching student exam details:", error);
       throw error;
     }
+  },
+
+  // Add student to subject
+  addStudentToSubject: async (teacherId, subjectId, studentId) => {
+    try {
+      const response = await apiClient.post(`/teachers/${teacherId}/subjects/${subjectId}/addstudent/${studentId}`);
+      return response.data; // Expected format: { message: string, subject: {...}, student: {...}, teacher: {...} }
+    } catch (error) {
+      console.error("Error adding student to subject:", error);
+      throw error;
+    }
   }
 };
 

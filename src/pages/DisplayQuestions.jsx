@@ -29,7 +29,6 @@ export default function QuestionsDisplay() {
   }, 0);
   useEffect(() => {
     const executionId = Math.random().toString(36).substr(2, 9);
-    console.log(`DEBUG: useEffect running with execution ID: ${executionId}`);
 
     // Create a unique key for the current location state
     const locationStateKey = location.state
@@ -38,9 +37,6 @@ export default function QuestionsDisplay() {
 
     // Check if we've already processed this exact location state
     if (processedLocationRef.current === locationStateKey) {
-      console.log(
-        `DEBUG: [${executionId}] Skipping duplicate processing of same location state`
-      );
       return;
     }
 

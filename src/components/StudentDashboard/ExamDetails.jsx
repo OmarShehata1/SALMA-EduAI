@@ -3,7 +3,7 @@ import { ArrowLeft, FileText, Calendar, User, MessageSquare, AlertTriangle, Chec
 import { teacherApi } from "../../service/apiService";
 import { useAuth } from "../../context/AuthProvider";
 
-export default function ExamDetails({ exam, onBack, onAppeal }) {
+export default function ExamDetails({ exam, onBack }) {
   const [detailedExamData, setDetailedExamData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -237,13 +237,12 @@ export default function ExamDetails({ exam, onBack, onAppeal }) {
                     <div className={`px-4 py-2 rounded-xl font-bold text-lg ${getQuestionGradeBg(question.student_grade || question.grade || 0, question.max_grade)}`}>
                       {question.student_grade || question.grade || 0} / {question.max_grade}
                     </div>
-                    <button
-                      onClick={() => onAppeal(exam.examId, index + 1)}
-                      className="bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 px-4 py-2 rounded-xl hover:from-amber-100 hover:to-orange-100 transition-all duration-300 border border-amber-200 flex items-center space-x-2"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span className="text-sm font-medium">Appeal</span>
-                    </button>
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-4 py-2">
+                      <div className="flex items-center space-x-2 text-amber-700">
+                        <MessageSquare className="w-4 h-4" />
+                        <span className="text-sm font-medium">Appeal Coming Soon</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

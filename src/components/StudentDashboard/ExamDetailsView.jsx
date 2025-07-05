@@ -3,7 +3,7 @@ import { ArrowLeft, FileText, CheckCircle, XCircle, AlertCircle, Award, Clock, U
 import { teacherApi } from "../../service/apiService";
 import { useAuth } from "../../context/AuthProvider";
 
-export default function ExamDetailsView({ teacher, exam, subject, onBack, onAppeal }) {
+export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
   const [examDetails, setExamDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -285,16 +285,18 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack, onAppe
                 </div>
               )}
 
-              {/* Appeal Button */}
-              {question.student_grade < question.max_grade && onAppeal && (
+              {/* Appeal Button - Coming Soon */}
+              {question.student_grade < question.max_grade && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={() => onAppeal(examDetails.exam.id, index + 1, question)}
-                    className="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-2 px-4 rounded-lg font-medium hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Submit Appeal for Question {index + 1}</span>
-                  </button>
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3">
+                    <div className="flex items-center space-x-2 text-amber-700">
+                      <MessageCircle className="w-4 h-4" />
+                      <span className="text-sm font-medium">Appeal System Coming Soon</span>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-1">
+                      Grade appeal functionality will be available in a future update.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

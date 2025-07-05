@@ -1,5 +1,5 @@
 // file upload component for uploading answer sheets in PDF format
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Upload, X, Image, FileText, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 
 export function FileUpload({

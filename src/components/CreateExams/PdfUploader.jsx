@@ -1,5 +1,4 @@
 // components/PDFUploader.jsx
-import React from "react";
 
 function PDFUploader({ onFileUpload }) {
   const handleChange = (event) => {

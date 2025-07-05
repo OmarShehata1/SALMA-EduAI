@@ -1,5 +1,4 @@
 // EmptyState component for displaying a message when there are no grades to show
-import React from 'react';
 
 export function EmptyState() {
   return (

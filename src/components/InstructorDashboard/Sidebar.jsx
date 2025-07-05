@@ -34,7 +34,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
       id: "appeals",
       label: "Appeals",
       icon: <MessageSquare className="w-5 h-5" />,
-      description: "Review student appeals",
+      description: "Coming Soon",
     },
     {
       id: "profile",
@@ -70,15 +70,20 @@ export default function Sidebar({ currentPage, onPageChange }) {
           <button
             key={item.id}
             onClick={() => onPageChange(item.id)}
+            disabled={item.id === "appeals"}
             className={`w-full flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 group ${
-              currentPage === item.id
+              item.id === "appeals"
+                ? "text-gray-400 cursor-not-allowed bg-gray-50"
+                : currentPage === item.id
                 ? "bg-gradient-to-r from-sky-50 to-indigo-50 border-2 border-sky-300 shadow-lg text-sky-700"
                 : "hover:bg-white/80 hover:shadow-md text-gray-700 border-2 border-transparent"
             }`}
           >
             <div
               className={`p-2 rounded-lg transition-all duration-300 ${
-                currentPage === item.id
+                item.id === "appeals"
+                  ? "bg-gray-200 text-gray-400"
+                  : currentPage === item.id
                   ? "bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md"
                   : "bg-sky-100 text-sky-600 group-hover:bg-sky-200"
               }`}

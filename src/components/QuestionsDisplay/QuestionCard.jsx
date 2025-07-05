@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 const QuestionCard = ({ question, onEdit, onDelete }) => {
   const [expanded, setExpanded] = useState(false);

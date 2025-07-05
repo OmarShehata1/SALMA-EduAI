@@ -74,7 +74,6 @@ export default function QuestionGenerator() {
         throw new Error(`API error: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Raw API response:", data);
 
       // Process the returned questions based on the actual API response structure
       let formattedQuestions = [];
@@ -141,7 +140,6 @@ export default function QuestionGenerator() {
       // Set the newly generated questions (don't merge with existing ones here)
       setGeneratedQuestions(formattedQuestions);
 
-      console.log("Formatted questions:", formattedQuestions);
     } catch (err) {
       console.error("Error generating questions:", err);
 

@@ -14,6 +14,7 @@ import CreateFullExam from "./pages/CreateFullExam";
 import ProtectedRoute, { GuestRoute } from "./components/ProtectedRoute";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import JoinSubject from "./components/JoinSubject";
 import { useAuth } from "./context/AuthProvider";
 import { getRoleBasedRoute } from "./utils/navigation";
 import ScrollToTop from "./components/common/ScrollToTop";
@@ -107,7 +108,15 @@ export default function App() {
                     <StudentDashboard />
                   </ProtectedRoute>
                 }
-              />              {/* Catch-all route */}
+              />
+              
+              {/* Subject join route - accessible to all users */}
+              <Route
+                path="/join-subject/:teacherId/:subjectId"
+                element={<JoinSubject />}
+              />
+
+              {/* Catch-all route */}
               <Route path="*" element={<NotFoundRedirect />} />
             </Routes>
             </main>

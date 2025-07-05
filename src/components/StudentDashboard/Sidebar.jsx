@@ -1,4 +1,4 @@
-import { Users, FileText, MessageSquare, User, Bell } from "lucide-react";
+import { Users, FileText, MessageSquare, User, Bell, Plus } from "lucide-react";
 import { useAuth } from "../../context/AuthProvider";
 
 export default function Sidebar({ currentPage, onPageChange }) {
@@ -11,6 +11,12 @@ export default function Sidebar({ currentPage, onPageChange }) {
       description: "My enrolled courses",
     },
     {
+      id: "join-subjects",
+      label: "Join Subject",
+      icon: <Plus className="w-5 h-5" />,
+      description: "Join new subjects",
+    },
+    {
       id: "exams",
       label: "Exams Overview",
       icon: <FileText className="w-5 h-5" />,
@@ -20,7 +26,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
       id: "appeal",
       label: "Submit Appeal",
       icon: <MessageSquare className="w-5 h-5" />,
-      description: "Contest exam grades",
+      description: "Coming Soon",
     },
     {
       id: "profile",
@@ -52,15 +58,20 @@ export default function Sidebar({ currentPage, onPageChange }) {
             <button
               key={item.id}
               onClick={() => onPageChange(item.id)}
+              disabled={item.id === "appeal"}
               className={`w-full flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-300 group ${
-                currentPage === item.id
+                item.id === "appeal"
+                  ? "text-gray-400 cursor-not-allowed bg-gray-50"
+                  : currentPage === item.id
                   ? "bg-gradient-to-r from-sky-100 to-indigo-100 text-sky-700 shadow-md border border-sky-200"
                   : "text-gray-600 hover:bg-sky-50 hover:text-sky-600"
               }`}
             >
               <div
                 className={`p-2 rounded-lg transition-all duration-300 ${
-                  currentPage === item.id
+                  item.id === "appeal"
+                    ? "bg-gray-200 text-gray-400"
+                    : currentPage === item.id
                     ? "bg-sky-200 text-sky-700"
                     : "bg-gray-100 text-gray-500 group-hover:bg-sky-100 group-hover:text-sky-600"
                 }`}

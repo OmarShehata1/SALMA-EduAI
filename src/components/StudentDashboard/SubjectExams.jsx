@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ArrowLeft, FileText, Calendar, Award, TrendingUp, AlertCircle, Loader2, Clock, CheckCircle } from "lucide-react";
 import { studentApi } from "../../service/apiService";
 import { useAuth } from "../../context/AuthProvider";
@@ -10,43 +10,46 @@ export default function SubjectExams({ teacher, subject, onBack, onViewExamDetai
   const [lastFetchedKey, setLastFetchedKey] = useState(null);
   const { currentUser } = useAuth();
 
-  // Extract stable IDs to prevent unnecessary re-renders
-  const teacherId = teacher?.teacher_id || teacher?.id || teacher?._id;
-  const subjectId = subject?.subject_id || subject?.id || subject?._id;
-  const studentId = currentUser?.id || currentUser?._id;
+  // Extract stable IDs to prevent unnecessary re-renders - memoized for performance
+  const { teacherId, subjectId, studentId } = useMemo(() => ({
+    teacherId: teacher?.teacher_id || teacher?.id || teacher?._id,
+    subjectId: subject?.subject_id || subject?.id || subject?._id,
+    studentId: currentUser?.id || currentUser?._id
+  }), [teacher, subject, currentUser]);
+
+  // Memoized fetch function for performance
+  const fetchSubjectExams = useCallback(async () => {
+    if (!studentId || !teacherId || !subjectId) {
+      setError("Missing required information to load exams");
+      setLoading(false);
+      return;
+    }
+    
+    // Create a unique key for this combination
+    const fetchKey = `${studentId}-${teacherId}-${subjectId}`;
+    
+    // Prevent refetching if we already have data for this combination
+    if (lastFetchedKey === fetchKey && examsData) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await studentApi.getStudentSubjectExams(teacherId, subjectId, studentId);
+      setExamsData(data);
+      setLastFetchedKey(fetchKey);
+    } catch (err) {
+      console.error("Error fetching subject exams:", err);
+      setError(err.message || "Failed to load exam details");
+    } finally {
+      setLoading(false);
+    }
+  }, [studentId, teacherId, subjectId, lastFetchedKey, examsData]);
 
   useEffect(() => {
-    const fetchSubjectExams = async () => {
-      if (!studentId || !teacherId || !subjectId) {
-        setError("Missing required information to load exams");
-        setLoading(false);
-        return;
-      }
-      
-      // Create a unique key for this combination
-      const fetchKey = `${studentId}-${teacherId}-${subjectId}`;
-      
-      // Prevent refetching if we already have data for this combination
-      if (lastFetchedKey === fetchKey && examsData) {
-        return;
-      }
-      
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await studentApi.getStudentSubjectExams(teacherId, subjectId, studentId);
-        setExamsData(data);
-        setLastFetchedKey(fetchKey);
-      } catch (err) {
-        console.error("Error fetching subject exams:", err);
-        setError(err.message || "Failed to load exam details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSubjectExams();
-  }, [studentId, teacherId, subjectId, lastFetchedKey, examsData]);
+  }, [fetchSubjectExams]);
 
   // Reset cache when component unmounts
   useEffect(() => {
@@ -64,21 +67,22 @@ export default function SubjectExams({ teacher, subject, onBack, onViewExamDetai
     }
   }, [studentId, teacherId, subjectId, lastFetchedKey]);
 
-  const getGradeColor = (grade, maxGrade) => {
+  // Memoized grade calculation functions for performance
+  const getGradeColor = useCallback((grade, maxGrade) => {
     const percentage = (grade / maxGrade) * 100;
     if (percentage >= 90) return "text-emerald-600";
     if (percentage >= 80) return "text-blue-600";
     if (percentage >= 70) return "text-amber-600";
     return "text-red-600";
-  };
+  }, []);
 
-  const getGradeBg = (grade, maxGrade) => {
+  const getGradeBg = useCallback((grade, maxGrade) => {
     const percentage = (grade / maxGrade) * 100;
     if (percentage >= 90) return "from-emerald-50 to-green-50 border-emerald-100";
     if (percentage >= 80) return "from-blue-50 to-sky-50 border-blue-100";
     if (percentage >= 70) return "from-amber-50 to-orange-50 border-amber-100";
     return "from-red-50 to-rose-50 border-red-100";
-  };
+  }, []);
 
   if (loading) {
     return (

@@ -1,6 +1,5 @@
 
 // components/PDFList.jsx
-import React from 'react';
 
 function PDFList({ pdfs, onPdfSelect, currentPdfIndex }) {
   return (

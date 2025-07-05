@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -24,10 +24,11 @@ export const useNotifications = () => {
     setNotifications([]);
   }, []);
 
-  return {
+  // Memoize the return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     notifications,
     addNotification,
     removeNotification,
     clearAllNotifications,
-  };
+  }), [notifications, addNotification, removeNotification, clearAllNotifications]);
 };

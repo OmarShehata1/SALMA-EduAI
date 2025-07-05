@@ -7,9 +7,11 @@ import {
   Calendar,
   Plus,
   RefreshCw,
+  Share2,
 } from "lucide-react";
 import { teacherApi } from "../../service/apiService";
 import { useAuth } from "../../context/AuthProvider";
+import SubjectInviteLink from "./SubjectInviteLink";
 
 // Color options for different subjects
 const colorOptions = [
@@ -68,6 +70,18 @@ export default function GroupOverview({ onGroupSelect }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState("");
+  const [selectedSubjectForShare, setSelectedSubjectForShare] = useState(null);
+  const [showSharePopup, setShowSharePopup] = useState(false);
+
+  const handleShareSubject = (subject) => {
+    setSelectedSubjectForShare(subject);
+    setShowSharePopup(true);
+  };
+
+  const handleCloseSharePopup = () => {
+    setShowSharePopup(false);
+    setSelectedSubjectForShare(null);
+  };
 
   // Fetch teacher subjects
   useEffect(() => {
@@ -240,21 +254,42 @@ export default function GroupOverview({ onGroupSelect }) {
                     </div>
                   </div>
 
-                 
-
-                  <button
-                    onClick={() => onGroupSelect(group)}
-                    className="w-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 group-hover:from-sky-600 group-hover:to-indigo-700"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>View Details</span>
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => onGroupSelect(group)}
+                      className="flex-1 bg-gradient-to-r from-sky-500 to-indigo-600 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 group-hover:from-sky-600 group-hover:to-indigo-700"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>View Details</span>
+                    </button>
+                    <button
+                      onClick={() => handleShareSubject(group)}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center space-x-2"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span>Share</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Standalone Share Popup */}
+      {showSharePopup && selectedSubjectForShare && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
+            <SubjectInviteLink 
+              subject={selectedSubjectForShare} 
+              teacherId={currentUser?.id}
+              onClose={handleCloseSharePopup}
+              standalone={true}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
