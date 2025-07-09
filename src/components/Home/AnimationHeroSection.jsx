@@ -11,10 +11,12 @@ import {
   FileText,
   BarChart3,
 } from "lucide-react";
+import { useTheme } from "../../context/ThemeProvider";
 
 const AnimatedHeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentFeature, setCurrentFeature] = useState(0);
+  const { currentTheme } = useTheme();
 
   const scrollToFeatures = () => {
     // Method 1: Using an event
@@ -38,19 +40,19 @@ const AnimatedHeroSection = () => {
       icon: <Brain className="w-6 h-6" />,
       title: "AI-Powered",
       description: "Smart question generation",
-      color: "from-blue-400 to-indigo-500",
+      color: "from-blue-600 to-blue-700",
     },
     {
       icon: <Eye className="w-6 h-6" />,
       title: "OCR Recognition",
       description: "Arabic & English text",
-      color: "from-emerald-400 to-teal-500",
+      color: "from-blue-600 to-blue-700",
     },
     {
       icon: <Users className="w-6 h-6" />,
       title: "Multi-Agent",
       description: "Collaborative grading",
-      color: "from-purple-400 to-pink-500",
+      color: "from-blue-600 to-blue-700",
     },
   ];
 
@@ -82,7 +84,16 @@ const AnimatedHeroSection = () => {
   ];
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-white text-gray-800 min-h-screen pt-11">
+    <div
+      className="relative overflow-hidden min-h-screen pt-11 theme-transition"
+      style={{
+        background:
+          currentTheme === "light"
+            ? "linear-gradient(to bottom, #e0f2fe, #e3f2fd, #ffffff)"
+            : "var(--theme-gradientSecondary)",
+        color: "var(--theme-textPrimary)",
+      }}
+    >
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <svg
@@ -116,10 +127,21 @@ const AnimatedHeroSection = () => {
           className={`absolute ${card.position} opacity-80 animate-pulse hidden md:block`}
           style={{ animationDelay: card.delay, animationDuration: "4s" }}
         >
-          <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white border-opacity-30 hover:scale-110 transition-all duration-300">
+          <div
+            className="rounded-2xl p-4 theme-shadow-lg border theme-backdrop hover:scale-110 transition-all duration-300"
+            style={{
+              backgroundColor: "var(--theme-cardBackground)",
+              borderColor: "var(--theme-border)",
+            }}
+          >
             <div className="flex items-center space-x-2">
-              <div className="text-sky-600">{card.icon}</div>
-              <span className="text-sm font-medium text-gray-700">
+              <div style={{ color: "var(--theme-brandPrimary)" }}>
+                {card.icon}
+              </div>
+              <span
+                className="text-sm font-medium"
+                style={{ color: "var(--theme-textPrimary)" }}
+              >
                 {card.label}
               </span>
             </div>
@@ -139,14 +161,31 @@ const AnimatedHeroSection = () => {
             }`}
           >
             <div className="relative">
-              <div className="bg-gradient-to-r from-sky-400 to-indigo-500 bg-opacity-20 inline-block px-6 py-3 rounded-full mb-6 backdrop-blur-sm border border-sky-300 border-opacity-30">
+              <div
+                className="inline-block px-6 py-3 rounded-full mb-6 theme-backdrop border theme-shadow"
+                style={{
+                  backgroundColor: "var(--theme-cardBackground)",
+                  borderColor: "var(--theme-border)",
+                }}
+              >
                 <div className="flex items-center space-x-3">
                   <Sparkles
-                    className="w-6 h-6 text-sky-600 animate-spin"
-                    style={{ animationDuration: "3s" }}
+                    className="w-6 h-6 animate-spin"
+                    style={{
+                      animationDuration: "3s",
+                      color: "var(--theme-brandPrimary)",
+                    }}
                   />
-                  <span className="text-lg font-bold text-sky-800">SALMA</span>
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                  <span
+                    className="text-lg font-bold"
+                    style={{ color: "var(--theme-brandPrimary)" }}
+                  >
+                    SALMA
+                  </span>
+                  <div
+                    className="w-2 h-2 rounded-full animate-pulse"
+                    style={{ backgroundColor: "var(--theme-brandPrimary)" }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -162,19 +201,16 @@ const AnimatedHeroSection = () => {
           >
             <h1
               className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight max-w-5xl mx-auto"
-              style={{ fontFamily: "Patrick Hand, cursive" }}
+              style={{
+                fontFamily: "Patrick Hand, cursive",
+                color: "var(--theme-textPrimary)",
+              }}
             >
-              <span className="bg-gradient-to-r from-gray-800 via-sky-600 to-indigo-600 bg-clip-text text-transparent">
-                System for Automated
-              </span>
+              System for Automated
               <br />
-              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">
-                Learning & Multi-Agent
-              </span>
+              Learning & Multi-Agent
               <br />
-              <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 bg-clip-text text-transparent">
-                Assessment
-              </span>
+              Assessment
             </h1>
           </div>
 
@@ -198,7 +234,8 @@ const AnimatedHeroSection = () => {
                     }`}
                   >
                     <div
-                      className={`bg-gradient-to-r ${feature.color} p-4 rounded-2xl shadow-lg text-white`}
+                      className="p-4 rounded-2xl theme-shadow-lg text-white"
+                      style={{ background: "var(--theme-gradientPrimary)" }}
                     >
                       <div className="flex flex-col items-center space-y-2">
                         {feature.icon}
@@ -227,18 +264,27 @@ const AnimatedHeroSection = () => {
             }`}
           >
             <p
-              className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed"
-              style={{ fontFamily: "Patrick Hand, cursive" }}
+              className="text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed"
+              style={{
+                fontFamily: "Patrick Hand, cursive",
+                color: "var(--theme-textSecondary)",
+              }}
             >
               Revolutionize exam{" "}
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white px-3 py-1 rounded-lg font-semibold shadow-md">
+              <span
+                className="px-3 py-1 rounded-lg font-semibold theme-shadow text-white"
+                style={{ background: "var(--theme-gradientPrimary)" }}
+              >
                 Generation
               </span>{" "}
               and{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-500 text-white px-3 py-1 rounded-lg font-semibold shadow-md">
+              <span
+                className="px-3 py-1 rounded-lg font-semibold theme-shadow text-white"
+                style={{ background: "var(--theme-gradientPrimary)" }}
+              >
                 Evaluation
               </span>{" "}
-              with AI-powered automation that saves educators 90% of their time
+              with AI-powered automation that saves educators 70% of their time
             </p>
           </div>
 
@@ -253,41 +299,57 @@ const AnimatedHeroSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {[
                 {
-                  number: "90%",
+                  number: "70%",
                   label: "Time Saved",
                   icon: <Zap className="w-5 h-5" />,
-                  color: "from-yellow-400 to-orange-500",
+                  color: "from-blue-500 to-blue-600",
                 },
                 {
                   number: "95%",
                   label: "OCR Accuracy",
                   icon: <Eye className="w-5 h-5" />,
-                  color: "from-green-400 to-emerald-500",
+                  color: "from-blue-500 to-blue-600",
                 },
                 {
                   number: "∞",
                   label: "Question Types",
                   icon: <Brain className="w-5 h-5" />,
-                  color: "from-purple-400 to-indigo-500",
+                  color: "from-blue-500 to-blue-600",
                 },
               ].map((stat, index) => (
                 <div
                   key={index}
-                  className="bg-white bg-opacity-60 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-sky-200 hover:scale-105 transition-all duration-300"
+                  className="rounded-2xl p-6 theme-shadow-lg border theme-backdrop hover:scale-105 transition-all duration-300"
+                  style={{
+                    backgroundColor: "var(--theme-cardBackground)",
+                    borderColor: "var(--theme-border)",
+                  }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div
-                      className={`bg-gradient-to-r ${stat.color} p-2 rounded-xl text-white`}
+                      className="p-2 rounded-xl text-white"
+                      style={{ background: "var(--theme-gradientPrimary)" }}
                     >
                       {stat.icon}
                     </div>
                     <div
-                      className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                      className="text-3xl font-bold"
+                      style={{
+                        background: "var(--theme-gradientPrimary)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
                     >
                       {stat.number}
                     </div>
                   </div>
-                  <div className="text-gray-700 font-medium">{stat.label}</div>
+                  <div
+                    className="font-medium"
+                    style={{ color: "var(--theme-textPrimary)" }}
+                  >
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -302,13 +364,29 @@ const AnimatedHeroSection = () => {
             }`}
           >
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="group bg-gradient-to-r from-sky-500 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2">
+              <button
+                className="group text-white px-8 py-4 rounded-2xl font-semibold theme-shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
+                style={{ background: "var(--theme-gradientPrimary)" }}
+              >
                 <span>Start Creating Exams</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
                 onClick={scrollToFeatures}
-                className="group border-2 border-sky-500 text-sky-600 px-8 py-4 rounded-2xl font-semibold hover:bg-sky-500 hover:text-white transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
+                className="group border-2 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 theme-backdrop"
+                style={{
+                  borderColor: "var(--theme-brandPrimary)",
+                  color: "var(--theme-brandPrimary)",
+                  backgroundColor: "var(--theme-cardBackground)",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = "var(--theme-gradientPrimary)";
+                  e.target.style.color = "#ffffff";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = "var(--theme-cardBackground)";
+                  e.target.style.color = "var(--theme-brandPrimary)";
+                }}
               >
                 <span>See How It Works</span>
                 <BookOpen className="w-5 h-5 group-hover:rotate-12 transition-transform" />
@@ -325,20 +403,37 @@ const AnimatedHeroSection = () => {
             }`}
           >
             <div className="flex flex-col items-center space-y-4">
-              <div className="flex items-center space-x-2 text-gray-600">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium">
+              <div className="flex items-center space-x-2">
+                <div
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: "var(--theme-brandPrimary)" }}
+                ></div>
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: "var(--theme-textSecondary)" }}
+                >
                   Trusted by educators worldwide
                 </span>
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <div
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: "var(--theme-brandPrimary)" }}
+                ></div>
               </div>
 
               <div className="flex items-center space-x-8 opacity-60">
                 {["Arabic", "English", "Multi-Format", "AI-Powered"].map(
                   (feature, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <Check className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm text-gray-600">{feature}</span>
+                      <Check
+                        className="w-4 h-4"
+                        style={{ color: "var(--theme-success)" }}
+                      />
+                      <span
+                        className="text-sm"
+                        style={{ color: "var(--theme-textSecondary)" }}
+                      >
+                        {feature}
+                      </span>
                     </div>
                   )
                 )}
@@ -349,7 +444,13 @@ const AnimatedHeroSection = () => {
       </div>
 
       {/* Bottom Gradient Overlay */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to top, var(--theme-primary), transparent)",
+        }}
+      ></div>
     </div>
   );
 };

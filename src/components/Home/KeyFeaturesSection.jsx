@@ -193,18 +193,31 @@ const KeyFeaturesSection = () => {
     <div
       ref={sectionRef}
       id="features"
-      className="py-24 bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-hidden relative"
+      className="py-24 overflow-hidden relative theme-transition"
+      style={{
+        background: "var(--theme-gradientSecondary)",
+        color: "var(--theme-textPrimary)",
+      }}
     >
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-20 w-32 h-32 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse"></div>
         <div
-          className="absolute bottom-20 right-20 w-40 h-40 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 animate-pulse"
-          style={{ animationDelay: "2s" }}
+          className="absolute top-20 left-20 w-32 h-32 rounded-full animate-pulse"
+          style={{ background: "var(--theme-gradientPrimary)" }}
         ></div>
         <div
-          className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full bg-gradient-to-r from-amber-400 to-rose-400 animate-pulse"
-          style={{ animationDelay: "4s" }}
+          className="absolute bottom-20 right-20 w-40 h-40 rounded-full animate-pulse"
+          style={{
+            background: "var(--theme-gradientAccent)",
+            animationDelay: "2s",
+          }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full animate-pulse"
+          style={{
+            background: "var(--theme-gradientPrimary)",
+            animationDelay: "4s",
+          }}
         ></div>
       </div>
 
@@ -216,18 +229,30 @@ const KeyFeaturesSection = () => {
           }`}
         >
           <div className="flex items-center justify-center mb-4">
-            <Sparkles className="w-8 h-8 text-purple-500 mr-3" />
+            <Sparkles
+              className="w-8 h-8 mr-3"
+              style={{ color: "var(--theme-brandSecondary)" }}
+            />
             <h2
-              className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-800 via-purple-600 to-blue-600 bg-clip-text text-transparent"
-              style={{ fontFamily: "Patrick Hand, cursive" }}
+              className="text-5xl md:text-6xl font-bold"
+              style={{
+                fontFamily: "Patrick Hand, cursive",
+                color: "var(--theme-brandPrimary)",
+              }}
             >
               Key Features
             </h2>
-            <Sparkles className="w-8 h-8 text-blue-500 ml-3" />
+            <Sparkles
+              className="w-8 h-8 ml-3"
+              style={{ color: "var(--theme-brandTertiary)" }}
+            />
           </div>
           <p
-            className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
-            style={{ fontFamily: "Patrick Hand, cursive" }}
+            className="text-xl max-w-3xl mx-auto leading-relaxed"
+            style={{
+              fontFamily: "Patrick Hand, cursive",
+              color: "var(--theme-textSecondary)",
+            }}
           >
             Discover how SALMA transforms the assessment process from start to
             finish
@@ -241,20 +266,46 @@ const KeyFeaturesSection = () => {
           }`}
           style={{ transitionDelay: "300ms" }}
         >
-          <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+          <div
+            className="relative rounded-3xl theme-shadow-2xl overflow-hidden border theme-backdrop"
+            style={{
+              backgroundColor: "var(--theme-cardBackground)",
+              borderColor: "var(--theme-border)",
+            }}
+          >
             {/* Feature Navigation */}
             <div className="absolute top-6 right-6 z-20 flex space-x-2">
               <button
                 onClick={() => scrollToFeature("prev")}
-                className="p-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-lg hover:bg-opacity-100 transition-all group"
+                className="p-2 rounded-full theme-shadow-lg hover:scale-110 transition-all group theme-backdrop"
+                style={{
+                  backgroundColor: "var(--theme-cardBackground)",
+                  color: "var(--theme-textSecondary)",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = "var(--theme-textPrimary)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = "var(--theme-textSecondary)";
+                }}
               >
-                <ChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={() => scrollToFeature("next")}
-                className="p-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-lg hover:bg-opacity-100 transition-all group"
+                className="p-2 rounded-full theme-shadow-lg hover:scale-110 transition-all group theme-backdrop"
+                style={{
+                  backgroundColor: "var(--theme-cardBackground)",
+                  color: "var(--theme-textSecondary)",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = "var(--theme-textPrimary)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = "var(--theme-textSecondary)";
+                }}
               >
-                <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
 
@@ -272,7 +323,8 @@ const KeyFeaturesSection = () => {
                   }`}
                 >
                   <div
-                    className={`bg-gradient-to-br ${feature.gradient} h-full flex items-center relative overflow-hidden`}
+                    className="h-full flex items-center relative overflow-hidden"
+                    style={{ background: "var(--theme-gradientPrimary)" }}
                   >
                     {/* Background pattern */}
                     <div className="absolute inset-0 opacity-10">
@@ -328,9 +380,10 @@ const KeyFeaturesSection = () => {
                         <div className="hidden md:flex justify-center">
                           <div className="relative">
                             <div className="w-48 h-48 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl">
+                              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center theme-shadow-2xl">
                                 <div
-                                  className={`text-6xl ${feature.textColor}`}
+                                  className="text-6xl"
+                                  style={{ color: "var(--theme-brandPrimary)" }}
                                 >
                                   {feature.icon}
                                 </div>
@@ -380,35 +433,61 @@ const KeyFeaturesSection = () => {
                   onMouseLeave={() => setHoveredCard(null)}
                 >
                   <div
-                    className={`${
-                      feature.bgColor
-                    } rounded-2xl p-6 h-full border-2 transition-all duration-300 ${
+                    className={`rounded-2xl p-6 h-full border-2 transition-all duration-300 theme-shadow-md hover:theme-shadow-lg theme-backdrop ${
                       activeFeature === index
-                        ? `border-current ${feature.textColor} shadow-xl`
-                        : "border-transparent shadow-md hover:shadow-lg"
+                        ? "border-current theme-shadow-xl"
+                        : "border-transparent"
                     }`}
+                    style={{
+                      backgroundColor: "var(--theme-cardBackground)",
+                      borderColor:
+                        activeFeature === index
+                          ? "var(--theme-brandPrimary)"
+                          : "transparent",
+                      color:
+                        activeFeature === index
+                          ? "var(--theme-brandPrimary)"
+                          : "var(--theme-textPrimary)",
+                    }}
                   >
                     <div
-                      className={`${feature.iconBg} w-12 h-12 rounded-xl flex items-center justify-center mb-4`}
+                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                      style={{
+                        backgroundColor:
+                          activeFeature === index
+                            ? "var(--theme-tertiary)"
+                            : "var(--theme-secondary)",
+                        color: "var(--theme-brandPrimary)",
+                      }}
                     >
-                      <div className={feature.textColor}>{feature.icon}</div>
+                      {feature.icon}
                     </div>
                     <h4
-                      className={`text-lg font-bold mb-2 ${feature.textColor}`}
+                      className="text-lg font-bold mb-2"
+                      style={{ color: "var(--theme-textPrimary)" }}
                     >
                       {feature.title}
                     </h4>
-                    <p className="text-gray-600 text-sm line-clamp-3">
+                    <p
+                      className="text-sm line-clamp-3"
+                      style={{ color: "var(--theme-textSecondary)" }}
+                    >
                       {feature.description}
                     </p>
 
                     {/* Progress indicator */}
                     {activeFeature === index && (
                       <div className="mt-4">
-                        <div className="w-full bg-gray-200 rounded-full h-1">
+                        <div
+                          className="w-full rounded-full h-1"
+                          style={{ backgroundColor: "var(--theme-border)" }}
+                        >
                           <div
-                            className={`h-1 rounded-full bg-gradient-to-r ${feature.gradient} animate-pulse`}
-                            style={{ width: "100%" }}
+                            className="h-1 rounded-full animate-pulse"
+                            style={{
+                              width: "100%",
+                              background: "var(--theme-gradientPrimary)",
+                            }}
                           ></div>
                         </div>
                       </div>
@@ -426,12 +505,30 @@ const KeyFeaturesSection = () => {
             <button
               key={index}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                activeFeature === index
-                  ? `bg-gradient-to-r ${feature.gradient} scale-125`
-                  : "bg-gray-300 hover:bg-gray-400"
+                activeFeature === index ? "scale-125" : ""
               }`}
+              style={{
+                backgroundColor:
+                  activeFeature === index
+                    ? "var(--theme-brandPrimary)"
+                    : "var(--theme-border)",
+                background:
+                  activeFeature === index
+                    ? "var(--theme-gradientPrimary)"
+                    : "var(--theme-border)",
+              }}
               onClick={() => scrollToCard(index)}
               aria-label={`View ${feature.title}`}
+              onMouseEnter={(e) => {
+                if (activeFeature !== index) {
+                  e.target.style.backgroundColor = "var(--theme-textTertiary)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeFeature !== index) {
+                  e.target.style.backgroundColor = "var(--theme-border)";
+                }
+              }}
             />
           ))}
         </div>
