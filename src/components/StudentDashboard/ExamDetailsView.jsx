@@ -1,5 +1,17 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, FileText, CheckCircle, XCircle, AlertCircle, Award, Clock, User, BookOpen, Loader2, MessageCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Award,
+  Clock,
+  User,
+  BookOpen,
+  Loader2,
+  MessageCircle,
+} from "lucide-react";
 import { teacherApi } from "../../service/apiService";
 import { useAuth } from "../../context/AuthProvider";
 
@@ -21,7 +33,7 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
         console.log("Missing required data for exam details:", {
           teacherId,
           examId,
-          studentId
+          studentId,
         });
         setError("Missing required information to load exam details");
         setLoading(false);
@@ -31,8 +43,16 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
       try {
         setLoading(true);
         setError(null);
-        console.log("Fetching exam details with:", { teacherId, examId, studentId });
-        const data = await teacherApi.getStudentExamDetails(teacherId, examId, studentId);
+        console.log("Fetching exam details with:", {
+          teacherId,
+          examId,
+          studentId,
+        });
+        const data = await teacherApi.getStudentExamDetails(
+          teacherId,
+          examId,
+          studentId
+        );
         console.log("Exam details response:", data);
         setExamDetails(data);
       } catch (err) {
@@ -116,7 +136,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Exam Details</h1>
-              <p className="text-gray-600">{exam?.exam_name || "Error loading exam"}</p>
+              <p className="text-gray-600">
+                {exam?.exam_name || "Error loading exam"}
+              </p>
             </div>
           </div>
         </div>
@@ -126,7 +148,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
           <div className="flex items-center space-x-3">
             <AlertCircle className="w-6 h-6 text-red-600" />
             <div>
-              <h3 className="font-semibold text-red-800">Error Loading Exam Details</h3>
+              <h3 className="font-semibold text-red-800">
+                Error Loading Exam Details
+              </h3>
               <p className="text-red-600">{error}</p>
             </div>
           </div>
@@ -162,7 +186,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               <User className="w-5 h-5 text-sky-600" />
               <div>
                 <p className="text-sm text-gray-600">Teacher</p>
-                <p className="font-semibold text-sky-700">{examDetails.teacher.name}</p>
+                <p className="font-semibold text-sky-700">
+                  {examDetails.teacher.name}
+                </p>
               </div>
             </div>
           </div>
@@ -171,7 +197,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               <BookOpen className="w-5 h-5 text-purple-600" />
               <div>
                 <p className="text-sm text-gray-600">Subject</p>
-                <p className="font-semibold text-purple-700">{subject?.subject_name || subject?.name || "N/A"}</p>
+                <p className="font-semibold text-purple-700">
+                  {subject?.subject_name || subject?.name || "N/A"}
+                </p>
               </div>
             </div>
           </div>
@@ -187,7 +215,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               <Award className="w-5 h-5 text-emerald-600" />
               <div>
                 <p className="text-sm text-gray-600">Your Score</p>
-                <p className="text-xl font-bold text-emerald-700">{examDetails.grade_summary.total_grade}</p>
+                <p className="text-xl font-bold text-emerald-700">
+                  {examDetails.grade_summary.total_grade}
+                </p>
               </div>
             </div>
           </div>
@@ -196,7 +226,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               <FileText className="w-5 h-5 text-sky-600" />
               <div>
                 <p className="text-sm text-gray-600">Full Mark</p>
-                <p className="text-xl font-bold text-sky-700">{examDetails.grade_summary.max_total_grade}</p>
+                <p className="text-xl font-bold text-sky-700">
+                  {examDetails.grade_summary.max_total_grade}
+                </p>
               </div>
             </div>
           </div>
@@ -205,7 +237,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               <CheckCircle className="w-5 h-5 text-indigo-600" />
               <div>
                 <p className="text-sm text-gray-600">Percentage</p>
-                <p className="text-xl font-bold text-indigo-700">{examDetails.grade_summary.percentage}%</p>
+                <p className="text-xl font-bold text-indigo-700">
+                  {examDetails.grade_summary.percentage}%
+                </p>
               </div>
             </div>
           </div>
@@ -214,7 +248,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               <Clock className="w-5 h-5 text-amber-600" />
               <div>
                 <p className="text-sm text-gray-600">Questions</p>
-                <p className="text-xl font-bold text-amber-700">{examDetails.exam.num_of_questions}</p>
+                <p className="text-xl font-bold text-amber-700">
+                  {examDetails.exam.num_of_questions}
+                </p>
               </div>
             </div>
           </div>
@@ -223,19 +259,29 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
 
       {/* Question Details */}
       <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-sky-100">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">Question-by-Question Breakdown</h2>
+        <h2 className="text-xl font-bold text-gray-800 mb-6">
+          Question-by-Question Breakdown
+        </h2>
         <div className="space-y-4">
           {examDetails.question_details.map((question, index) => (
-            <div 
-              key={question.question_id} 
-              className={`bg-gradient-to-r ${getQuestionStatusColor(question.student_grade, question.max_grade)} p-6 rounded-2xl border`}
+            <div
+              key={question.question_id}
+              className={`bg-gradient-to-r ${getQuestionStatusColor(
+                question.student_grade,
+                question.max_grade
+              )} p-6 rounded-2xl border`}
             >
               {/* Question Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  {getQuestionStatusIcon(question.student_grade, question.max_grade)}
+                  {getQuestionStatusIcon(
+                    question.student_grade,
+                    question.max_grade
+                  )}
                   <div>
-                    <h3 className="text-lg font-bold text-gray-800">Question {index + 1}</h3>
+                    <h3 className="text-lg font-bold text-gray-800">
+                      Question {index + 1}
+                    </h3>
                     <p className="text-sm text-gray-600">
                       {question.student_grade} / {question.max_grade} points
                     </p>
@@ -244,7 +290,10 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
                 <div className="text-right">
                   <div className="text-sm text-gray-600">Score</div>
                   <div className="text-2xl font-bold text-gray-800">
-                    {Math.round((question.student_grade / question.max_grade) * 100)}%
+                    {Math.round(
+                      (question.student_grade / question.max_grade) * 100
+                    )}
+                    %
                   </div>
                 </div>
               </div>
@@ -252,23 +301,24 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               {/* Question Text */}
               <div className="mb-4">
                 <h4 className="font-semibold text-gray-800 mb-2">Question:</h4>
-                <p className="text-gray-700 bg-white/50 p-3 rounded-lg">{question.question_text}</p>
+                <p className="text-gray-700 bg-white/50 p-3 rounded-lg">
+                  {question.question_text}
+                </p>
               </div>
 
               {/* Correct Answer */}
               <div className="mb-4">
-                <h4 className="font-semibold text-gray-800 mb-2">Correct Answer:</h4>
+                <h4 className="font-semibold text-gray-800 mb-2">
+                  Correct Answer:
+                </h4>
                 <p className="text-gray-700 bg-green-50 p-3 rounded-lg border border-green-200">
                   {question.correct_answer}
                 </p>
               </div>
 
               {/* Student Answer */}
-<<<<<<< HEAD
               {/* <div className="mb-4">
-=======
               <div className="mb-4 hidden">
->>>>>>> 336bed6cfcddbe70ba1ffdc1e67741054e5ccd49
                 <h4 className="font-semibold text-gray-800 mb-2">Your Answer:</h4>
                 <p className={`text-gray-700 p-3 rounded-lg border ${
                   question.student_answer === question.correct_answer 
@@ -282,7 +332,9 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               {/* Explanation */}
               {question.explanation && (
                 <div className="mb-4">
-                  <h4 className="font-semibold text-gray-800 mb-2">Explanation:</h4>
+                  <h4 className="font-semibold text-gray-800 mb-2">
+                    Explanation:
+                  </h4>
                   <p className="text-gray-700 bg-blue-50 p-3 rounded-lg border border-blue-200">
                     {question.explanation}
                   </p>
@@ -295,10 +347,13 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
                   <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 text-amber-700">
                       <MessageCircle className="w-4 h-4" />
-                      <span className="text-sm font-medium">Appeal System Coming Soon</span>
+                      <span className="text-sm font-medium">
+                        Appeal System Coming Soon
+                      </span>
                     </div>
                     <p className="text-xs text-amber-600 mt-1">
-                      Grade appeal functionality will be available in a future update.
+                      Grade appeal functionality will be available in a future
+                      update.
                     </p>
                   </div>
                 </div>
