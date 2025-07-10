@@ -24,7 +24,9 @@ export default function Login() {
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
-  const navigate = useNavigate();  const handleSubmit = async (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -43,14 +45,14 @@ export default function Login() {
       }
 
       setSuccess(true);
-      
+
       // Navigate based on user role after successful login
       setTimeout(() => {
         if (result.redirectTo) {
           navigate(result.redirectTo);
         } else {
           // Fallback to role-based navigation
-          const user = JSON.parse(localStorage.getItem('user'));
+          const user = JSON.parse(localStorage.getItem("user"));
           navigateBasedOnRole(user, navigate);
         }
       }, 1000);
@@ -62,9 +64,15 @@ export default function Login() {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-200 via-sky-100 to-white relative overflow-hidden">
+    <div
+      className="min-h-screen relative overflow-hidden theme-transition"
+      style={{
+        background: "var(--theme-gradientSecondary)",
+        color: "var(--theme-textPrimary)",
+      }}
+    >
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 opacity-5">
         <svg
           className="absolute inset-0 h-full w-full"
           viewBox="0 0 400 400"
@@ -91,10 +99,16 @@ export default function Login() {
 
       {/* Floating Elements */}
       <div className="absolute top-20 left-10 opacity-20">
-        <div className="w-32 h-32 bg-gradient-to-r from-sky-300 to-blue-400 rounded-full blur-xl"></div>
+        <div
+          className="w-32 h-32 rounded-full blur-xl"
+          style={{ background: "var(--theme-gradientPrimary)" }}
+        ></div>
       </div>
       <div className="absolute bottom-20 right-10 opacity-20">
-        <div className="w-40 h-40 bg-gradient-to-r from-indigo-300 to-purple-400 rounded-full blur-xl"></div>
+        <div
+          className="w-40 h-40 rounded-full blur-xl"
+          style={{ background: "var(--theme-gradientAccent)" }}
+        ></div>
       </div>
 
       <div className="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -104,32 +118,61 @@ export default function Login() {
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-4 rounded-2xl shadow-lg">
+                  <div
+                    className="text-white p-4 rounded-2xl theme-shadow-lg"
+                    style={{ background: "var(--theme-gradientPrimary)" }}
+                  >
                     <GraduationCap className="w-8 h-8" />
                   </div>
-                  <Sparkles className="absolute -top-1 -right-1 w-6 h-6 text-yellow-400 animate-pulse" />
+                  <Sparkles
+                    className="absolute -top-1 -right-1 w-6 h-6 animate-pulse"
+                    style={{ color: "var(--theme-warning)" }}
+                  />
                 </div>
                 <div>
                   <span
-                    className="text-4xl font-bold bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent"
-                    style={{ fontFamily: "Patrick Hand, cursive" }}
+                    className="text-4xl font-bold"
+                    style={{
+                      background: "var(--theme-gradientPrimary)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      fontFamily: "Patrick Hand, cursive",
+                    }}
                   >
                     SALMA
                   </span>
-                  <div className="text-lg text-gray-600 font-medium">
+                  <div
+                    className="text-lg font-medium"
+                    style={{ color: "var(--theme-textSecondary)" }}
+                  >
                     AI Assessment Platform
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h1 className="text-5xl font-bold text-gray-800 leading-tight">
+                <h1
+                  className="text-5xl font-bold leading-tight"
+                  style={{ color: "var(--theme-textPrimary)" }}
+                >
                   Welcome Back to the
-                  <span className="block bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent">
+                  <span
+                    className="block"
+                    style={{
+                      background: "var(--theme-gradientPrimary)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
                     Future of Education
                   </span>
                 </h1>
-                <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
+                <p
+                  className="text-xl leading-relaxed max-w-lg"
+                  style={{ color: "var(--theme-textSecondary)" }}
+                >
                   Sign in to continue revolutionizing education through
                   intelligent assessment and automated grading.
                 </p>
@@ -137,13 +180,45 @@ export default function Login() {
 
               {/* Feature Highlights */}
               <div className="grid grid-cols-2 gap-4 max-w-lg">
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
-                  <div className="text-2xl font-bold text-sky-600">70%</div>
-                  <div className="text-sm text-gray-600">Time Saved</div>
+                <div
+                  className="rounded-xl p-4 border theme-shadow-sm theme-backdrop"
+                  style={{
+                    backgroundColor: "var(--theme-cardBackground)",
+                    borderColor: "var(--theme-border)",
+                  }}
+                >
+                  <div
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--theme-brandPrimary)" }}
+                  >
+                    70%
+                  </div>
+                  <div
+                    className="text-sm"
+                    style={{ color: "var(--theme-textSecondary)" }}
+                  >
+                    Time Saved
+                  </div>
                 </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
-                  <div className="text-2xl font-bold text-emerald-600">95%</div>
-                  <div className="text-sm text-gray-600">OCR Accuracy</div>
+                <div
+                  className="rounded-xl p-4 border theme-shadow-sm theme-backdrop"
+                  style={{
+                    backgroundColor: "var(--theme-cardBackground)",
+                    borderColor: "var(--theme-border)",
+                  }}
+                >
+                  <div
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--theme-success)" }}
+                  >
+                    95%
+                  </div>
+                  <div
+                    className="text-sm"
+                    style={{ color: "var(--theme-textSecondary)" }}
+                  >
+                    OCR Accuracy
+                  </div>
                 </div>
               </div>
             </div>
@@ -155,37 +230,74 @@ export default function Login() {
             <div className="lg:hidden text-center mb-8">
               <div className="flex justify-center mb-4">
                 <div className="relative">
-                  <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-3 rounded-2xl shadow-lg">
+                  <div
+                    className="text-white p-3 rounded-2xl theme-shadow-lg"
+                    style={{ background: "var(--theme-gradientPrimary)" }}
+                  >
                     <GraduationCap className="w-6 h-6" />
                   </div>
-                  <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" />
+                  <Sparkles
+                    className="absolute -top-1 -right-1 w-4 h-4 animate-pulse"
+                    style={{ color: "var(--theme-warning)" }}
+                  />
                 </div>
               </div>
-              <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
-              <p className="text-gray-600 mt-2">
+              <h2
+                className="text-3xl font-bold"
+                style={{ color: "var(--theme-textPrimary)" }}
+              >
+                Welcome Back
+              </h2>
+              <p
+                className="mt-2"
+                style={{ color: "var(--theme-textSecondary)" }}
+              >
                 Sign in to your SALMA account
               </p>
             </div>
 
             {/* Form Card */}
-            <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-sky-100 p-8 space-y-6">
+            <div
+              className="rounded-2xl theme-shadow-xl border p-8 space-y-6 theme-backdrop"
+              style={{
+                backgroundColor: "var(--theme-cardBackground)",
+                borderColor: "var(--theme-border)",
+              }}
+            >
               {/* Desktop Header */}
               <div className="hidden lg:block text-center space-y-2">
-                <h3 className="text-2xl font-bold text-gray-800">Sign In</h3>
-                <p className="text-gray-600">
+                <h3
+                  className="text-2xl font-bold"
+                  style={{ color: "var(--theme-textPrimary)" }}
+                >
+                  Sign In
+                </h3>
+                <p style={{ color: "var(--theme-textSecondary)" }}>
                   Enter your credentials to continue
                 </p>
               </div>
 
               {/* Error/Success Messages */}
               {error && (
-                <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl p-4">
+                <div
+                  className="border rounded-xl p-4 theme-backdrop"
+                  style={{
+                    backgroundColor: "var(--theme-errorBackground)",
+                    borderColor: "var(--theme-error)",
+                  }}
+                >
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: "var(--theme-error)" }}
+                      ></div>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-red-700 font-medium">
+                      <p
+                        className="text-sm font-medium"
+                        style={{ color: "var(--theme-error)" }}
+                      >
                         {error}
                       </p>
                     </div>
@@ -194,10 +306,22 @@ export default function Login() {
               )}
 
               {success && (
-                <div className="bg-emerald-50/80 backdrop-blur-sm border border-emerald-200 rounded-xl p-4">
+                <div
+                  className="border rounded-xl p-4 theme-backdrop"
+                  style={{
+                    backgroundColor: "var(--theme-successBackground)",
+                    borderColor: "var(--theme-success)",
+                  }}
+                >
                   <div className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-emerald-500 mr-3" />
-                    <p className="text-sm text-emerald-700 font-medium">
+                    <CheckCircle
+                      className="h-5 w-5 mr-3"
+                      style={{ color: "var(--theme-success)" }}
+                    />
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "var(--theme-success)" }}
+                    >
                       Login successful! Redirecting...
                     </p>
                   </div>
@@ -210,13 +334,17 @@ export default function Login() {
                 <div className="space-y-2">
                   <label
                     htmlFor="email"
-                    className="block text-sm font-semibold text-gray-700"
+                    className="block text-sm font-semibold"
+                    style={{ color: "var(--theme-textPrimary)" }}
                   >
                     Email Address
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-sky-400" />
+                      <Mail
+                        className="h-5 w-5"
+                        style={{ color: "var(--theme-brandPrimary)" }}
+                      />
                     </div>
                     <input
                       id="email"
@@ -226,8 +354,23 @@ export default function Login() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                      className="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 theme-backdrop"
+                      style={{
+                        backgroundColor: "var(--theme-inputBackground)",
+                        borderColor: "var(--theme-border)",
+                        color: "var(--theme-textPrimary)",
+                        "--focus-ring-color": "var(--theme-brandPrimary)",
+                      }}
                       placeholder="Enter your email address"
+                      onFocus={(e) => {
+                        e.target.style.borderColor =
+                          "var(--theme-brandPrimary)";
+                        e.target.style.boxShadow = `0 0 0 2px var(--theme-brandPrimary)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = "var(--theme-border)";
+                        e.target.style.boxShadow = "none";
+                      }}
                     />
                   </div>
                 </div>
@@ -236,13 +379,17 @@ export default function Login() {
                 <div className="space-y-2">
                   <label
                     htmlFor="password"
-                    className="block text-sm font-semibold text-gray-700"
+                    className="block text-sm font-semibold"
+                    style={{ color: "var(--theme-textPrimary)" }}
                   >
                     Password
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-sky-400" />
+                      <Lock
+                        className="h-5 w-5"
+                        style={{ color: "var(--theme-brandPrimary)" }}
+                      />
                     </div>
                     <input
                       id="password"
@@ -252,13 +399,34 @@ export default function Login() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-12 pr-12 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-300 text-gray-800 placeholder-gray-500"
+                      className="w-full pl-12 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 theme-backdrop"
+                      style={{
+                        backgroundColor: "var(--theme-inputBackground)",
+                        borderColor: "var(--theme-border)",
+                        color: "var(--theme-textPrimary)",
+                      }}
                       placeholder="Enter your password"
+                      onFocus={(e) => {
+                        e.target.style.borderColor =
+                          "var(--theme-brandPrimary)";
+                        e.target.style.boxShadow = `0 0 0 2px var(--theme-brandPrimary)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = "var(--theme-border)";
+                        e.target.style.boxShadow = "none";
+                      }}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-sky-400 hover:text-sky-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center transition-colors"
+                      style={{ color: "var(--theme-brandPrimary)" }}
+                      onMouseEnter={(e) => {
+                        e.target.style.color = "var(--theme-textAccent)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.color = "var(--theme-brandPrimary)";
+                      }}
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -276,15 +444,30 @@ export default function Login() {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 text-sky-600 bg-white/60 border-sky-300 rounded focus:ring-sky-400 focus:ring-2"
+                      className="w-4 h-4 rounded focus:ring-2"
+                      style={{
+                        accentColor: "var(--theme-brandPrimary)",
+                        backgroundColor: "var(--theme-inputBackground)",
+                        borderColor: "var(--theme-border)",
+                      }}
                     />
-                    <span className="ml-2 text-sm text-gray-700">
+                    <span
+                      className="ml-2 text-sm"
+                      style={{ color: "var(--theme-textSecondary)" }}
+                    >
                       Remember me
                     </span>
                   </label>
                   <Link
                     to="/forgot-password"
-                    className="text-sm text-sky-600 hover:text-sky-700 font-medium hover:underline decoration-sky-300 underline-offset-4 transition-all duration-300"
+                    className="text-sm font-medium hover:underline decoration-2 underline-offset-4 transition-all duration-300"
+                    style={{ color: "var(--theme-brandPrimary)" }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = "var(--theme-textAccent)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = "var(--theme-brandPrimary)";
+                    }}
                   >
                     Forgot password?
                   </Link>
@@ -294,7 +477,11 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-sky-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                  className="w-full text-white py-3 px-6 rounded-xl font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-300 hover:scale-[1.02] theme-shadow-lg hover:theme-shadow-xl flex items-center justify-center space-x-2"
+                  style={{
+                    background: "var(--theme-gradientPrimary)",
+                    "--focus-ring-color": "var(--theme-brandPrimary)",
+                  }}
                 >
                   {isLoading ? (
                     <>
@@ -333,10 +520,19 @@ export default function Login() {
               {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-sky-200"></div>
+                  <div
+                    className="w-full border-t"
+                    style={{ borderColor: "var(--theme-border)" }}
+                  ></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white/70 text-gray-500 font-medium">
+                  <span
+                    className="px-4 font-medium theme-backdrop"
+                    style={{
+                      backgroundColor: "var(--theme-cardBackground)",
+                      color: "var(--theme-textTertiary)",
+                    }}
+                  >
                     Or continue with
                   </span>
                 </div>
@@ -346,7 +542,21 @@ export default function Login() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center px-4 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl text-gray-700 font-medium hover:bg-white/80 hover:border-sky-300 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-md"
+                  className="flex items-center justify-center px-4 py-3 border rounded-xl font-medium transition-all duration-300 hover:scale-[1.02] theme-shadow-sm hover:theme-shadow-md theme-backdrop"
+                  style={{
+                    backgroundColor: "var(--theme-inputBackground)",
+                    borderColor: "var(--theme-border)",
+                    color: "var(--theme-textSecondary)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = "var(--theme-tertiary)";
+                    e.target.style.borderColor = "var(--theme-brandPrimary)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor =
+                      "var(--theme-inputBackground)";
+                    e.target.style.borderColor = "var(--theme-border)";
+                  }}
                 >
                   <svg
                     className="w-5 h-5 mr-2"
@@ -375,7 +585,21 @@ export default function Login() {
 
                 <button
                   type="button"
-                  className="flex items-center justify-center px-4 py-3 bg-white/60 backdrop-blur-sm border border-sky-200 rounded-xl text-gray-700 font-medium hover:bg-white/80 hover:border-sky-300 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-md"
+                  className="flex items-center justify-center px-4 py-3 border rounded-xl font-medium transition-all duration-300 hover:scale-[1.02] theme-shadow-sm hover:theme-shadow-md theme-backdrop"
+                  style={{
+                    backgroundColor: "var(--theme-inputBackground)",
+                    borderColor: "var(--theme-border)",
+                    color: "var(--theme-textSecondary)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = "var(--theme-tertiary)";
+                    e.target.style.borderColor = "var(--theme-brandPrimary)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor =
+                      "var(--theme-inputBackground)";
+                    e.target.style.borderColor = "var(--theme-border)";
+                  }}
                 >
                   <Github className="w-5 h-5 mr-2" />
                   GitHub
@@ -384,11 +608,18 @@ export default function Login() {
 
               {/* Sign Up Link */}
               <div className="text-center pt-4">
-                <p className="text-gray-600">
+                <p style={{ color: "var(--theme-textSecondary)" }}>
                   Don't have an account?{" "}
                   <Link
                     to="/register"
-                    className="text-sky-600 hover:text-sky-700 font-semibold hover:underline decoration-sky-300 underline-offset-4 transition-all duration-300"
+                    className="font-semibold hover:underline decoration-2 underline-offset-4 transition-all duration-300"
+                    style={{ color: "var(--theme-brandPrimary)" }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = "var(--theme-textAccent)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = "var(--theme-brandPrimary)";
+                    }}
                   >
                     Create your account
                   </Link>

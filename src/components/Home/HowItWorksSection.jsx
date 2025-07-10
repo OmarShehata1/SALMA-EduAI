@@ -194,18 +194,31 @@ const HowItWorksSection = () => {
   return (
     <div
       ref={sectionRef}
-      className="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50 overflow-hidden relative"
+      className="py-24 relative overflow-hidden theme-transition"
+      style={{
+        background: "var(--theme-gradientSecondary)",
+        color: "var(--theme-textPrimary)",
+      }}
     >
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-10 w-40 h-40 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse"></div>
         <div
-          className="absolute bottom-20 right-10 w-32 h-32 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 animate-pulse"
-          style={{ animationDelay: "2s" }}
+          className="absolute top-20 left-10 w-40 h-40 rounded-full animate-pulse"
+          style={{ background: "var(--theme-gradientPrimary)" }}
         ></div>
         <div
-          className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full bg-gradient-to-r from-rose-400 to-orange-400 animate-pulse"
-          style={{ animationDelay: "4s" }}
+          className="absolute bottom-20 right-10 w-32 h-32 rounded-full animate-pulse"
+          style={{
+            background: "var(--theme-gradientAccent)",
+            animationDelay: "2s",
+          }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full animate-pulse"
+          style={{
+            background: "var(--theme-gradientPrimary)",
+            animationDelay: "4s",
+          }}
         ></div>
       </div>
 
@@ -219,14 +232,20 @@ const HowItWorksSection = () => {
           }`}
         >
           <h2
-            className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-blue-600 to-purple-600 bg-clip-text text-transparent"
-            style={{ fontFamily: "Patrick Hand, cursive" }}
+            className="text-5xl md:text-6xl font-bold mb-6"
+            style={{
+              fontFamily: "Patrick Hand, cursive",
+              color: "var(--theme-brandPrimary)",
+            }}
           >
             How SALMA Works
           </h2>
           <p
-            className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
-            style={{ fontFamily: "Patrick Hand, cursive" }}
+            className="text-xl max-w-3xl mx-auto leading-relaxed"
+            style={{
+              fontFamily: "Patrick Hand, cursive",
+              color: "var(--theme-textSecondary)",
+            }}
           >
             Experience the intelligent workflow that transforms education
           </p>
@@ -241,16 +260,44 @@ const HowItWorksSection = () => {
           }`}
           style={{ transitionDelay: "200ms" }}
         >
-          <div className="bg-white rounded-2xl p-2 shadow-xl border border-gray-100 inline-flex">
+          <div
+            className="rounded-2xl p-2 theme-shadow-xl border inline-flex theme-backdrop"
+            style={{
+              backgroundColor: "var(--theme-cardBackground)",
+              borderColor: "var(--theme-border)",
+            }}
+          >
             {Object.entries(processes).map(([key, process]) => (
               <button
                 key={key}
                 onClick={() => handleProcessChange(key)}
                 className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-3 ${
                   activeProcess === key
-                    ? `bg-gradient-to-r ${process.color} text-white shadow-lg transform scale-105`
-                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                    ? "text-white theme-shadow-lg transform scale-105"
+                    : ""
                 }`}
+                style={{
+                  background:
+                    activeProcess === key
+                      ? "var(--theme-gradientPrimary)"
+                      : "transparent",
+                  color:
+                    activeProcess === key
+                      ? "#ffffff"
+                      : "var(--theme-textSecondary)",
+                }}
+                onMouseEnter={(e) => {
+                  if (activeProcess !== key) {
+                    e.target.style.color = "var(--theme-textAccent)";
+                    e.target.style.backgroundColor = "var(--theme-tertiary)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeProcess !== key) {
+                    e.target.style.color = "var(--theme-textSecondary)";
+                    e.target.style.backgroundColor = "transparent";
+                  }
+                }}
               >
                 <span>{process.title}</span>
               </button>
@@ -270,11 +317,20 @@ const HowItWorksSection = () => {
           {/* Process Header */}
           <div className="text-center mb-12">
             <h3
-              className={`text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r ${activeProcessData.color} bg-clip-text text-transparent`}
+              className="text-3xl md:text-4xl font-bold mb-3"
+              style={{
+                background: "var(--theme-gradientPrimary)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
             >
               {activeProcessData.title}
             </h3>
-            <p className="text-gray-600 text-lg mb-6">
+            <p
+              className="text-lg mb-6"
+              style={{ color: "var(--theme-textSecondary)" }}
+            >
               {activeProcessData.subtitle}
             </p>
 
@@ -282,7 +338,8 @@ const HowItWorksSection = () => {
             <div className="flex justify-center items-center space-x-4">
               <button
                 onClick={togglePlayback}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all bg-gradient-to-r ${activeProcessData.color} text-white hover:shadow-lg transform hover:scale-105`}
+                className="flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all text-white theme-shadow-lg transform hover:scale-105"
+                style={{ background: "var(--theme-gradientPrimary)" }}
               >
                 {isPlaying ? (
                   <Pause className="w-5 h-5" />
@@ -293,7 +350,19 @@ const HowItWorksSection = () => {
               </button>
               <button
                 onClick={resetProcess}
-                className="flex items-center space-x-2 px-4 py-3 rounded-xl font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all"
+                className="flex items-center space-x-2 px-4 py-3 rounded-xl font-medium border transition-all"
+                style={{
+                  color: "var(--theme-textSecondary)",
+                  backgroundColor: "var(--theme-cardBackground)",
+                  borderColor: "var(--theme-border)",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = "var(--theme-tertiary)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor =
+                    "var(--theme-cardBackground)";
+                }}
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Reset</span>
@@ -303,19 +372,25 @@ const HowItWorksSection = () => {
 
           {/* Interactive Process Flow */}
           <div
-            className={`${activeProcessData.bgPattern} rounded-3xl p-8 md:p-12 shadow-2xl border border-gray-100 relative overflow-hidden`}
+            className="rounded-3xl p-8 md:p-12 theme-shadow-2xl border relative overflow-hidden theme-backdrop"
+            style={{
+              backgroundColor: "var(--theme-cardBackground)",
+              borderColor: "var(--theme-border)",
+            }}
           >
             {/* Current Step Highlight */}
             <div className="absolute inset-0 pointer-events-none">
               <div
-                className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${activeProcessData.color} opacity-30`}
+                className="absolute top-0 left-0 w-full h-2 opacity-30"
+                style={{ background: "var(--theme-gradientPrimary)" }}
               ></div>
               <div
-                className={`absolute top-0 left-0 h-2 bg-gradient-to-r ${activeProcessData.color} transition-all duration-1000`}
+                className="absolute top-0 left-0 h-2 transition-all duration-1000"
                 style={{
                   width: `${
                     ((currentStep + 1) / activeProcessData.steps.length) * 100
                   }%`,
+                  background: "var(--theme-gradientPrimary)",
                 }}
               ></div>
             </div>
@@ -336,16 +411,37 @@ const HowItWorksSection = () => {
                 >
                   {/* Step Card */}
                   <div
-                    className={`bg-white rounded-2xl p-6 shadow-lg cursor-pointer transition-all duration-300 border-2 ${
+                    className={`rounded-2xl p-6 theme-shadow-lg cursor-pointer transition-all duration-300 border-2 ${
                       index === currentStep
-                        ? `border-current bg-gradient-to-br from-white to-gray-50 shadow-2xl`
-                        : "border-transparent hover:border-gray-200 hover:shadow-xl"
+                        ? "theme-shadow-2xl"
+                        : "border-transparent hover:theme-shadow-xl"
                     }`}
+                    style={{
+                      backgroundColor:
+                        index === currentStep
+                          ? "var(--theme-cardBackground)"
+                          : "var(--theme-cardBackground)",
+                      borderColor:
+                        index === currentStep
+                          ? "var(--theme-brandPrimary)"
+                          : "transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (index !== currentStep) {
+                        e.target.style.borderColor = "var(--theme-border)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (index !== currentStep) {
+                        e.target.style.borderColor = "transparent";
+                      }
+                    }}
                   >
                     {/* Step Number & Icon */}
                     <div className="flex items-center justify-between mb-4">
                       <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${activeProcessData.color} text-white shadow-md`}
+                        className="w-12 h-12 rounded-xl flex items-center justify-center text-white theme-shadow-md"
+                        style={{ background: "var(--theme-gradientPrimary)" }}
                       >
                         {step.icon}
                       </div>
@@ -356,22 +452,38 @@ const HowItWorksSection = () => {
                     <div className="space-y-3">
                       <div className="flex items-center space-x-2">
                         <span
-                          className={`text-sm font-bold px-2 py-1 rounded-full bg-gradient-to-r ${activeProcessData.color} text-white`}
+                          className="text-sm font-bold px-2 py-1 rounded-full text-white"
+                          style={{ background: "var(--theme-gradientPrimary)" }}
                         >
                           {index + 1}
                         </span>
-                        <h4 className="font-bold text-gray-800">
+                        <h4
+                          className="font-bold"
+                          style={{ color: "var(--theme-textPrimary)" }}
+                        >
                           {step.title}
                         </h4>
                       </div>
-                      <p className="text-gray-600 text-sm leading-relaxed">
+                      <p
+                        className="text-sm leading-relaxed"
+                        style={{ color: "var(--theme-textSecondary)" }}
+                      >
                         {step.description}
                       </p>
 
                       {/* Expanded Detail (when active) */}
                       {index === currentStep && (
-                        <div className="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-current animate-fadeIn">
-                          <p className="text-xs text-gray-700 font-medium">
+                        <div
+                          className="mt-4 p-3 rounded-lg border-l-4 animate-fadeIn"
+                          style={{
+                            backgroundColor: "var(--theme-tertiary)",
+                            borderColor: "var(--theme-brandPrimary)",
+                          }}
+                        >
+                          <p
+                            className="text-xs font-medium"
+                            style={{ color: "var(--theme-textPrimary)" }}
+                          >
                             {step.detail}
                           </p>
                         </div>
@@ -381,12 +493,16 @@ const HowItWorksSection = () => {
                     {/* Progress Indicator */}
                     {index === currentStep && isPlaying && (
                       <div className="mt-4">
-                        <div className="w-full bg-gray-200 rounded-full h-1">
+                        <div
+                          className="w-full rounded-full h-1"
+                          style={{ backgroundColor: "var(--theme-border)" }}
+                        >
                           <div
-                            className={`h-1 rounded-full bg-gradient-to-r ${activeProcessData.color} animate-pulse`}
+                            className="h-1 rounded-full animate-pulse"
                             style={{
                               width: "100%",
                               animation: `progress ${step.duration}ms linear infinite`,
+                              background: "var(--theme-gradientPrimary)",
                             }}
                           ></div>
                         </div>
@@ -398,9 +514,15 @@ const HowItWorksSection = () => {
                   {index < activeProcessData.steps.length - 1 && (
                     <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-0">
                       <ArrowRight
-                        className={`w-6 h-6 text-gray-300 ${
-                          index < currentStep ? `text-current` : ""
-                        } transition-colors duration-500`}
+                        className={`w-6 h-6 transition-colors duration-500 ${
+                          index < currentStep ? "" : ""
+                        }`}
+                        style={{
+                          color:
+                            index < currentStep
+                              ? "var(--theme-brandPrimary)"
+                              : "var(--theme-border)",
+                        }}
                       />
                     </div>
                   )}
@@ -415,7 +537,8 @@ const HowItWorksSection = () => {
                   (window.location.href =
                     activeProcess === "create" ? "/create" : "/grades")
                 }
-                className={`bg-gradient-to-r ${activeProcessData.color} text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all transform hover:scale-105 inline-flex items-center space-x-2`}
+                className="text-white px-8 py-4 rounded-xl font-semibold theme-shadow-lg transition-all transform hover:scale-105 inline-flex items-center space-x-2"
+                style={{ background: "var(--theme-gradientPrimary)" }}
               >
                 <span>Try {activeProcessData.title}</span>
                 <ArrowRight className="w-5 h-5" />

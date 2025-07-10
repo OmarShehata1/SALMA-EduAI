@@ -264,7 +264,11 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               </div>
 
               {/* Student Answer */}
+<<<<<<< HEAD
               {/* <div className="mb-4">
+=======
+              <div className="mb-4 hidden">
+>>>>>>> 336bed6cfcddbe70ba1ffdc1e67741054e5ccd49
                 <h4 className="font-semibold text-gray-800 mb-2">Your Answer:</h4>
                 <p className={`text-gray-700 p-3 rounded-lg border ${
                   question.student_answer === question.correct_answer 

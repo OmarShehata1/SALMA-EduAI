@@ -94,18 +94,31 @@ const SALMAUniqueSection = () => {
   return (
     <div
       ref={sectionRef}
-      className="py-24 bg-gradient-to-b from-sky-200 via-sky-100 to-white text-gray-800 overflow-hidden relative"
+      className="py-24 relative overflow-hidden theme-transition"
+      style={{
+        background: "var(--theme-gradientSecondary)",
+        color: "var(--theme-textPrimary)",
+      }}
     >
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-10 w-40 h-40 rounded-full bg-sky-400 animate-pulse"></div>
         <div
-          className="absolute bottom-20 right-10 w-60 h-60 rounded-full bg-indigo-400 animate-pulse"
-          style={{ animationDelay: "2s" }}
+          className="absolute top-20 left-10 w-40 h-40 rounded-full animate-pulse"
+          style={{ background: "var(--theme-gradientPrimary)" }}
         ></div>
         <div
-          className="absolute top-1/2 left-1/4 w-20 h-20 rounded-full bg-emerald-400 animate-pulse"
-          style={{ animationDelay: "4s" }}
+          className="absolute bottom-20 right-10 w-60 h-60 rounded-full animate-pulse"
+          style={{
+            background: "var(--theme-gradientAccent)",
+            animationDelay: "2s",
+          }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/4 w-20 h-20 rounded-full animate-pulse"
+          style={{
+            background: "var(--theme-gradientPrimary)",
+            animationDelay: "4s",
+          }}
         ></div>
       </div>
 
@@ -120,8 +133,11 @@ const SALMAUniqueSection = () => {
             }`}
           >
             <h2
-              className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-sky-600 via-indigo-600 to-emerald-600 bg-clip-text text-transparent"
-              style={{ fontFamily: "Patrick Hand, cursive" }}
+              className="text-5xl md:text-6xl font-bold mb-6"
+              style={{
+                fontFamily: "Patrick Hand, cursive",
+                color: "var(--theme-brandPrimary)",
+              }}
             >
               What Makes SALMA Unique?
             </h2>
@@ -135,8 +151,11 @@ const SALMAUniqueSection = () => {
             style={{ transitionDelay: "200ms" }}
           >
             <p
-              className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
-              style={{ fontFamily: "Patrick Hand, cursive" }}
+              className="text-xl max-w-3xl mx-auto leading-relaxed"
+              style={{
+                fontFamily: "Patrick Hand, cursive",
+                color: "var(--theme-textSecondary)",
+              }}
             >
               Combining cutting-edge AI with automation to revolutionize
               educational assessment
@@ -171,27 +190,44 @@ const SALMAUniqueSection = () => {
                 >
                   <div className="flex items-center space-x-4">
                     <span
-                      className={`text-6xl font-bold text-${feature.color} opacity-20`}
+                      className="text-6xl font-bold opacity-20"
+                      style={{ color: "var(--theme-brandPrimary)" }}
                     >
                       {feature.number}
                     </span>
                     <div>
-                      <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                      <h3
+                        className="text-3xl md:text-4xl font-bold mb-2"
+                        style={{ color: "var(--theme-textPrimary)" }}
+                      >
                         {feature.title}
                       </h3>
                       <p
-                        className={`text-lg font-medium text-${feature.color} uppercase tracking-wide`}
+                        className="text-lg font-medium uppercase tracking-wide"
+                        style={{ color: "var(--theme-brandPrimary)" }}
                       >
                         {feature.subtitle}
                       </p>
                     </div>
                   </div>
 
-                  <p className="text-lg text-gray-600 leading-relaxed">
+                  <p
+                    className="text-lg leading-relaxed"
+                    style={{ color: "var(--theme-textSecondary)" }}
+                  >
                     {feature.description}
                   </p>
 
-                  <div className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer group">
+                  <div
+                    className="flex items-center space-x-2 cursor-pointer group transition-colors"
+                    style={{ color: "var(--theme-textTertiary)" }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = "var(--theme-textSecondary)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = "var(--theme-textTertiary)";
+                    }}
+                  >
                     <span className="text-sm uppercase tracking-wide font-medium">
                       Learn More
                     </span>
@@ -214,7 +250,8 @@ const SALMAUniqueSection = () => {
                   >
                     {/* Main visual container */}
                     <div
-                      className={`bg-gradient-to-br ${feature.bgGradient} p-12 relative min-h-[300px] flex items-center justify-center`}
+                      className="relative min-h-[300px] flex items-center justify-center p-12"
+                      style={{ background: "var(--theme-gradientPrimary)" }}
                     >
                       {/* Animated background pattern */}
                       <div className="absolute inset-0">
@@ -237,7 +274,13 @@ const SALMAUniqueSection = () => {
                             : "scale-100 rotate-0"
                         }`}
                       >
-                        <div className="bg-white p-6 rounded-2xl shadow-2xl text-gray-800">
+                        <div
+                          className="p-6 rounded-2xl theme-shadow-2xl"
+                          style={{
+                            backgroundColor: "var(--theme-primary)",
+                            color: "var(--theme-textPrimary)",
+                          }}
+                        >
                           {feature.icon}
                         </div>
                       </div>
@@ -262,7 +305,8 @@ const SALMAUniqueSection = () => {
 
                     {/* Bottom accent bar */}
                     <div
-                      className={`h-2 bg-gradient-to-r ${feature.bgGradient}`}
+                      className="h-2"
+                      style={{ background: "var(--theme-gradientPrimary)" }}
                     ></div>
                   </div>
 
@@ -270,9 +314,8 @@ const SALMAUniqueSection = () => {
                   <div
                     className={`absolute -z-10 top-4 ${
                       index % 2 === 0 ? "-right-4" : "-left-4"
-                    } w-full h-full ${
-                      feature.accentColor
-                    } rounded-3xl opacity-30`}
+                    } w-full h-full rounded-3xl opacity-30`}
+                    style={{ backgroundColor: "var(--theme-tertiary)" }}
                   ></div>
                 </div>
               </div>
@@ -289,16 +332,31 @@ const SALMAUniqueSection = () => {
           }`}
           style={{ transitionDelay: "1300ms" }}
         >
-          <div className="bg-white bg-opacity-60 backdrop-blur-lg p-8 rounded-3xl border border-sky-200 shadow-lg max-w-4xl mx-auto">
+          <div
+            className="p-8 rounded-3xl border theme-shadow-lg max-w-4xl mx-auto theme-backdrop"
+            style={{
+              backgroundColor: "var(--theme-cardBackground)",
+              borderColor: "var(--theme-border)",
+            }}
+          >
             <div className="flex items-center justify-center space-x-6">
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-2xl">
+              <div
+                className="p-4 rounded-2xl"
+                style={{ background: "var(--theme-gradientAccent)" }}
+              >
                 <Trophy className="text-white w-12 h-12" />
               </div>
               <div className="text-left">
-                <p className="text-2xl font-bold text-gray-800 mb-2">
+                <p
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: "var(--theme-textPrimary)" }}
+                >
                   70% Reduction in Grading Time
                 </p>
-                <p className="text-gray-600 text-lg">
+                <p
+                  className="text-lg"
+                  style={{ color: "var(--theme-textSecondary)" }}
+                >
                   While maintaining superior assessment quality and accuracy
                 </p>
               </div>

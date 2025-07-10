@@ -20,15 +20,21 @@ import {
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const location = useLocation();
-    // Determine the left margin based on the dashboard type
+  // Determine the left margin based on the dashboard type
   const getLeftMargin = () => {
-    if (location.pathname === '/dashboard') return 'ml-80'; // Instructor dashboard (320px)
-    if (location.pathname === '/student-dashboard') return 'ml-80'; // Student dashboard (320px - now same width)
-    return '';
+    if (location.pathname === "/dashboard") return "ml-80"; // Instructor dashboard (320px)
+    if (location.pathname === "/student-dashboard") return "ml-80"; // Student dashboard (320px - now same width)
+    return "";
   };
 
   return (
-    <footer className={`bg-gradient-to-b from-sky-50 via-sky-25 to-white border-t border-sky-100 relative overflow-hidden ${getLeftMargin()}`}>
+    <footer
+      className={`border-t relative overflow-hidden theme-transition ${getLeftMargin()}`}
+      style={{
+        background: "var(--theme-gradientSecondary)",
+        borderColor: "var(--theme-border)",
+      }}
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <svg
@@ -62,25 +68,43 @@ export default function Footer() {
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center group">
               <div className="relative">
-                <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-3 rounded-2xl shadow-lg transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
+                <div
+                  className="text-white p-3 rounded-2xl theme-shadow-lg transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl"
+                  style={{ background: "var(--theme-gradientPrimary)" }}
+                >
                   <GraduationCap className="w-8 h-8" />
                 </div>
-                <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-400 animate-pulse" />
+                <Sparkles
+                  className="absolute -top-1 -right-1 w-5 h-5 animate-pulse"
+                  style={{ color: "var(--theme-warning)" }}
+                />
               </div>
               <div className="ml-4">
                 <span
-                  className="text-3xl font-bold bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent"
-                  style={{ fontFamily: "Patrick Hand, cursive" }}
+                  className="text-3xl font-bold"
+                  style={{
+                    background: "var(--theme-gradientPrimary)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    fontFamily: "Patrick Hand, cursive",
+                  }}
                 >
                   SALMA
                 </span>
-                <div className="text-sm text-gray-500 font-medium">
+                <div
+                  className="text-sm font-medium"
+                  style={{ color: "var(--theme-textSecondary)" }}
+                >
                   AI Assessment Platform
                 </div>
               </div>
             </div>
 
-            <p className="text-gray-600 leading-relaxed max-w-md">
+            <p
+              className="leading-relaxed max-w-md"
+              style={{ color: "var(--theme-textSecondary)" }}
+            >
               System for Automated Learning and Multi-Agent Assessment.
               Revolutionizing education through intelligent exam creation and
               evaluation.
@@ -88,13 +112,45 @@ export default function Footer() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-4 max-w-md">
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
-                <div className="text-2xl font-bold text-sky-600">90%</div>
-                <div className="text-xs text-gray-600">Time Saved</div>
+              <div
+                className="rounded-xl p-4 border theme-shadow-sm theme-backdrop"
+                style={{
+                  backgroundColor: "var(--theme-cardBackground)",
+                  borderColor: "var(--theme-border)",
+                }}
+              >
+                <div
+                  className="text-2xl font-bold"
+                  style={{ color: "var(--theme-brandPrimary)" }}
+                >
+                  70%
+                </div>
+                <div
+                  className="text-xs"
+                  style={{ color: "var(--theme-textSecondary)" }}
+                >
+                  Time Saved
+                </div>
               </div>
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-sky-100 shadow-sm">
-                <div className="text-2xl font-bold text-emerald-600">95%</div>
-                <div className="text-xs text-gray-600">OCR Accuracy</div>
+              <div
+                className="rounded-xl p-4 border theme-shadow-sm theme-backdrop"
+                style={{
+                  backgroundColor: "var(--theme-cardBackground)",
+                  borderColor: "var(--theme-border)",
+                }}
+              >
+                <div
+                  className="text-2xl font-bold"
+                  style={{ color: "var(--theme-success)" }}
+                >
+                  95%
+                </div>
+                <div
+                  className="text-xs"
+                  style={{ color: "var(--theme-textSecondary)" }}
+                >
+                  OCR Accuracy
+                </div>
               </div>
             </div>
 
@@ -122,9 +178,15 @@ export default function Footer() {
           <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Platform */}
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-2 rounded-lg mr-3">
-                  <BookOpen className="w-4 h-4 text-white" />
+              <h3
+                className="text-lg font-bold mb-6 flex items-center"
+                style={{ color: "var(--theme-textPrimary)" }}
+              >
+                <div
+                  className="p-2 rounded-lg mr-3 text-white"
+                  style={{ background: "var(--theme-gradientPrimary)" }}
+                >
+                  <BookOpen className="w-4 h-4" />
                 </div>
                 Platform
               </h3>
@@ -154,9 +216,15 @@ export default function Footer() {
 
             {/* Support */}
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <div className="bg-gradient-to-r from-emerald-400 to-teal-500 p-2 rounded-lg mr-3">
-                  <MessageSquare className="w-4 h-4 text-white" />
+              <h3
+                className="text-lg font-bold mb-6 flex items-center"
+                style={{ color: "var(--theme-textPrimary)" }}
+              >
+                <div
+                  className="p-2 rounded-lg mr-3 text-white"
+                  style={{ background: "var(--theme-gradientAccent)" }}
+                >
+                  <MessageSquare className="w-4 h-4" />
                 </div>
                 Support
               </h3>
@@ -184,11 +252,17 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Contact & Legal */}
+            {/* Connect & Legal */}
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <div className="bg-gradient-to-r from-purple-400 to-pink-500 p-2 rounded-lg mr-3">
-                  <Globe className="w-4 h-4 text-white" />
+              <h3
+                className="text-lg font-bold mb-6 flex items-center"
+                style={{ color: "var(--theme-textPrimary)" }}
+              >
+                <div
+                  className="p-2 rounded-lg mr-3 text-white"
+                  style={{ background: "var(--theme-gradientPrimary)" }}
+                >
+                  <Globe className="w-4 h-4" />
                 </div>
                 Connect
               </h3>
@@ -197,13 +271,29 @@ export default function Footer() {
                 <div className="space-y-3">
                   <a
                     href="mailto:contact@salma.ai"
-                    className="flex items-center text-gray-600 hover:text-sky-600 transition-all duration-300 group"
+                    className="flex items-center transition-all duration-300 group"
+                    style={{ color: "var(--theme-textSecondary)" }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = "var(--theme-brandPrimary)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = "var(--theme-textSecondary)";
+                    }}
                   >
-                    <Mail className="w-4 h-4 mr-3 text-sky-500 group-hover:scale-110 transition-transform" />
+                    <Mail
+                      className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform"
+                      style={{ color: "var(--theme-brandPrimary)" }}
+                    />
                     <span className="text-sm">contact@salma.ai</span>
                   </a>
-                  <div className="flex items-center text-gray-600">
-                    <Phone className="w-4 h-4 mr-3 text-sky-500" />
+                  <div
+                    className="flex items-center"
+                    style={{ color: "var(--theme-textSecondary)" }}
+                  >
+                    <Phone
+                      className="w-4 h-4 mr-3"
+                      style={{ color: "var(--theme-brandPrimary)" }}
+                    />
                     <span className="text-sm">(555) 123-4567</span>
                   </div>
                 </div>
@@ -227,28 +317,52 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section with Enhanced Design */}
-        <div className="border-t border-sky-200 pt-8">
+        <div
+          className="border-t pt-8"
+          style={{ borderColor: "var(--theme-border)" }}
+        >
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright with love */}
-            <div className="flex items-center text-gray-600 text-sm">
+            <div
+              className="flex items-center text-sm"
+              style={{ color: "var(--theme-textSecondary)" }}
+            >
               <span>© {currentYear} SALMA. Made with</span>
-              <Heart className="w-4 h-4 mx-2 text-red-400 animate-pulse" />
+              <Heart
+                className="w-4 h-4 mx-2 animate-pulse"
+                style={{ color: "var(--theme-error)" }}
+              />
               <span>for educators worldwide</span>
             </div>
 
             {/* Trust Indicators */}
             <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                <span>AI-Powered</span>
+              <div className="flex items-center space-x-2 text-xs">
+                <div
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: "var(--theme-success)" }}
+                ></div>
+                <span style={{ color: "var(--theme-textTertiary)" }}>
+                  AI-Powered
+                </span>
               </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                <span>Secure</span>
+              <div className="flex items-center space-x-2 text-xs">
+                <div
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: "var(--theme-brandPrimary)" }}
+                ></div>
+                <span style={{ color: "var(--theme-textTertiary)" }}>
+                  Secure
+                </span>
               </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                <span>Multi-Language</span>
+              <div className="flex items-center space-x-2 text-xs">
+                <div
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: "var(--theme-brandTertiary)" }}
+                ></div>
+                <span style={{ color: "var(--theme-textTertiary)" }}>
+                  Multi-Language
+                </span>
               </div>
             </div>
 
@@ -256,19 +370,40 @@ export default function Footer() {
             <div className="flex space-x-6 text-sm">
               <Link
                 to="/privacy"
-                className="text-gray-500 hover:text-sky-600 transition-colors"
+                className="transition-colors"
+                style={{ color: "var(--theme-textTertiary)" }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = "var(--theme-brandPrimary)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = "var(--theme-textTertiary)";
+                }}
               >
                 Privacy
               </Link>
               <Link
                 to="/terms"
-                className="text-gray-500 hover:text-sky-600 transition-colors"
+                className="transition-colors"
+                style={{ color: "var(--theme-textTertiary)" }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = "var(--theme-brandPrimary)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = "var(--theme-textTertiary)";
+                }}
               >
                 Terms
               </Link>
               <Link
                 to="/cookies"
-                className="text-gray-500 hover:text-sky-600 transition-colors"
+                className="transition-colors"
+                style={{ color: "var(--theme-textTertiary)" }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = "var(--theme-brandPrimary)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = "var(--theme-textTertiary)";
+                }}
               >
                 Cookies
               </Link>
@@ -278,7 +413,10 @@ export default function Footer() {
       </div>
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-400 via-indigo-500 to-purple-500 opacity-50"></div>
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1 opacity-50"
+        style={{ background: "var(--theme-gradientPrimary)" }}
+      ></div>
     </footer>
   );
 }
@@ -288,9 +426,19 @@ const FooterLink = ({ to, icon, text }) => (
   <li className="list-none">
     <Link
       to={to}
-      className="flex items-center text-gray-600 hover:text-sky-600 transition-all duration-300 group text-sm"
+      className="flex items-center text-sm transition-all duration-300 group"
+      style={{ color: "var(--theme-textSecondary)" }}
+      onMouseEnter={(e) => {
+        e.target.style.color = "var(--theme-brandPrimary)";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.color = "var(--theme-textSecondary)";
+      }}
     >
-      <span className="mr-3 text-sky-500 group-hover:scale-110 group-hover:text-sky-600 transition-all duration-300">
+      <span
+        className="mr-3 group-hover:scale-110 group-hover:text-sky-600 transition-all duration-300"
+        style={{ color: "var(--theme-brandPrimary)" }}
+      >
         {icon}
       </span>
       <span className="group-hover:translate-x-1 transition-transform duration-300">
@@ -304,11 +452,20 @@ const FooterLink = ({ to, icon, text }) => (
 const SocialLink = ({ href, icon, label }) => (
   <a
     href={href}
-    className="bg-white/60 backdrop-blur-sm p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-sky-600 hover:text-sky-700 hover:scale-110 border border-sky-100 group"
+    className="p-3 rounded-xl theme-shadow-sm transition-all duration-300 hover:scale-110 border group theme-backdrop"
+    style={{
+      backgroundColor: "var(--theme-cardBackground)",
+      borderColor: "var(--theme-border)",
+      color: "var(--theme-brandPrimary)",
+    }}
     aria-label={label}
+    onMouseEnter={(e) => {
+      e.target.style.transform = "scale(1.1) rotate(12deg)";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.transform = "scale(1) rotate(0deg)";
+    }}
   >
-    <div className="group-hover:rotate-12 transition-transform duration-300">
-      {icon}
-    </div>
+    <div className="transition-transform duration-300">{icon}</div>
   </a>
 );
