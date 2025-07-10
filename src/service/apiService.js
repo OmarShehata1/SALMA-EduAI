@@ -103,6 +103,28 @@ export const studentApi = {
     }
   },
 
+  // Get complete student profile information
+  getStudentProfile: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/teachers/student/${studentId}/profile`);
+      return response.data; // Expected format: { student: {...}, message }
+    } catch (error) {
+      console.error("Error fetching student profile:", error);
+      throw error;
+    }
+  },
+
+  // Update student profile
+  updateStudentProfile: async (studentId, profileData) => {
+    try {
+      const response = await apiClient.put(`/teachers/student/${studentId}/profile`, profileData);
+      return response.data; // Expected format: { student: {...}, message }
+    } catch (error) {
+      console.error("Error updating student profile:", error);
+      throw error;
+    }
+  },
+
   // Search students by name/email
   searchStudents: async (query) => {
     try {
@@ -194,6 +216,28 @@ export const teacherApi = {
       return response.data; // Expected format: { message: string, subject: {...}, student: {...}, teacher: {...} }
     } catch (error) {
       console.error("Error adding student to subject:", error);
+      throw error;
+    }
+  },
+
+  // Get teacher profile
+  getTeacherProfile: async (teacherId) => {
+    try {
+      const response = await apiClient.get(`/teachers/${teacherId}/profile`);
+      return response.data; // Expected format: { message: string, teacher: {id, name, email, phone, bio, subjects_count, exams_count, students_count, pdfs_count} }
+    } catch (error) {
+      console.error("Error fetching teacher profile:", error);
+      throw error;
+    }
+  },
+
+  // Update teacher profile
+  updateTeacherProfile: async (teacherId, profileData) => {
+    try {
+      const response = await apiClient.put(`/teachers/${teacherId}/profile`, profileData);
+      return response.data; // Expected format: { message: string, teacher: {id, name, email, phone, bio, subjects_count, exams_count, students_count, pdfs_count} }
+    } catch (error) {
+      console.error("Error updating teacher profile:", error);
       throw error;
     }
   }

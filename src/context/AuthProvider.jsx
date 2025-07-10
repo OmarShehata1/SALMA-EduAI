@@ -180,11 +180,29 @@ export const AuthProvider = ({ children }) => {
     window.location.href = "/";
   };
 
+  // Update user function
+  const updateUser = (updatedUserData) => {
+    try {
+      // Update the current user state
+      const updatedUser = {
+        ...currentUser,
+        ...updatedUserData
+      };
+      setCurrentUser(updatedUser);
+      
+      // Update localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  };
+
   const value = {
     currentUser,
     login,
     register,
     logout,
+    updateUser,
     error,
   };
 

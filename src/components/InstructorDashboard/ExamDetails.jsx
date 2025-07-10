@@ -253,13 +253,13 @@ export default function ExamDetails({ teacherId, examId, studentId, onBack }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                  {/* <div className="bg-white rounded-lg p-4">
                     <div className="text-sm font-medium text-gray-600 mb-2">Student Answer</div>
                     <div className="text-gray-800">
                       {question.student_answer || "No answer provided"}
                     </div>
-                  </div>
+                  </div> */}
                   
                   <div className="bg-white rounded-lg p-4">
                     <div className="text-sm font-medium text-gray-600 mb-2">Correct Answer</div>

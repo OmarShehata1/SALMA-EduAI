@@ -264,7 +264,7 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               </div>
 
               {/* Student Answer */}
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <h4 className="font-semibold text-gray-800 mb-2">Your Answer:</h4>
                 <p className={`text-gray-700 p-3 rounded-lg border ${
                   question.student_answer === question.correct_answer 
@@ -273,7 +273,7 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
                 }`}>
                   {question.student_answer || "No answer submitted"}
                 </p>
-              </div>
+              </div> */}
 
               {/* Explanation */}
               {question.explanation && (
