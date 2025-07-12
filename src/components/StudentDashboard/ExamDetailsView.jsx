@@ -317,8 +317,8 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
               </div>
 
               {/* Student Answer */}
-              {/* <div className="mb-4">
-              <div className="mb-4 hidden">
+              
+              <div className="mb-4">
                 <h4 className="font-semibold text-gray-800 mb-2">Your Answer:</h4>
                 <p className={`text-gray-700 p-3 rounded-lg border ${
                   question.student_answer === question.correct_answer 
@@ -327,7 +327,7 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
                 }`}>
                   {question.student_answer || "No answer submitted"}
                 </p>
-              </div> */}
+              </div>
 
               {/* Explanation */}
               {question.explanation && (
@@ -348,7 +348,7 @@ export default function ExamDetailsView({ teacher, exam, subject, onBack }) {
                     <div className="flex items-center space-x-2 text-amber-700">
                       <MessageCircle className="w-4 h-4" />
                       <span className="text-sm font-medium">
-                        Appeal System Coming Soon
+                        Appeal
                       </span>
                     </div>
                     <p className="text-xs text-amber-600 mt-1">

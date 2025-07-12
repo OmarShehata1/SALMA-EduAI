@@ -1,5 +1,5 @@
 // student detail component for displaying individual student grades
-import { Award, TrendingUp, TrendingDown, Target, FileText, Star } from "lucide-react";
+import { Award, TrendingUp, TrendingDown, Target, FileText, Star, CheckCircle2 } from "lucide-react";
 
 export function StudentDetail({ selectedStudent, selectedExam }) {
   const getGradeColor = (grade, maxGrade) => {
@@ -176,15 +176,40 @@ export function StudentDetail({ selectedStudent, selectedExam }) {
                 </div>
               </div>
 
-              {/* Enhanced Explanation */}
-              <div className="mt-4 p-4 bg-white bg-opacity-60 rounded-lg border border-opacity-30">
-                <h5 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                  <Star className="w-4 h-4 mr-1" />
-                  AI Grading Analysis:
-                </h5>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {question.explanation || "No detailed explanation provided for this question."}
-                </p>
+              {/* Enhanced Explanation with Student and Ideal Answers */}
+              <div className="mt-4 space-y-3">
+                {/* Student Answer Section */}
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h5 className="text-sm font-semibold text-blue-700 mb-2 flex items-center">
+                    <FileText className="w-4 h-4 mr-1" />
+                    Student's Answer:
+                  </h5>
+                  <p className="text-sm text-blue-800 leading-relaxed bg-white p-3 rounded border">
+                    {question.studentAnswer || "No answer text extracted from the image."}
+                  </p>
+                </div>
+
+                {/* Ideal Answer Section */}
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h5 className="text-sm font-semibold text-green-700 mb-2 flex items-center">
+                    <CheckCircle2 className="w-4 h-4 mr-1" />
+                    Ideal Answer:
+                  </h5>
+                  <p className="text-sm text-green-800 leading-relaxed bg-white p-3 rounded border">
+                    {question.idealAnswer || "No ideal answer provided."}
+                  </p>
+                </div>
+
+                {/* AI Grading Analysis */}
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h5 className="text-sm font-semibold text-purple-700 mb-2 flex items-center">
+                    <Star className="w-4 h-4 mr-1" />
+                    AI Grading Analysis:
+                  </h5>
+                  <p className="text-sm text-purple-800 leading-relaxed bg-white p-3 rounded border">
+                    {question.explanation || "No detailed explanation provided for this question."}
+                  </p>
+                </div>
               </div>
 
               {/* Score Breakdown */}

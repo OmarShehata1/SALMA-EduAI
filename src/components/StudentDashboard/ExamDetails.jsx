@@ -240,7 +240,7 @@ export default function ExamDetails({ exam, onBack }) {
                     <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-4 py-2">
                       <div className="flex items-center space-x-2 text-amber-700">
                         <MessageSquare className="w-4 h-4" />
-                        <span className="text-sm font-medium">Appeal Coming Soon</span>
+                        <span className="text-sm font-medium">Appeal</span>
                       </div>
                     </div>
                   </div>
@@ -249,7 +249,7 @@ export default function ExamDetails({ exam, onBack }) {
                 {/* Student Answer and Correct Answer */}
                 {(question.student_answer || question.correct_answer) && (
                   <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
-                    {/* {question.student_answer && (
+                    {question.student_answer && (
                       <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/40">
                         <h4 className="font-medium text-gray-800 mb-2 flex items-center space-x-2">
                           <User className="w-4 h-4 text-blue-600" />
@@ -257,7 +257,7 @@ export default function ExamDetails({ exam, onBack }) {
                         </h4>
                         <p className="text-gray-700 text-sm">{question.student_answer}</p>
                       </div>
-                    )} */}
+                    )}
                     {question.correct_answer && (
                       <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/40">
                         <h4 className="font-medium text-gray-800 mb-2 flex items-center space-x-2">

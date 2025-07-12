@@ -307,6 +307,8 @@ export default function Grades() {
           grade: detail.grade,
           maxGrade: detail.max_grade,
           explanation: detail.explanation,
+          studentAnswer: detail.student_answer,
+          idealAnswer: detail.ideal_answer,
           questionNumber: index + 1,
         })
       );
